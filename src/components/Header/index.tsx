@@ -46,9 +46,9 @@ function UserButton() {
 
   return (
     <div className="relative group">
-      <button
-        type="button"
-        className="relative rounded-full bg-gray-100 p-1 hover:bg-gray-200"
+      <Link
+        href="/profile"
+        className="relative rounded-full bg-gray-100 p-1 hover:bg-gray-200 block"
       >
         <div className="h-8 w-8 rounded-full bg-gray-300 overflow-hidden">
           {session.user.image ? (
@@ -67,12 +67,18 @@ function UserButton() {
             </div>
           )}
         </div>
-      </button>
+      </Link>
 
       <div className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
         <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
           {session.user.name || session.user.email}
         </div>
+        <Link
+          href="/profile"
+          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+        >
+          Profile
+        </Link>
         <form action={handleSignOut}>
           <button
             type="submit"

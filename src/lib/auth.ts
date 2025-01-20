@@ -1,7 +1,7 @@
 import NextAuth from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials"
-import { getAuth, signInWithEmailAndPassword, signInWithCredential, GoogleAuthProvider } from "firebase/auth"
+import { getAuth, signInWithEmailAndPassword, signInWithCredential, GoogleAuthProvider, setPersistence, browserLocalPersistence } from "firebase/auth"
 import { initFirebaseApp } from "./firebase"
 
 export const {
@@ -67,11 +67,15 @@ export const {
       if (account?.provider === "google") {
         try {
           const auth = getAuth(initFirebaseApp())
+          // Set persistence to LOCAL to persist the Firebase session
+          await setPersistence(auth, browserLocalPersistence)
+          
           // Create a Google credential with the token
           const credential = GoogleAuthProvider.credential(
             account.id_token,
             account.access_token
           )
+          
           // Sign in to Firebase with the credential
           const result = await signInWithCredential(auth, credential)
           
