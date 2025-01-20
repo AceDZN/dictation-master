@@ -68,10 +68,17 @@ export const {
         try {
           const auth = getAuth(initFirebaseApp())
           // Create a Google credential with the token
-          const credential = GoogleAuthProvider.credential(account.id_token)
+          const credential = GoogleAuthProvider.credential(
+            account.id_token,
+            account.access_token
+          )
           // Sign in to Firebase with the credential
-          await signInWithCredential(auth, credential)
-          return true
+          const result = await signInWithCredential(auth, credential)
+          // Update user data if needed
+          if (result.user) {
+            return true
+          }
+          return false
         } catch (error) {
           console.error("Error syncing with Firebase:", error)
           return false

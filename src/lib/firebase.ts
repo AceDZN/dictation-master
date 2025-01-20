@@ -1,5 +1,6 @@
 import { getApps, initializeApp } from "firebase/app"
 import { getAnalytics } from "firebase/analytics"
+import { GoogleAuthProvider } from "firebase/auth"
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -18,4 +19,10 @@ export function initFirebaseApp() {
     getAnalytics(app)
   }
   return app
-} 
+}
+
+// Configure Google Auth Provider with the same client ID
+export const googleProvider = new GoogleAuthProvider()
+googleProvider.setCustomParameters({
+  client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!
+}) 
