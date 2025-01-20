@@ -74,11 +74,11 @@ export const {
           )
           // Sign in to Firebase with the credential
           const result = await signInWithCredential(auth, credential)
-          // Update user data if needed
-          if (result.user) {
-            return true
-          }
-          return false
+          
+          // Update the Next Auth user ID to match Firebase
+          user.id = result.user.uid
+          
+          return true
         } catch (error) {
           console.error("Error syncing with Firebase:", error)
           return false
@@ -97,8 +97,8 @@ export const {
       console.log('JWT Callback:', { trigger, hasUser: !!user, hasSession: !!session })
       
       if (user) {
+        // Always use the user object's ID as it will be the Firebase UID
         token.id = user.id
-        // If it's a Google sign in, update the token with additional user info
         if (account?.provider === "google") {
           token.name = user.name
           token.email = user.email
@@ -118,9 +118,8 @@ export const {
     },
     async session({ session, token }) {
       if (session.user) {
-        console.log('session', session, token)
+        // Always use the token's ID which will be the Firebase UID
         session.user.id = token.id as string
-        // Ensure we have the latest user info from the token
         session.user.name = token.name
         session.user.email = token.email as string
         session.user.image = token.picture as string | null
