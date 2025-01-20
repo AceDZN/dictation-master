@@ -1,7 +1,7 @@
 import NextAuth from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials"
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth"
+import { getAuth, signInWithEmailAndPassword, signInWithCredential, GoogleAuthProvider } from "firebase/auth"
 import { initFirebaseApp } from "./firebase"
 
 export const {
@@ -9,10 +9,13 @@ export const {
   auth,
   signIn,
   signOut,
+  unstable_update,
 } = NextAuth({
   secret: process.env.AUTH_SECRET,
   session: {
-    strategy: "jwt"
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+    updateAge: 24 * 60 * 60, // 24 hours
   },
   providers: [
     GoogleProvider({
@@ -60,7 +63,20 @@ export const {
     error: "/auth/error",
   },
   callbacks: {
-    async signIn({ user, account, profile, email, credentials }) {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "google") {
+        try {
+          const auth = getAuth(initFirebaseApp())
+          // Create a Google credential with the token
+          const credential = GoogleAuthProvider.credential(account.id_token)
+          // Sign in to Firebase with the credential
+          await signInWithCredential(auth, credential)
+          return true
+        } catch (error) {
+          console.error("Error syncing with Firebase:", error)
+          return false
+        }
+      }
       return true
     },
     async redirect({ url, baseUrl }) {
@@ -70,7 +86,9 @@ export const {
       else if (new URL(url).origin === baseUrl) return url
       return baseUrl
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger, session }) {
+      console.log('JWT Callback:', { trigger, hasUser: !!user, hasSession: !!session })
+      
       if (user) {
         token.id = user.id
         // If it's a Google sign in, update the token with additional user info
@@ -80,10 +98,20 @@ export const {
           token.picture = user.image
         }
       }
+
+      // Handle updates to the session
+      if (trigger === "update" && session?.user) {
+        console.log('Updating token with:', session.user)
+        token.name = session.user.name
+        token.picture = session.user.image
+      }
+
+      console.log('Returning token:', token)
       return token
     },
     async session({ session, token }) {
       if (session.user) {
+        console.log('session', session, token)
         session.user.id = token.id as string
         // Ensure we have the latest user info from the token
         session.user.name = token.name
