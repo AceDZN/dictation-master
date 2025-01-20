@@ -14,6 +14,7 @@ export interface QuizParameters {
 export interface DictationGame {
   id?: string
   title: string
+  description?: string
   sourceLanguage: string
   targetLanguage: string
   wordPairs: WordPair[]

@@ -5,9 +5,10 @@ import { ArrowUpTrayIcon } from "@heroicons/react/24/outline"
 import type { WordPair } from "@/lib/types"
 import { getLanguageCodeFromName } from "@/lib/utils"
 import { Spinner } from "@/components/ui/spinner"
+import type { WordPairsList } from "@/lib/openai"
 
 interface FileUploadProps {
-  onUpload: (wordPairs: WordPair[]) => void
+  onUpload: (data: WordPairsList) => void
   onError: (error: string) => void
   sourceLanguage: string
   targetLanguage: string
@@ -44,8 +45,8 @@ export function FileUpload({
     try {
       const formData = new FormData()
       formData.append('file', file)
-      formData.append('firstLanguage', getLanguageCodeFromName(sourceLanguage))
-      formData.append('secondLanguage', getLanguageCodeFromName(targetLanguage))
+      formData.append('firstLanguage', sourceLanguage)
+      formData.append('secondLanguage', targetLanguage)
 
       const response = await fetch('/api/dictation/upload', {
         method: 'POST',
@@ -57,7 +58,7 @@ export function FileUpload({
         throw new Error(data.error || 'Failed to process file')
       }
 
-      onUpload(data.wordPairs)
+      onUpload(data)
     } catch (error) {
       onError(error instanceof Error ? error.message : 'Failed to process file')
     } finally {

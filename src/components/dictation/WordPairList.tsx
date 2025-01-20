@@ -8,6 +8,7 @@ import { WordPair } from "@/lib/types"
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline"
 import { FileUpload } from "./FileUpload"
 import { useState } from "react"
+import type { WordPairsList } from "@/lib/openai"
 
 interface WordPairListProps {
   wordPairs: WordPair[]
@@ -17,7 +18,7 @@ interface WordPairListProps {
   error?: string
   disabled?: boolean
   onFileUploadStart?: () => void
-  onFileUploadComplete?: (wordPairs: WordPair[]) => void
+  onFileUploadComplete?: (data: WordPairsList) => void
   onFileUploadError?: (error: string) => void
 }
 
@@ -48,10 +49,10 @@ export function WordPairList({
     onChange(newPairs)
   }
 
-  const handleFileUpload = (newPairs: WordPair[]) => {
+  const handleFileUpload = (data: WordPairsList) => {
     setFileError(undefined)
-    onChange(newPairs)
-    onFileUploadComplete?.(newPairs)
+    onChange(data.wordPairs)
+    onFileUploadComplete?.(data)
   }
 
   const handleFileError = (error: string) => {

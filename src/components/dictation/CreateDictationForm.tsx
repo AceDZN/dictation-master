@@ -3,40 +3,61 @@
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
 import { LanguageSelector } from "@/components/dictation/LanguageSelector"
 import { WordPairList } from "@/components/dictation/WordPairList"
 import { QuizParameters } from "@/components/dictation/QuizParameters"
 import { createDictation } from "@/app/actions/dictation"
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import type { CreateDictationInput } from "@/app/actions/dictation"
 import type { WordPair } from "@/lib/types"
+import type { WordPairsList } from "@/lib/openai"
 import { useRouter } from "next/navigation"
 import { AdvancedQuizOptions } from "./AdvancedQuizOptions"
 import { getLanguageCodeFromName, getLanguageNameFromCode } from "@/lib/utils"
 import { Spinner } from "@/components/ui/spinner"
+import { saveDraft } from '@/lib/draft-storage'
+import type { DraftDictation } from '@/lib/draft-storage'
 
 const DEFAULT_LANGUAGES = {
   source: 'Hebrew',
   target: 'English'
 } as const
 
-export function CreateDictationForm() {
+interface CreateDictationFormProps {
+  initialData?: DraftDictation
+}
+
+export function CreateDictationForm({ initialData }: CreateDictationFormProps) {
   const router = useRouter()
-  const [formData, setFormData] = useState<CreateDictationInput>({
-    title: '',
-    sourceLanguage: DEFAULT_LANGUAGES.source,
-    targetLanguage: DEFAULT_LANGUAGES.target,
-    wordPairs: [{ first: '', second: '', sentence: '' }],
-    quizParameters: {
+  const [formData, setFormData] = useState<CreateDictationInput & { isPublic?: boolean }>(() => ({
+    id: initialData?.id,
+    title: initialData?.title || '',
+    description: initialData?.description || '',
+    sourceLanguage: initialData?.sourceLanguage || DEFAULT_LANGUAGES.source,
+    targetLanguage: initialData?.targetLanguage || DEFAULT_LANGUAGES.target,
+    wordPairs: initialData?.wordPairs || [{ first: '', second: '', sentence: '' }],
+    quizParameters: initialData?.quizParameters || {
       globalTimeLimit: 0,
       globalLivesLimit: 3,
       activityTimeLimit: 0,
       quizModeEnabled: false,
     },
-  })
+    isPublic: initialData?.isPublic ?? true,
+  }))
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isProcessingFile, setIsProcessingFile] = useState(false)
+
+  const isFormComplete = useMemo(() => {
+    return (
+      formData.title.length >= 3 &&
+      formData.sourceLanguage &&
+      formData.targetLanguage &&
+      formData.wordPairs.length > 0 &&
+      formData.wordPairs.every(pair => pair.first && pair.second)
+    )
+  }, [formData.title, formData.sourceLanguage, formData.targetLanguage, formData.wordPairs])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -46,8 +67,8 @@ export function CreateDictationForm() {
     try {
       const result = await createDictation({
         ...formData,
-        sourceLanguage: getLanguageCodeFromName(formData.sourceLanguage),
-        targetLanguage: getLanguageCodeFromName(formData.targetLanguage),
+        sourceLanguage: formData.sourceLanguage,
+        targetLanguage: formData.targetLanguage,
       })
       
       if (result.error) {
@@ -67,8 +88,13 @@ export function CreateDictationForm() {
     setError(undefined)
   }
 
-  const handleFileUploadComplete = (wordPairs: WordPair[]) => {
-    setFormData(prev => ({ ...prev, wordPairs }))
+  const handleFileUploadComplete = (data: WordPairsList) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      wordPairs: data.wordPairs,
+      title: data.title || prev.title,
+      description: data.description || prev.description || '',
+    }))
     setIsProcessingFile(false)
   }
 
@@ -102,6 +128,29 @@ export function CreateDictationForm() {
             disabled={isLoading}
             className="transition duration-200 ease-in-out focus:ring-2 focus:ring-indigo-500"
           />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="description">Description</Label>
+          <Input
+            id="description"
+            value={formData.description || ''}
+            onChange={e => setFormData({ ...formData, description: e.target.value })}
+            placeholder="Enter game description"
+            maxLength={200}
+            disabled={isLoading}
+            className="transition duration-200 ease-in-out focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="public"
+            checked={formData.isPublic}
+            onCheckedChange={checked => setFormData({ ...formData, isPublic: checked })}
+            disabled={isLoading}
+          />
+          <Label htmlFor="public">Public</Label>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -155,14 +204,71 @@ export function CreateDictationForm() {
           type="button" 
           variant="outline" 
           className="transition duration-200 ease-in-out hover:bg-gray-100"
+          disabled={isLoading || isFormComplete}
+          onClick={async () => {
+            setIsProcessingFile(true)
+            try {
+              const response = await fetch('/api/dictation/generate-content', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  sourceLanguage: getLanguageCodeFromName(formData.sourceLanguage),
+                  targetLanguage: getLanguageCodeFromName(formData.targetLanguage),
+                  wordPairs: formData.wordPairs,
+                  title: formData.title,
+                  description: formData.description || '',
+                }),
+              })
+              
+              if (!response.ok) {
+                throw new Error('Failed to generate content')
+              }
+              
+              const data = await response.json()
+              setFormData(prev => ({ 
+                ...prev, 
+                wordPairs: data.wordPairs,
+                title: data.title || prev.title,
+                description: data.description || prev.description || '',
+              }))
+            } catch (err) {
+              setError(err instanceof Error ? err.message : 'Failed to generate content')
+            } finally {
+              setIsProcessingFile(false)
+            }
+          }}
+        >
+          {isProcessingFile ? (
+            <div className="flex items-center gap-2">
+              <Spinner size="sm" />
+              <span>Generating...</span>
+            </div>
+          ) : (
+            'Populate Data'
+          )}
+        </Button>
+        <Button 
+          type="button" 
+          variant="outline" 
+          className="transition duration-200 ease-in-out hover:bg-gray-100"
           disabled={isLoading}
+          onClick={() => {
+            try {
+              const draft = saveDraft(formData)
+              router.push(`/profile?saved=${draft.id}`)
+            } catch (err) {
+              setError('Failed to save draft')
+            }
+          }}
         >
           Save as Draft
         </Button>
         <Button 
           type="submit" 
           className="bg-indigo-600 text-white transition duration-200 ease-in-out hover:bg-indigo-700 min-w-[120px]"
-          disabled={isLoading}
+          disabled={isLoading || !isFormComplete}
         >
           {isSubmitting ? (
             <div className="flex items-center gap-2">
@@ -175,7 +281,7 @@ export function CreateDictationForm() {
               <span>Processing File...</span>
             </div>
           ) : (
-            'Create Game'
+            'Create Dictation'
           )}
         </Button>
       </div>

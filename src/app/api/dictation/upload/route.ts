@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { extractWordPairsFromImage, extractWordPairsFromText } from '@/lib/openai'
+import { extractWordPairsFromImage, extractWordPairsFromText, type WordPairsList } from '@/lib/openai'
 import { WordPair } from '@/lib/types'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
@@ -32,25 +32,25 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    let wordPairs: WordPair[] = []
+    let result: WordPairsList
 
     if (file.type.startsWith('image/')) {
       // Handle image file
       const arrayBuffer = await file.arrayBuffer()
       const base64 = Buffer.from(arrayBuffer).toString('base64')
-      wordPairs = await extractWordPairsFromImage(base64, firstLanguage, secondLanguage)
+      result = await extractWordPairsFromImage(base64, firstLanguage, secondLanguage)
     } else if (file.type === 'text/plain' || file.type === 'text/csv' || file.name.endsWith('.csv')) {
       // Handle text/CSV file
       const text = await file.text()
-      wordPairs = await extractWordPairsFromText(text, firstLanguage, secondLanguage)
+      result = await extractWordPairsFromText(text, firstLanguage, secondLanguage)
     } else {
       return NextResponse.json(
         { error: 'Unsupported file type. Please upload a text, CSV, or image file.' },
         { status: 400 }
       )
     }
-    console.log({ wordPairs })
-    if (!wordPairs.length) {
+
+    if (!result.wordPairs.length) {
       return NextResponse.json(
         { error: 'No word pairs could be extracted from the file' },
         { status: 400 }
@@ -58,8 +58,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({
-      wordPairs,
-      message: `Successfully extracted ${wordPairs.length} word pairs`
+      ...result,
+      message: `Successfully extracted ${result.wordPairs.length} word pairs`
     })
 
   } catch (error) {
