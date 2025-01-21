@@ -35,13 +35,14 @@ const RequestSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { sourceLanguage='Hebrew', targetLanguage='English', wordPairs=[], title='undefined', description='undefined' } = RequestSchema.parse(body)
+    console.log('body', body)
+    const { sourceLanguage='Hebrew', targetLanguage='English', wordPairs=[], title='NO TITLE', description='NO DESCRIPTION' } = RequestSchema.parse(body)
 
     const prompt = `Given these word pairs between ${sourceLanguage} and ${targetLanguage}, please:
         1. If a word is missing its translation, provide it
         2. For each pair, generate a natural, contextual example sentence in ${targetLanguage} using the ${targetLanguage} word
         3. For each pair, generate an English image prompt that would help visualize the word's meaning
-        4. If required, generate a title and description for the content 
+        4. If required, generate a title and description for the content in ${sourceLanguage} - the title and description should be in natural language, SEO friendly, cool, and related to the topic of the words.
         Word pairs:
         ${wordPairs.map(pair => `${pair.first} - ${pair.second}`).join('\n')}
         title: ${title}
@@ -57,6 +58,7 @@ export async function POST(req: NextRequest) {
     })
 
     const content = response.choices[0].message.content
+    console.log('content', content)
     if (!content) {
       throw new Error('No content in the response')
     }

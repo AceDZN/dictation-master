@@ -56,13 +56,81 @@ export function CreateDictationForm({ initialData }: CreateDictationFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isProcessingFile, setIsProcessingFile] = useState(false)
 
+  const handleGenerateContent = async () => {
+    setIsProcessingFile(true)
+    try {
+      const response = await fetch('/api/dictation/generate-content', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sourceLanguage: getLanguageCodeFromName(formData.sourceLanguage),
+          targetLanguage: getLanguageCodeFromName(formData.targetLanguage),
+          wordPairs: formData.wordPairs || [],
+          title: formData.title || 'NO TITLE',
+          description: formData.description || 'NO DESCRIPTION',
+          isPublic: formData.isPublic ,
+        }),
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate content')
+      }
+      
+      const data = await response.json()
+      setFormData(prev => ({ 
+        ...prev, 
+        wordPairs: data.wordPairs,
+        title: data.title || prev.title,
+        description: data.description || prev.description,
+      }))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to generate content')
+    } finally {
+      setIsProcessingFile(false)
+    }
+  }
+
+  const handleSaveDraft = async () => {
+    setIsSubmitting(true)
+    setError(undefined)
+    
+    try {
+      const response = await fetch('/api/dictation/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          isPublic: false, // Force draft to be private
+          sourceLanguage: formData.sourceLanguage,
+          targetLanguage: formData.targetLanguage,
+        }),
+      })
+
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to save draft')
+      }
+
+      router.push(`/profile?saved=${data.dictationId}`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save draft')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   const isFormComplete = useMemo(() => {
     return (
       formData.title.length >= 3 &&
       formData.sourceLanguage &&
       formData.targetLanguage &&
       formData.wordPairs.length > 0 &&
-      formData.wordPairs.every(pair => pair.first && pair.second)
+      formData.wordPairs.every(pair => pair.first && pair.second) ? true : false
     )
   }, [formData.title, formData.sourceLanguage, formData.targetLanguage, formData.wordPairs])
 
@@ -219,42 +287,8 @@ export function CreateDictationForm({ initialData }: CreateDictationFormProps) {
           type="button" 
           variant="outline" 
           className="transition duration-200 ease-in-out hover:bg-gray-100"
-          disabled={isLoading || !isFormComplete}
-          onClick={async () => {
-            setIsProcessingFile(true)
-            try {
-              const response = await fetch('/api/dictation/generate-content', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  sourceLanguage: getLanguageCodeFromName(formData.sourceLanguage),
-                  targetLanguage: getLanguageCodeFromName(formData.targetLanguage),
-                  wordPairs: formData.wordPairs,
-                  title: formData.title,
-                  description: formData.description,
-                  isPublic: formData.isPublic,
-                }),
-              })
-              
-              if (!response.ok) {
-                throw new Error('Failed to generate content')
-              }
-              
-              const data = await response.json()
-              setFormData(prev => ({ 
-                ...prev, 
-                wordPairs: data.wordPairs,
-                title: data.title || prev.title,
-                description: data.description || prev.description,
-              }))
-            } catch (err) {
-              setError(err instanceof Error ? err.message : 'Failed to generate content')
-            } finally {
-              setIsProcessingFile(false)
-            }
-          }}
+          disabled={isLoading || isFormComplete}
+          onClick={handleGenerateContent}
         >
           {isProcessingFile ? (
             <div className="flex items-center gap-2">
@@ -270,14 +304,7 @@ export function CreateDictationForm({ initialData }: CreateDictationFormProps) {
           variant="outline" 
           className="transition duration-200 ease-in-out hover:bg-gray-100"
           disabled={isLoading}
-          onClick={() => {
-            try {
-              const draft = saveDraft(formData)
-              router.push(`/profile?saved=${draft.id}`)
-            } catch (err) {
-              setError('Failed to save draft')
-            }
-          }}
+          onClick={handleSaveDraft}
         >
           Save as Draft
         </Button>

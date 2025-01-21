@@ -1,35 +1,50 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { CreateDictationForm } from '@/components/dictation/CreateDictationForm'
-import { getDraft } from '@/lib/draft-storage'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import type { DictationGame } from '@/lib/types'
+import { CreateDictationForm } from '@/components/dictation/CreateDictationForm'
 
 interface DraftLoaderProps {
   draftId: string
 }
 
 export function DraftLoader({ draftId }: DraftLoaderProps) {
-  const [draft, setDraft] = useState<ReturnType<typeof getDraft>>(null)
+  const [draft, setDraft] = useState<DictationGame | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
-    const draftData = getDraft(draftId)
-    if (!draftData) {
-      toast.error('Draft not found')
-      router.push('/profile')
-      return
+    const fetchDraft = async () => {
+      try {
+        const response = await fetch(`/api/dictation/edit/${draftId}`)
+        if (!response.ok) {
+          throw new Error('Failed to fetch draft')
+        }
+        const data = await response.json()
+        setDraft(data)
+      } catch (err) {
+        toast.error('Draft not found')
+        router.push('/profile')
+      } finally {
+        setIsLoading(false)
+      }
     }
-    setDraft(draftData)
+
+    fetchDraft()
   }, [draftId, router])
 
-  if (!draft) {
+  if (isLoading) {
     return (
       <div className="text-center py-8 text-gray-500">
         Loading draft...
       </div>
     )
+  }
+
+  if (!draft) {
+    return null
   }
 
   return <CreateDictationForm initialData={draft} />

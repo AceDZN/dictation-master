@@ -3,19 +3,35 @@
 import { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { getAllDrafts, deleteDraft, type DraftDictation } from '@/lib/draft-storage'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { TrashIcon } from 'lucide-react'
+import type { DictationGame } from '@/lib/types'
 
 export function DraftsGallery() {
-  const [drafts, setDrafts] = useState<DraftDictation[]>([])
+  const [drafts, setDrafts] = useState<DictationGame[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
   const searchParams = useSearchParams()
   const savedId = searchParams.get('saved')
 
   useEffect(() => {
-    setDrafts(getAllDrafts())
+    const fetchDrafts = async () => {
+      try {
+        const response = await fetch('/api/dictation/drafts')
+        if (!response.ok) {
+          throw new Error('Failed to fetch drafts')
+        }
+        const data = await response.json()
+        setDrafts(data.drafts)
+      } catch (err) {
+        toast.error('Failed to load drafts')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchDrafts()
   }, [])
 
   useEffect(() => {
@@ -24,14 +40,29 @@ export function DraftsGallery() {
     }
   }, [savedId])
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     try {
-      deleteDraft(id)
+      const response = await fetch(`/api/dictation/edit/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete draft')
+      }
+
       setDrafts(drafts.filter(d => d.id !== id))
       toast.success('Draft deleted')
     } catch (err) {
       toast.error('Failed to delete draft')
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        Loading drafts...
+      </div>
+    )
   }
 
   if (drafts.length === 0) {
@@ -62,7 +93,7 @@ export function DraftsGallery() {
             </div>
             <div className="text-sm">
               <span className="text-gray-500">Last updated: </span>
-              <span>{new Date(draft.updatedAt).toLocaleDateString()}</span>
+              <span>{draft.updatedAt ? new Date(draft.updatedAt).toLocaleDateString() : 'Unknown'}</span>
             </div>
           </div>
 
@@ -70,14 +101,14 @@ export function DraftsGallery() {
             <Button 
               variant="default" 
               className="flex-1"
-              onClick={() => router.push(`/dictation/create/${draft.id}`)}
+              onClick={() => router.push(`/dictation/create/${draft.id || ''}`)}
             >
               Edit
             </Button>
             <Button 
               variant="destructive" 
               size="icon"
-              onClick={() => handleDelete(draft.id)}
+              onClick={() => draft.id && handleDelete(draft.id)}
             >
               <TrashIcon className="h-4 w-4" />
             </Button>
