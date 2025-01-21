@@ -56,6 +56,7 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
   })
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [isProcessingFile, setIsProcessingFile] = useState(false)
   const [isLoading, setIsLoading] = useState(!!id)
 
@@ -156,7 +157,7 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
   const handleDelete = async () => {
     if (!formData.id) return
 
-    setIsSubmitting(true)
+    setIsDeleting(true)
     setError(undefined)
     
     try {
@@ -172,7 +173,7 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete draft')
     } finally {
-      setIsSubmitting(false)
+      setIsDeleting(false)
     }
   }
 
@@ -353,7 +354,7 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
               variant="outline"
               className="transition duration-200 ease-in-out hover:bg-gray-100"
               onClick={() => router.push('/profile')}
-              disabled={isLoadingState}
+              disabled={isLoadingState || isDeleting}
             >
               Cancel
             </Button>
@@ -362,10 +363,10 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
                 type="button" 
                 variant="destructive"
                 className="transition duration-200 ease-in-out"
-                disabled={isLoadingState}
+                disabled={isLoadingState || isDeleting}
                 onClick={handleDelete}
               >
-                {isSubmitting ? (
+                {isDeleting ? (
                   <div className="flex items-center gap-2">
                     <Spinner size="sm" />
                     <span>Deleting...</span>
@@ -378,7 +379,7 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
             <Button 
               type="submit" 
               className="bg-indigo-600 text-white transition duration-200 ease-in-out hover:bg-indigo-700 min-w-[120px]"
-              disabled={isLoadingState || !isFormComplete}
+              disabled={isLoadingState || isDeleting || !isFormComplete}
             >
               {isSubmitting ? (
                 <div className="flex items-center gap-2">

@@ -1,4 +1,4 @@
-import { CreateDictationForm } from "@/components/dictation/CreateDictationForm"
+import { DictationForm } from "@/components/dictation/DictationForm"
 
 export default function CreateDictationPage() {
   return (
@@ -11,7 +11,7 @@ export default function CreateDictationPage() {
           </p>
         </div>
 
-        <CreateDictationForm />
+        <DictationForm />
       </div>
     </div>
   )

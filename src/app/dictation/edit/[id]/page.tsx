@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { Spinner } from '@/components/ui/spinner'
-import { EditDictationForm } from '@/components/dictation/EditDictationForm'
+import { DictationForm } from '@/components/dictation/DictationForm'
 
 interface EditDictationPageProps {
   params: {
@@ -12,11 +12,19 @@ export default async function EditDictationPage({ params }: EditDictationPagePro
   const { id:dictationId } = await params
   
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8">Edit Dictation</h1>
-      <Suspense fallback={<div className="flex justify-center"><Spinner size="lg" /></div>}>
-        <EditDictationForm id={dictationId} />
-      </Suspense>
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold">Edit Dictation</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Edit your dictation game
+          </p>
+        </div>
+
+        <Suspense fallback={<div className="flex justify-center"><Spinner size="lg" /></div>}>
+          <DictationForm id={dictationId} />
+        </Suspense>
+      </div>
     </div>
   )
 } 
