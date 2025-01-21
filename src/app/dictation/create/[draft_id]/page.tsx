@@ -17,8 +17,8 @@ export default function CreateFromDraftPage({ params }: CreateFromDraftPageProps
           </p>
         </div>
 
-        <DraftLoader draftId={params.draft_id} />
+        <DraftLoader draftId={params?.draft_id} />
       </div>
     </div>
   )
-} 
+}

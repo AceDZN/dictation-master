@@ -98,7 +98,7 @@ export const {
       return baseUrl
     },
     async jwt({ token, user, account, trigger, session }) {
-      console.log('JWT Callback:', { trigger, hasUser: !!user, hasSession: !!session })
+      //console.log('JWT Callback:', { trigger, hasUser: !!user, hasSession: !!session })
       
       if (user) {
         // Always use the user object's ID as it will be the Firebase UID
@@ -117,7 +117,7 @@ export const {
         token.picture = session.user.image
       }
 
-      console.log('Returning token:', token)
+      //console.log('Returning token:', token)
       return token
     },
     async session({ session, token }) {

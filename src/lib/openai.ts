@@ -41,7 +41,7 @@ export async function extractWordPairsFromImage(
         content: [
           {
             type: 'text',
-            text: `Extract word pairs from image. For each: 'first' in ${firstLanguage}, 'second' in ${secondLanguage}, ${secondLanguage} 'sentence' using word, 'imagePrompt' (always in English) for visualization. Use exact words if present. Only translate if no translation found. Include multiple ${firstLanguage} words if given for one ${secondLanguage} word. make sure to use the words exactly as they appear in the image. Return JSON array. double check that you have all the words, no matter how much words are in the image. If you are not sure, Check the image again. if there are words only in one of the specified languages, make sure to use and TRANSLATE the words to the other language. Also, add a title and description which are related to the words in the image.`,
+            text: `Extract word pairs from image. For each: 'first' in ${firstLanguage}, 'second' in ${secondLanguage}, ${secondLanguage} 'sentence' using word, 'imagePrompt' (always in English) for visualization. Use exact words if present. Only translate if no translation found. Include multiple ${firstLanguage} words if given for one ${secondLanguage} word. make sure to use the words exactly as they appear in the image. Return JSON array. double check that you have all the words, no matter how much words are in the image. If you are not sure, Check the image again. if there are words only in one of the specified languages, make sure to use and TRANSLATE the words to the other language. Also, add a relevant title and interesting description, both in ${firstLanguage}, related to the topic of the words, cool, and SEO friendly.`,
           },
           {
             type: 'image_url',
@@ -80,7 +80,7 @@ export async function extractWordPairsFromText(
     messages: [
       {
         role: 'user',
-        content: `Extract word pairs from the following text. For each pair: 'first' in ${firstLanguage}, 'second' in ${secondLanguage}, ${secondLanguage} 'sentence' using the word, 'imagePrompt' (always in English) for visualization. Use exact words if present. Only translate if no translation is given. Include multiple ${firstLanguage} words if given for one ${secondLanguage} word. Make sure to use the words exactly as they appear in the text. Also, add a title and description which are related to the words in the text.\n\nText:\n${text}`,
+        content: `Extract word pairs from the following text. For each pair: 'first' in ${firstLanguage}, 'second' in ${secondLanguage}, ${secondLanguage} 'sentence' using the word, 'imagePrompt' (always in English) for visualization. Use exact words if present. Only translate if no translation is given. Include multiple ${firstLanguage} words if given for one ${secondLanguage} word. Make sure to use the words exactly as they appear in the text. Also,  add a relevant title and interesting description, both in ${firstLanguage}, related to the topic of the text words, cool, and SEO friendly. \n\nText:\n${text}`,
       },
     ],
     max_tokens: 3500,

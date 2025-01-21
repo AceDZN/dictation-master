@@ -13,6 +13,7 @@ export interface QuizParameters {
 
 export interface DictationGame {
   id?: string
+  userId: string
   title: string
   description?: string
   sourceLanguage: string
