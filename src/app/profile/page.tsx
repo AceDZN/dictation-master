@@ -1,33 +1,79 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { getFirestore } from 'firebase-admin/firestore'
 import { initAdminApp } from '@/lib/firebase-admin'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { EyeIcon } from '@heroicons/react/24/outline'
+import { EyeIcon, TrashIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 
-async function getCreatedGames(userId: string) {
-  const db = getFirestore(initAdminApp())
-  const gamesRef = db.collection('dictation_games').doc(userId).collection('games')
-  const snapshot = await gamesRef
-    .orderBy('createdAt', 'desc')
-    .get()
-  
-  return snapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  }))
+interface Game {
+  id: string
+  title: string
+  description?: string
+  sourceLanguage: string
+  targetLanguage: string
+  wordPairs: any[]
+  createdAt: { toDate: () => Date }
+  isPublic: boolean
 }
 
-export default async function ProfilePage() {
-  const session = await auth()
-  if (!session?.user?.id) {
-    redirect('/auth/signin')
+export default function ProfilePage() {
+  const [games, setGames] = useState<Game[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchGames = async () => {
+      try {
+        const response = await fetch('/api/dictation/list')
+        if (!response.ok) {
+          throw new Error('Failed to fetch games')
+        }
+        const data = await response.json()
+        setGames(data.games)
+      } catch (err) {
+        toast.error('Failed to load games')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchGames()
+  }, [])
+
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/dictation/edit/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete game')
+      }
+
+      setGames(games.filter(game => game.id !== id))
+      toast.success('Game deleted successfully')
+    } catch (err) {
+      toast.error('Failed to delete game')
+    }
   }
 
-  const games = await getCreatedGames(session.user.id)
-  const publishedGames = games.filter((game: any) => game.isPublic)
-  const draftGames = games.filter((game: any) => !game.isPublic)
+  const publishedGames = games.filter(game => game.isPublic)
+  const draftGames = games.filter(game => !game.isPublic)
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="text-center py-8 text-gray-500">
+          Loading...
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="container mx-auto py-8">
@@ -37,7 +83,7 @@ export default async function ProfilePage() {
       <div className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">Published Games</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {publishedGames.map((game: any) => (
+          {publishedGames.map((game) => (
             <Link href={`/dictation/edit/${game.id}`} key={game.id}>
               <Card className="hover:shadow-lg transition-shadow">
                 <CardHeader>
@@ -54,11 +100,11 @@ export default async function ProfilePage() {
                     <div>Words: {game.wordPairs.length}</div>
                     <div>From: {game.sourceLanguage}</div>
                     <div>To: {game.targetLanguage}</div>
-                    {game?.createdAt && game?.createdAt?.toDate ? (
+                    {game?.createdAt?.toDate && (
                       <div className="text-xs mt-2">
                         Created: {new Date(game.createdAt.toDate()).toLocaleDateString()}
                       </div>
-                    ) : null}
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -76,29 +122,51 @@ export default async function ProfilePage() {
       <div className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">Draft Games</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {draftGames.map((game: any) => (
-            <Link href={`/dictation/edit/${game.id}`} key={game.id}>
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg">{game.title}</CardTitle>
-                  </div>
-                  <CardDescription>
-                    {game.description || 'No description'}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-sm text-gray-500">
-                    <div>Words: {game.wordPairs.length}</div>
-                    <div>From: {game.sourceLanguage}</div>
-                    <div>To: {game.targetLanguage}</div>
+          {draftGames.map((game) => (
+            <Card key={game.id} className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <CardTitle className="text-lg">{game.title}</CardTitle>
+                </div>
+                <CardDescription>
+                  {game.description || 'No description'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-sm text-gray-500">
+                  <div>Words: {game.wordPairs.length}</div>
+                  <div>From: {game.sourceLanguage}</div>
+                  <div>To: {game.targetLanguage}</div>
+                  {game?.createdAt?.toDate && (
                     <div className="text-xs mt-2">
                       Created: {new Date(game.createdAt.toDate()).toLocaleDateString()}
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
+                  )}
+                </div>
+                <div className="flex gap-2 mt-4">
+                  <Button 
+                    variant="default" 
+                    className="flex-1"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      window.location.href = `/dictation/edit/${game.id}`
+                    }}
+                  >
+                    Edit
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    size="icon"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      handleDelete(game.id)
+                    }}
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           ))}
           {draftGames.length === 0 && (
             <div className="col-span-full text-center py-8 text-gray-500">

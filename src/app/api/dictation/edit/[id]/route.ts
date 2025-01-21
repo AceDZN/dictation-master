@@ -82,4 +82,39 @@ export async function PUT(
       { status: 500 }
     )
   }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { id: dictationId } = await params
+    // Get the current user
+    const session = await auth()
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Initialize Firestore
+    const db = getFirestore(initAdminApp())
+    
+    // Get reference to the game document
+    const userRef = db.collection('dictation_games').doc(session.user.id)
+    const gameRef = userRef.collection('games').doc(dictationId)
+
+    // Check if the game exists and belongs to the user
+    const game = await gameRef.get()
+    if (!game.exists) {
+      return NextResponse.json({ error: 'Game not found' }, { status: 404 })
+    }
+
+    // Delete the game
+    await gameRef.delete()
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Error deleting game:', error)
+    return NextResponse.json({ error: 'Failed to delete game' }, { status: 500 })
+  }
 } 

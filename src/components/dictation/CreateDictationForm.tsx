@@ -16,8 +16,6 @@ import { useRouter } from "next/navigation"
 import { AdvancedQuizOptions } from "./AdvancedQuizOptions"
 import { getLanguageCodeFromName, getLanguageNameFromCode } from "@/lib/utils"
 import { Spinner } from "@/components/ui/spinner"
-import { saveDraft } from '@/lib/draft-storage'
-import type { DraftDictation } from '@/lib/draft-storage'
 
 const DEFAULT_LANGUAGES = {
   source: 'Hebrew',
@@ -25,10 +23,14 @@ const DEFAULT_LANGUAGES = {
 } as const
 
 interface CreateDictationFormProps {
-  initialData?: DraftDictation
+  initialData?: CreateDictationInput & {
+    id?: string
+    isPublic?: boolean
+  }
 }
 
 interface FormData extends CreateDictationInput {
+  id?: string
   isPublic: boolean
 }
 
@@ -186,6 +188,29 @@ export function CreateDictationForm({ initialData }: CreateDictationFormProps) {
     setIsProcessingFile(false)
   }
 
+  const handleDelete = async () => {
+    if (!formData.id) return
+
+    setIsSubmitting(true)
+    setError(undefined)
+    
+    try {
+      const response = await fetch(`/api/dictation/edit/${formData.id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete draft')
+      }
+
+      router.push('/profile')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete draft')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   const isLoading = isSubmitting || isProcessingFile
 
   return (
@@ -283,6 +308,24 @@ export function CreateDictationForm({ initialData }: CreateDictationFormProps) {
 
       {/* Form Actions */}
       <div className="flex justify-end gap-4">
+        {formData.id && !formData.isPublic && (
+          <Button 
+            type="button" 
+            variant="destructive"
+            className="transition duration-200 ease-in-out"
+            disabled={isLoading}
+            onClick={handleDelete}
+          >
+            {isSubmitting ? (
+              <div className="flex items-center gap-2">
+                <Spinner size="sm" />
+                <span>Deleting...</span>
+              </div>
+            ) : (
+              'Delete Draft'
+            )}
+          </Button>
+        )}
         <Button 
           type="button" 
           variant="outline" 
