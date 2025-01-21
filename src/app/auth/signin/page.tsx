@@ -8,7 +8,8 @@ export default async function SignInPage({
   searchParams: { [key: string]: string | string[] | undefined }
 }) {
   const session = await auth()
-  const from = typeof searchParams.from === 'string' ? searchParams.from : "/"
+  const {from:_from} = await searchParams
+  const from = typeof _from === 'string' ? _from : "/"
   
   if (session) {
     redirect(from)

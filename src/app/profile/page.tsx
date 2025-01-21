@@ -1,82 +1,39 @@
-'use client'
-
-import { useEffect, useState } from 'react'
 import { GameCard } from '@/components/dictation/GameCard'
-import { toast } from 'sonner'
+import { getGames, type Game } from '@/app/actions/dictation'
+import { auth } from "@/lib/auth"
+import { redirect } from "next/navigation"
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { PencilIcon } from '@heroicons/react/24/outline'
 
-interface Game {
-  id: string
-  title: string
-  description?: string
-  sourceLanguage: string
-  targetLanguage: string
-  wordPairs: any[]
-  createdAt: { toDate: () => Date }
-  isPublic: boolean
-}
-
-export default function ProfilePage() {
-  const [games, setGames] = useState<Game[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchGames = async () => {
-      try {
-        const response = await fetch('/api/dictation/list')
-        if (!response.ok) {
-          throw new Error('Failed to fetch games')
-        }
-        const data = await response.json()
-        setGames(data.games)
-      } catch (err) {
-        toast.error('Failed to load games')
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchGames()
-  }, [])
-
-  const handleDelete = async (id: string) => {
-    try {
-      const response = await fetch(`/api/dictation/edit/${id}`, {
-        method: 'DELETE',
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to delete game')
-      }
-
-      setGames(games.filter(game => game.id !== id))
-      toast.success('Game deleted successfully')
-    } catch (err) {
-      toast.error('Failed to delete game')
-    }
+export default async function ProfilePage() {
+  const session = await auth()
+  if (!session?.user) {
+    redirect('/api/auth/signin')
   }
 
-  const publishedGames = games.filter(game => game.isPublic)
-  const draftGames = games.filter(game => !game.isPublic)
+  const games = await getGames()
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto py-8">
-        <div className="text-center py-8 text-gray-500">
-          Loading...
-        </div>
-      </div>
-    )
-  }
+  const publishedGames = games.filter((game: Game) => game.isPublic)
+  const draftGames = games.filter((game: Game) => !game.isPublic)
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8">Profile</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Profile</h1>
+        <Link href="/profile/edit">
+          <Button variant="outline" size="sm" className="gap-2">
+            <PencilIcon className="h-4 w-4" />
+            Edit Profile
+          </Button>
+        </Link>
+      </div>
       
       {/* Published Games Section */}
       <div className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">Published Games</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {publishedGames.map((game) => (
+          {publishedGames.map((game: Game) => (
             <GameCard key={game.id} {...game} />
           ))}
           {publishedGames.length === 0 && (
@@ -91,11 +48,10 @@ export default function ProfilePage() {
       <div className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">Draft Games</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {draftGames.map((game) => (
+          {draftGames.map((game: Game) => (
             <GameCard 
               key={game.id} 
-              {...game} 
-              onDelete={handleDelete}
+              {...game}
             />
           ))}
           {draftGames.length === 0 && (
