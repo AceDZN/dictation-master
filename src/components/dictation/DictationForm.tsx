@@ -6,15 +6,14 @@ import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { LanguageSelector } from "@/components/dictation/LanguageSelector"
 import { WordPairList } from "@/components/dictation/WordPairList"
-import { QuizParameters } from "@/components/dictation/QuizParameters"
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, useCallback } from "react"
 import type { CreateDictationInput } from "@/app/actions/dictation"
-import type { WordPair, DictationGame } from "@/lib/types"
 import type { WordPairsList } from "@/lib/openai"
 import { useRouter } from "next/navigation"
 import { AdvancedQuizOptions } from "./AdvancedQuizOptions"
-import { getLanguageCodeFromName, getLanguageNameFromCode } from "@/lib/utils"
+import { getLanguageCodeFromName } from "@/lib/utils"
 import { Spinner } from "@/components/ui/spinner"
+import { ArrowsRightLeftIcon } from "@heroicons/react/24/outline"
 
 const DEFAULT_LANGUAGES = {
   source: 'Hebrew',
@@ -59,6 +58,7 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
   const [isDeleting, setIsDeleting] = useState(false)
   const [isProcessingFile, setIsProcessingFile] = useState(false)
   const [isLoading, setIsLoading] = useState(!!id)
+  const [selectorKey, setSelectorKey] = useState(0)
 
   // Fetch data if in edit mode
   useEffect(() => {
@@ -242,6 +242,24 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
     setIsProcessingFile(false)
   }
 
+  const handleLanguageSwap = useCallback(() => {
+    setFormData(prev => {
+      const newWordPairs = prev.wordPairs.map(pair => ({
+        first: pair.second,
+        second: pair.first,
+        sentence: pair.sentence
+      }))
+      
+      return {
+        ...prev,
+        sourceLanguage: prev.targetLanguage,
+        targetLanguage: prev.sourceLanguage,
+        wordPairs: newWordPairs
+      }
+    })
+    setSelectorKey(prev => prev + 1)
+  }, [])
+
   if (isLoading) {
     return (
       <div className="flex justify-center">
@@ -300,8 +318,9 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
           <Label htmlFor="public">Public</Label>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <LanguageSelector
+            key={`source-${selectorKey}`}
             id="source-language"
             label="Source Language"
             value={formData.sourceLanguage}
@@ -309,7 +328,21 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
             excludeLanguage={formData.targetLanguage}
             disabled={isLoadingState}
           />
+          <div className="flex items-end justify-center">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={handleLanguageSwap}
+              disabled={isLoadingState}
+              className="mb-[2px]"
+            >
+              <ArrowsRightLeftIcon className="h-4 w-4" />
+              <span className="sr-only">Swap languages</span>
+            </Button>
+          </div>
           <LanguageSelector
+            key={`target-${selectorKey}`}
             id="target-language"
             label="Target Language"
             value={formData.targetLanguage}

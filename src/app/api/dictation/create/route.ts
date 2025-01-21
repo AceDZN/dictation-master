@@ -5,8 +5,8 @@ import { initAdminApp } from '@/lib/firebase-admin'
 import { z } from 'zod'
 
 const createDictationSchema = z.object({
-  title: z.string().min(3),
-  description: z.string().optional(),
+  title: z.string().min(3).max(30),
+  description: z.string().max(100).optional(),
   sourceLanguage: z.string(),
   targetLanguage: z.string(),
   wordPairs: z.array(z.object({

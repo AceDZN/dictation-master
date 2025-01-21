@@ -5,8 +5,8 @@ import type { DictationGame } from '@/lib/types'
 
 const CreateDictationSchema = z.object({
   id: z.string().optional(),
-  title: z.string().min(3).max(100),
-  description: z.string().max(200).optional(),
+  title: z.string().min(3).max(30),
+  description: z.string().max(100).optional(),
   sourceLanguage: z.string().min(1),
   targetLanguage: z.string().min(1),
   wordPairs: z.array(z.object({
