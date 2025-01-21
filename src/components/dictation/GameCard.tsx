@@ -1,8 +1,9 @@
-import { EyeIcon, TrashIcon } from '@heroicons/react/24/outline'
+import { EyeIcon, TrashIcon, PlayIcon } from '@heroicons/react/24/outline'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
 import { Game } from '@/app/actions/dictation'
-import { GameCardActions } from './GameCardActions'
+import { GameCardActions } from '@/components/dictation/GameCardActions'
+import { Button } from '@/components/ui/button'
 
 interface GameCardProps extends Game {}
 
@@ -19,17 +20,28 @@ export function GameCard({
   return (
     <div>
       {isPublic ? (
-        <Link href={`/dictation/edit/${id}`}>
-          <GameCardContent
-            title={title}
-            description={description}
-            sourceLanguage={sourceLanguage}
-            targetLanguage={targetLanguage}
-            wordPairs={wordPairs}
-            createdAt={createdAt}
-            isPublic={isPublic}
-          />
-        </Link>
+        <GameCardContent
+          title={title}
+          description={description}
+          sourceLanguage={sourceLanguage}
+          targetLanguage={targetLanguage}
+          wordPairs={wordPairs}
+          createdAt={createdAt}
+          isPublic={isPublic}
+          actions={
+            <div className="flex gap-2 mt-4">
+              <Link href={`/dictation/play/${id}`}>
+                <Button 
+                  variant="default"
+                  size="icon"
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <PlayIcon className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          }
+        />
       ) : (
         <GameCardContent
           title={title}
