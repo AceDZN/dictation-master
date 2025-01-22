@@ -5,6 +5,7 @@ import { DictationGame, WordPair } from '@/lib/types'
 import { Input } from '@/components/ui/input'
 import Realistic from 'react-canvas-confetti/dist/presets/realistic'
 import { animate, useAnimate } from 'motion/react'
+import { ClockIcon } from '@heroicons/react/24/outline'
 
 interface GameViewProps {
   game: DictationGame
@@ -20,6 +21,8 @@ interface GameState {
   isGameOver: boolean
   stars: number
   fails: number
+  isPaused: boolean
+  completedWords: number
 }
 
 export function GameView({ game, onGameEnd }: GameViewProps) {
@@ -36,7 +39,9 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
     totalTime: 0,
     isGameOver: false,
     stars: 3,
-    fails: 0
+    fails: 0,
+    isPaused: false,
+    completedWords: 0
   })
   const [input, setInput] = useState('')
   const [inputStatus, setInputStatus] = useState<'default' | 'correct' | 'incorrect'>('default')
@@ -48,7 +53,7 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
 
   // Timer effect
   useEffect(() => {
-    if (gameState.isGameOver || !game.quizParameters.activityTimeLimit) return
+    if (gameState.isGameOver || !game.quizParameters.activityTimeLimit || gameState.isPaused) return
 
     const timer = setInterval(() => {
       if (gameState.timeLeft <= 0) {
@@ -59,7 +64,7 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [gameState.isGameOver, game.quizParameters.activityTimeLimit, gameState.timeLeft])
+  }, [gameState.isGameOver, game.quizParameters.activityTimeLimit, gameState.timeLeft, gameState.isPaused])
 
   // Auto-focus effect
   useEffect(() => {
@@ -108,22 +113,28 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
     setInputStatus('correct')
     setHasInputChanged(false)
     confettiController.current?.shoot()
+    
+    // Pause the timer immediately
+    setGameState(prev => ({ ...prev, isPaused: true, completedWords: prev.completedWords + 1 }))
 
-    // Move to next word after a short delay
+    // Move to next word after a longer delay
     setTimeout(() => {
       const nextIndex = gameState.currentWordIndex + 1
       if (nextIndex >= game.wordPairs.length) {
-        endGame()
+        setTimeout(() => {
+          endGame()
+        }, 1000) // Add delay before game end
       } else {
         setGameState(prev => ({
           ...prev,
           currentWordIndex: nextIndex,
-          timeLeft: game.quizParameters.activityTimeLimit
+          timeLeft: game.quizParameters.activityTimeLimit,
+          isPaused: false
         }))
         setInput('')
         setInputStatus('default')
       }
-    }, 500)
+    }, 1000) // Increased from 500ms to 1000ms
   }
 
   const animateHeartLoss = () => {
@@ -132,7 +143,8 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
     // Create a falling heart element
     const fallingHeart = document.createElement('div')
     fallingHeart.innerHTML = '❤️'
-    fallingHeart.className = 'falling-heart'
+    fallingHeart.className = 'absolute text-4xl leading-none pointer-events-none z-10 origin-center'
+    fallingHeart.style.willChange = 'transform, opacity'
 
     // Get the heart element position
     const heartElement = heartsContainerRef.current.querySelector('.heart')
@@ -193,18 +205,10 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
     if (newHearts <= 0) {
       endGame()
     } else {
-      if (isTimeOut) {
-        setTimeout(() => {
-          setInput('')
-          setInputStatus('default')
-          inputRef.current?.focus()
-        }, 500)
-      } else {
-        setTimeout(() => {
-          setInputStatus('default')
-          inputRef.current?.focus()
-        }, 500)
-      }
+      setTimeout(() => {
+        setInputStatus('default')
+        inputRef.current?.focus()
+      }, 500)
     }
   }
 
@@ -229,7 +233,9 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
       totalTime: 0,
       isGameOver: false,
       stars: 3,
-      fails: 0
+      fails: 0,
+      isPaused: false,
+      completedWords: 0
     })
     setInput('')
     setInputStatus('default')
@@ -246,13 +252,21 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
     return (
       <div className="max-w-md mx-auto text-center p-8 bg-white rounded-xl shadow-2xl">
         <h2 className="text-4xl font-bold mb-6 text-indigo-600">Game Over!</h2>
-        <div className="space-y-6">
+        <div className="space-y-6 grid ">
           <div className="text-6xl mb-6 animate-bounce">
             {'⭐'.repeat(gameState.stars)}
           </div>
-          <p className="text-xl">Hearts remaining: {'❤️'.repeat(gameState.hearts)}</p>
-          <p className="text-xl">Time: {gameState.totalTime} seconds</p>
-          <p className="text-xl">Words completed: {gameState.currentWordIndex + 1}/{game.wordPairs.length}</p>
+          <div className="flex flex-col gap-4">
+            <p className="text-xl flex items-center justify-center gap-2">
+              <span>❤️</span>
+              <span>{gameState.hearts}</span>
+            </p>
+            <p className="text-xl flex items-center justify-center gap-2">
+              <ClockIcon className="h-6 w-6" />
+              <span>{formatTime(gameState.totalTime)}</span>
+            </p>
+            <p className="text-xl">{gameState.completedWords}/{game.wordPairs.length}</p>
+          </div>
           <div className="space-x-6 mt-8">
             <button
               onClick={restartGame}
@@ -275,28 +289,27 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
   return (
     <div className="max-w-3xl mx-auto p-6">
       <Realistic onInit={handleConfettiInit} />
+      <h1 className="text-md mb-12 text-center text-gray-300">{game.title}</h1>
       
       {/* Game Header */}
-      <div className="flex justify-between items-center mb-12 relative">
+      <div className="flex justify-between items-center mb-12 relative  text-lg font-bold">
         {/* Hearts Container */}
-        <div ref={heartsContainerRef} className="hearts-container">
-          <div className="heart-display">
-            <span className="heart">❤️</span>
+        <div ref={heartsContainerRef} className="relative flex items-center gap-2 ">
+          <div className="flex items-center gap-2">
+            <span className="heart animate-pulse">❤️</span>
             <span className="heart-count">{gameState.hearts}</span>
           </div>
         </div>
 
         {/* Progress */}
-        <div className="text-lg font-bold">
+        <div className="">
           {gameState.currentWordIndex}/{game.wordPairs.length}
         </div>
 
         {/* Timer */}
         {game.quizParameters.activityTimeLimit > 0 && (
           <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 flex flex-col items-center">
-            <div className="text-2xl font-bold font-mono mb-2">
-              {formatTime(gameState.timeLeft)}
-            </div>
+            
             <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-indigo-600 transition-all duration-1000 ease-linear"
@@ -306,33 +319,44 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
                 }}
               />
             </div>
+            <div className=" font-mono mt-2">
+              {formatTime(gameState.timeLeft)}
+            </div>
           </div>
         )}
       </div>
 
       {/* Word Display */}
-      <div className="text-center mb-12">
-        <div className="text-5xl font-bold mb-8 text-indigo-600 animate-pulse">
-          {getCurrentWord().first}
+      <div className="text-center mb-12 w-full min-h-[50vh] flex flex-col justify-center items-center">
+        <div className="flex flex-col justify-center items-center h-auto">
+            <div className="text-5xl font-bold mb-8 text-indigo-600">
+                {getCurrentWord().first}
+            </div>
+            <div className="flex justify-center items-center">
+            <Input
+            ref={inputRef}
+            value={input}
+            onChange={handleInputChange}
+            onBlur={handleInputBlur}
+            onKeyDown={handleInputKeyDown}
+            className={`text-center text-xl md:text-4xl font-bold p-6 rounded-xl border-2 shadow-lg h-fit w-auto transition-all duration-300 ease-in-out transform preserve-3d hover:scale-105 focus:scale-105 ${
+                inputStatus === 'correct' ? 'bg-green-50 border-green-500 scale-105' :
+                inputStatus === 'incorrect' ? 'bg-red-50 border-red-500 shake' :
+                'border-indigo-200 hover:border-indigo-400 focus:border-indigo-600'
+            }`}
+            autoComplete="off"
+            style={{
+                transformStyle: 'preserve-3d',
+                transform: 'perspective(1000px) rotateX(2deg)',
+            }}
+            />
+            </div>
+            <div className="text-2xl mb-8 text-gray-600 mt-12">
+                {getCurrentWord().sentence}
+            </div>
         </div>
-        <Input
-          ref={inputRef}
-          value={input}
-          onChange={handleInputChange}
-          onBlur={handleInputBlur}
-          onKeyDown={handleInputKeyDown}
-          className={`text-center text-2xl p-6 rounded-xl border-2 shadow-lg transform transition-all duration-200 ${
-            inputStatus === 'correct' ? 'bg-green-50 border-green-500 scale-105' :
-            inputStatus === 'incorrect' ? 'bg-red-50 border-red-500 shake' :
-            'hover:scale-105 focus:scale-105 border-indigo-200 hover:border-indigo-400 focus:border-indigo-600'
-          }`}
-          autoComplete="off"
-          style={{
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-            transform: 'perspective(1000px) rotateX(2deg)',
-          }}
-        />
       </div>
+      
     </div>
   )
 } 

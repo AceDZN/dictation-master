@@ -15,7 +15,6 @@ export default async function PlayDictationPage({ params }: PlayDictationPagePro
 
     return (
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-8">{game.title}</h1>
         <GameContainer game={game} />
       </div>
     )
