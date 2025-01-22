@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { DictationGame } from '@/lib/types'
 import { Button } from '@/components/ui/button'
-import { WordPairList } from '@/components/dictation/WordPairList'
+import { WordPairDisplay } from '@/components/dictation/WordPairDisplay'
 import { GameView } from '@/components/dictation/GameView'
 
 interface GameContainerProps {
@@ -17,7 +17,7 @@ export function GameContainer({ game }: GameContainerProps) {
     return (
       <div className="max-w-2xl mx-auto">
         <h1 className="text-2xl font-bold mb-8 text-center">{game.title}</h1>
-        <WordPairList 
+        <WordPairDisplay 
           wordPairs={game.wordPairs} 
           hideSentences 
           sourceLanguage={game.sourceLanguage}

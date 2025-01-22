@@ -329,7 +329,7 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
       {/* Word Display */}
       <div className="text-center mb-12 w-full min-h-[50vh] flex flex-col justify-center items-center">
         <div className="flex flex-col justify-center items-center h-auto">
-            <div className="text-5xl font-bold mb-8 text-indigo-600">
+            <div className="text-6xl font-bold mb-12 text-indigo-600">
                 {getCurrentWord().first}
             </div>
             <div className="flex justify-center items-center">
@@ -351,7 +351,7 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
             }}
             />
             </div>
-            <div className="text-2xl mb-8 text-gray-600 mt-12">
+            <div className="text-xl  text-gray-600 mt-20">
                 {getCurrentWord().sentence}
             </div>
         </div>

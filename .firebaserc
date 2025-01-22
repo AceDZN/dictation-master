@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "dictation-master-001"
-  }
+    "default": "dictation-master-001",
+    "dictation-masters-prod": "dictation-master-001"
+  },
+  "targets": {},
+  "etags": {}
 }
