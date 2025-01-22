@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import { DictationGame, WordPair } from '@/lib/types'
 import { Input } from '@/components/ui/input'
 import Realistic from 'react-canvas-confetti/dist/presets/realistic'
-import { animate, useAnimate } from 'motion/react'
+import { useAnimate } from 'motion/react'
 import { ClockIcon } from '@heroicons/react/24/outline'
 
 interface GameViewProps {
@@ -49,6 +49,7 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const confettiController = useRef<any>(null)
   const heartsContainerRef = useRef<HTMLDivElement>(null)
+  // eslint-disable-next-line 
   const [scope, animate] = useAnimate()
 
   // Timer effect

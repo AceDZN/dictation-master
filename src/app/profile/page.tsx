@@ -38,7 +38,7 @@ export default async function ProfilePage() {
           ))}
           {publishedGames.length === 0 && (
             <div className="col-span-full text-center py-8 text-gray-500">
-              You haven't published any games yet.
+              {`You haven't published any games yet.`}
             </div>
           )}
         </div>
@@ -56,7 +56,7 @@ export default async function ProfilePage() {
           ))}
           {draftGames.length === 0 && (
             <div className="col-span-full text-center py-8 text-gray-500">
-              You don't have any drafts.
+              {`You don't have any drafts.`}
             </div>
           )}
         </div>

@@ -23,7 +23,7 @@ export function GameCardActions({ id }: GameCardActionsProps) {
         toast.error('Failed to delete game')
       }
     } catch (err) {
-      toast.error('Failed to delete game')
+      toast.error('Failed to delete game: '+err)
     }
   }
 

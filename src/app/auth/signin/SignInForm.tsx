@@ -160,7 +160,7 @@ export default function SignInForm({ from }: { from: string }) {
 
         <div className="mt-6 text-center">
           <div className="text-sm">
-            Don't have an account?{' '}
+            {`Don't have an account?`}
             <Link
               href="/auth/signup"
               className="font-medium text-indigo-600 hover:text-indigo-500"

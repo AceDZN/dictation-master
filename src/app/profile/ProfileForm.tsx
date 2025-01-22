@@ -65,7 +65,7 @@ export default function ProfileForm({ userId, initialName, initialImage }: Profi
     }
   }
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit() {
     setError(null)
     setSuccess(false)
 

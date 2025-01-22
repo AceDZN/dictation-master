@@ -28,7 +28,7 @@ export const {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" }
       },
-      async authorize(credentials, request) {
+      async authorize(credentials) {
         const email = credentials?.email as string
         const password = credentials?.password as string
         
@@ -63,7 +63,7 @@ export const {
     error: "/auth/error",
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       if (account?.provider === "google") {
         try {
           const auth = getAuth(initFirebaseApp())

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { extractWordPairsFromImage, extractWordPairsFromText, type WordPairsList } from '@/lib/openai'
-import { WordPair } from '@/lib/types'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 

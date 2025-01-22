@@ -1,11 +1,11 @@
-import { EyeIcon, TrashIcon, PlayIcon } from '@heroicons/react/24/outline'
+import { EyeIcon, PlayIcon } from '@heroicons/react/24/outline'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
 import { Game } from '@/app/actions/dictation'
 import { GameCardActions } from '@/components/dictation/GameCardActions'
 import { Button } from '@/components/ui/button'
 
-interface GameCardProps extends Game {}
+//interface GameCardProps extends Game {}
 
 export function GameCard({ 
   id, 
@@ -16,7 +16,7 @@ export function GameCard({
   wordPairs, 
   createdAt, 
   isPublic,
-}: GameCardProps) {
+}: Game) {
   return (
     <div>
       {isPublic ? (

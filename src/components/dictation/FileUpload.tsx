@@ -1,12 +1,7 @@
 'use client'
 
 import * as React from "react"
-import { ArrowUpTrayIcon } from "@heroicons/react/24/outline"
-import type { WordPair } from "@/lib/types"
-import { getLanguageCodeFromName } from "@/lib/utils"
-import { Spinner } from "@/components/ui/spinner"
 import type { WordPairsList } from "@/lib/openai"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 

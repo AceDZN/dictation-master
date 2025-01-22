@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { WordPair } from "@/lib/types"
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline"
 import { FileUpload } from "./FileUpload"

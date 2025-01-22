@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useSession } from 'next-auth/react'
 import { handleSignOut } from '@/app/auth/actions'
-
+/*
 function getInitials(name: string | null | undefined) {
   if (!name) return '?'
   return name
@@ -14,7 +14,7 @@ function getInitials(name: string | null | undefined) {
     .toUpperCase()
     .slice(0, 2)
 }
-
+*/
 function UserButton() {
   const { data: session } = useSession()
 

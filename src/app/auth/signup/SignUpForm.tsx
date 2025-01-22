@@ -29,7 +29,7 @@ function SubmitButton() {
   )
 }
 
-export default function SignUpForm({ from }: { from: string }) {
+export default function SignUpForm() {
   async function createUser(formData: FormData) {
     const email = formData.get("email") as string
     const password = formData.get("password") as string
