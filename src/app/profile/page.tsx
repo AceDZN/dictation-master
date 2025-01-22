@@ -11,7 +11,7 @@ export default async function ProfilePage() {
   if (!session?.user) {
     redirect('/api/auth/signin')
   }
-
+  
   const games = await getGames()
 
   const publishedGames = games.filter((game: Game) => game.isPublic)

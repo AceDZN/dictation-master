@@ -3,13 +3,11 @@ import { Spinner } from '@/components/ui/spinner'
 import { DictationForm } from '@/components/dictation/DictationForm'
 
 interface EditDictationPageProps {
-  params: {
-    id: string
-  }
+  params: Promise<{ id: string }>
 }
 
 export default async function EditDictationPage({ params }: EditDictationPageProps) {
-  const { id:dictationId } = await params
+  const { id: dictationId } = await params
   
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">

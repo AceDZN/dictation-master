@@ -61,7 +61,11 @@ export interface Game {
   description?: string
   sourceLanguage: string
   targetLanguage: string
-  wordPairs: any[]
+  wordPairs: Array<{
+    first: string
+    second: string
+    sentence?: string
+  }>
   createdAt: { toDate: () => Date }
   isPublic: boolean
 }

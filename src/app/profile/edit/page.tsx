@@ -2,11 +2,17 @@ import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import ProfileForm from "../ProfileForm"
 
-export default async function ProfileEditPage() {
+interface ProfileEditPageProps {
+  searchParams: Promise<Record<string, string | string[]>>
+}
+
+export default async function ProfileEditPage({ searchParams }: ProfileEditPageProps) {
   const session = await auth()
   if (!session?.user?.id) {
     redirect('/api/auth/signin')
   }
+
+  await searchParams // Need to await even if not using to comply with Next.js 15
 
   return (
     <div className="container mx-auto py-8">

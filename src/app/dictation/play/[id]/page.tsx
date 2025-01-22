@@ -2,9 +2,7 @@ import { GameContainer } from '@/components/dictation/GameContainer'
 import { getGame } from '@/lib/game'
 
 interface PlayDictationPageProps {
-  params: {
-    id: string
-  }
+  params: Promise<{ id: string }>
 }
 
 export default async function PlayDictationPage({ params }: PlayDictationPageProps) {

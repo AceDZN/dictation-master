@@ -62,9 +62,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid request data', details: error.errors }, { status: 400 })
     }
     // Add more specific error handling
-    if (error instanceof Error) {
-      const firestoreError = error as any
-      if (firestoreError.code === 5) {
+    if (error instanceof Error && 'code' in error) {
+      if (error.code === 'not-found') {
         return NextResponse.json({ error: 'Failed to create document in Firestore. Collection might not exist.' }, { status: 500 })
       }
     }

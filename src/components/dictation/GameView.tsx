@@ -4,8 +4,9 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import { DictationGame, WordPair } from '@/lib/types'
 import { Input } from '@/components/ui/input'
 import Realistic from 'react-canvas-confetti/dist/presets/realistic'
-import { useAnimate } from 'motion/react'
+import { useAnimate } from 'framer-motion'
 import { ClockIcon } from '@heroicons/react/24/outline'
+import { useCallback } from 'react'
 
 interface GameViewProps {
   game: DictationGame
@@ -52,29 +53,43 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
   // eslint-disable-next-line 
   const [scope, animate] = useAnimate()
 
-  // Timer effect
-  useEffect(() => {
-    if (gameState.isGameOver || !game.quizParameters.activityTimeLimit || gameState.isPaused) return
+  const endGame = useCallback(() => {
+    setGameState(prev => ({
+      ...prev,
+      isGameOver: true,
+      totalTime: Math.floor((Date.now() - prev.gameStartTime) / 1000)
+    }))
+  }, [])
 
-    const timer = setInterval(() => {
-      if (gameState.timeLeft <= 0) {
-        handleIncorrectAnswer(true)
-      } else {
-        setGameState(prev => ({ ...prev, timeLeft: prev.timeLeft - 1 }))
-      }
-    }, 1000)
+  const handleConfettiInit = useCallback(({ conductor }: { conductor: any }) => {
+    confettiController.current = conductor
+  }, [])
 
-    return () => clearInterval(timer)
-  }, [gameState.isGameOver, game.quizParameters.activityTimeLimit, gameState.timeLeft, gameState.isPaused])
+  const restartGame = useCallback(() => {
+    setGameState({
+      currentWordIndex: 0,
+      hearts: game.quizParameters.globalLivesLimit,
+      timeLeft: game.quizParameters.activityTimeLimit,
+      gameStartTime: Date.now(),
+      totalTime: 0,
+      isGameOver: false,
+      stars: 3,
+      fails: 0,
+      isPaused: false,
+      completedWords: 0
+    })
+    setInput('')
+    setInputStatus('default')
+    setHasInputChanged(false)
+  }, [game.quizParameters.globalLivesLimit, game.quizParameters.activityTimeLimit])
 
-  // Auto-focus effect
-  useEffect(() => {
-    if (!gameState.isGameOver) {
-      inputRef.current?.focus()
-    }
-  }, [gameState.currentWordIndex, gameState.isGameOver])
+  const formatTime = useCallback((seconds: number): string => {
+    const minutes = Math.floor(seconds / 60)
+    const remainingSeconds = seconds % 60
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
+  }, [])
 
-  const getCurrentWord = (): WordPair => randomizedWordPairs[gameState.currentWordIndex]
+  const getCurrentWord = useCallback((): WordPair => randomizedWordPairs[gameState.currentWordIndex], [randomizedWordPairs, gameState.currentWordIndex])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
@@ -101,16 +116,8 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
     }
   }
 
-  const validateAnswer = () => {
-    const isCorrect = input.toLowerCase().trim() === getCurrentWord().second.toLowerCase().trim()
-    if (isCorrect) {
-      handleCorrectAnswer()
-    } else {
-      handleIncorrectAnswer()
-    }
-  }
 
-  const handleCorrectAnswer = () => {
+  const handleCorrectAnswer = useCallback(() => {
     setInputStatus('correct')
     setHasInputChanged(false)
     confettiController.current?.shoot()
@@ -136,9 +143,9 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
         setInputStatus('default')
       }
     }, 1000) // Increased from 500ms to 1000ms
-  }
+  }, [endGame,gameState.currentWordIndex, game.wordPairs.length, game.quizParameters.activityTimeLimit])
 
-  const animateHeartLoss = () => {
+  const animateHeartLoss = useCallback(() => {
     if (!heartsContainerRef.current) return
 
     // Create a falling heart element
@@ -179,9 +186,9 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
         }
       ]
     ])
-  }
+  }, [animate])
 
-  const handleIncorrectAnswer = (isTimeOut: boolean = false) => {
+  const handleIncorrectAnswer = useCallback((isTimeOut: boolean = false) => {
     setInputStatus('incorrect')
     const newHearts = gameState.hearts - 1
     const newFails = gameState.fails + 1
@@ -211,43 +218,40 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
         inputRef.current?.focus()
       }, 500)
     }
-  }
+  }, [endGame, animateHeartLoss,gameState.hearts, gameState.fails,  game.quizParameters.activityTimeLimit])
 
-  const endGame = () => {
-    setGameState(prev => ({
-      ...prev,
-      isGameOver: true,
-      totalTime: Math.floor((Date.now() - prev.gameStartTime) / 1000)
-    }))
-  }
 
-  const handleConfettiInit = ({ conductor }: { conductor: any }) => {
-    confettiController.current = conductor
-  }
+  const validateAnswer = useCallback(() => {
+    const isCorrect = input.toLowerCase().trim() === getCurrentWord().second.toLowerCase().trim()
+    if (isCorrect) {
+      handleCorrectAnswer()
+    } else {
+      handleIncorrectAnswer()
+    }
+  }, [input, getCurrentWord, handleCorrectAnswer, handleIncorrectAnswer])
 
-  const restartGame = () => {
-    setGameState({
-      currentWordIndex: 0,
-      hearts: game.quizParameters.globalLivesLimit,
-      timeLeft: game.quizParameters.activityTimeLimit,
-      gameStartTime: Date.now(),
-      totalTime: 0,
-      isGameOver: false,
-      stars: 3,
-      fails: 0,
-      isPaused: false,
-      completedWords: 0
-    })
-    setInput('')
-    setInputStatus('default')
-    setHasInputChanged(false)
-  }
+  // Timer effect
+  useEffect(() => {
+    if (gameState.isGameOver || !game.quizParameters.activityTimeLimit || gameState.isPaused) return
 
-  const formatTime = (seconds: number): string => {
-    const minutes = Math.floor(seconds / 60)
-    const remainingSeconds = seconds % 60
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
-  }
+    const timer = setInterval(() => {
+      if (gameState.timeLeft <= 0) {
+        handleIncorrectAnswer(true)
+      } else {
+        setGameState(prev => ({ ...prev, timeLeft: prev.timeLeft - 1 }))
+      }
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [handleIncorrectAnswer, gameState.isGameOver, game.quizParameters.activityTimeLimit, gameState.timeLeft, gameState.isPaused])
+
+  // Auto-focus effect
+  useEffect(() => {
+    if (!gameState.isGameOver) {
+      inputRef.current?.focus()
+    }
+  }, [gameState.currentWordIndex, gameState.isGameOver])
+
 
   if (gameState.isGameOver) {
     return (

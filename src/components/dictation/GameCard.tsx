@@ -5,7 +5,7 @@ import { Game } from '@/app/actions/dictation'
 import { GameCardActions } from '@/components/dictation/GameCardActions'
 import { Button } from '@/components/ui/button'
 
-//interface GameCardProps extends Game {}
+
 
 export function GameCard({ 
   id, 
@@ -58,7 +58,7 @@ export function GameCard({
   )
 }
 
-interface GameCardContentProps extends Omit<GameCardProps, 'id'> {
+interface GameCardContentProps extends Omit<Game, 'id'> {
   actions?: React.ReactNode
 }
 

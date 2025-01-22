@@ -1,11 +1,13 @@
 import { XCircleIcon } from "@heroicons/react/20/solid"
 import Link from "next/link"
 
-export default function AuthError({
-  searchParams: { error = "An error occurred during authentication" },
+export default async function AuthError({
+  searchParams,
 }: {
-  searchParams: { error?: string }
+  searchParams: Promise<{ error?: string }>
 }) {
+  const { error = "An error occurred during authentication" } = await searchParams
+  
   return (
     <div className="flex min-h-screen flex-col items-center justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">

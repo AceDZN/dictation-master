@@ -5,10 +5,10 @@ import SignInForm from "./SignInForm"
 export default async function SignInPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined }
+  searchParams: Promise<{ from?: string | string[] }>
 }) {
   const session = await auth()
-  const {from:_from} = await searchParams
+  const { from: _from } = await searchParams
   const from = typeof _from === 'string' ? _from : "/"
   
   if (session) {

@@ -1,6 +1,12 @@
 import { DictationForm } from "@/components/dictation/DictationForm"
 
-export default function CreateDictationPage() {
+interface CreateDictationPageProps {
+  searchParams: Promise<Record<string, string | string[]>>
+}
+
+export default async function CreateDictationPage({ searchParams }: CreateDictationPageProps) {
+  await searchParams // Need to await even if not using to comply with Next.js 15
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="space-y-8">

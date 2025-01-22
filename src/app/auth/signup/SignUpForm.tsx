@@ -29,14 +29,18 @@ function SubmitButton() {
   )
 }
 
-export default function SignUpForm() {
+interface SignUpFormProps {
+  from: string
+}
+
+export default function SignUpForm({ from }: SignUpFormProps) {
   async function createUser(formData: FormData) {
     const email = formData.get("email") as string
     const password = formData.get("password") as string
     
     const result = await handleSignUp(email, password)
     if (result.success) {
-      redirect('/auth/signin')
+      redirect(from)
     } else {
       redirect(`/auth/error?error=${encodeURIComponent(result.error || 'Unknown error')}`)
     }

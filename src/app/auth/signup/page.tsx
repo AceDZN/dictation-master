@@ -5,10 +5,11 @@ import SignUpForm from "./SignUpForm"
 export default async function SignUpPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined }
+  searchParams: Promise<{ from?: string | string[] }>
 }) {
   const session = await auth()
-  const from = typeof searchParams.from === 'string' ? searchParams.from : "/"
+  const { from: _from } = await searchParams
+  const from = typeof _from === 'string' ? _from : "/"
 
   if (session) {
     redirect(from)

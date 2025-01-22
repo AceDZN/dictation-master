@@ -9,7 +9,7 @@ const db = getFirestore(initAdminApp())
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id: dictationId } = await params
@@ -31,7 +31,6 @@ export async function GET(
     }
 
     const data = doc.data() as DictationGame
-    // No need to check userId since we're already in the user's collection
     return NextResponse.json(data)
   } catch (error) {
     console.error('Error retrieving dictation:', error)
@@ -44,7 +43,7 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id: dictationId } = await params
@@ -86,7 +85,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id: dictationId } = await params

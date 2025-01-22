@@ -1,4 +1,5 @@
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage"
+import { FirebaseError } from 'firebase/app'
 import { initFirebaseApp } from "./firebase"
 
 const storage = getStorage(initFirebaseApp())
@@ -14,9 +15,9 @@ export async function uploadProfileImage(userId: string, file: File) {
     // Get the download URL
     const downloadURL = await getDownloadURL(storageRef)
     return { success: true, url: downloadURL }
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error uploading image:", error)
-    return { success: false, error: error.message }
+    return { success: false, error: error instanceof FirebaseError ? error.message : 'Unknown error occurred' }
   }
 }
 
@@ -29,8 +30,8 @@ export async function deleteProfileImage(userId: string, imageUrl: string) {
     
     await deleteObject(storageRef)
     return { success: true }
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error deleting image:", error)
-    return { success: false, error: error.message }
+    return { success: false, error: error instanceof FirebaseError ? error.message : 'Unknown error occurred' }
   }
 } 
