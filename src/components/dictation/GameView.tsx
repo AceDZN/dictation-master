@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { DictationGame, WordPair } from '@/lib/types'
 import { Input } from '@/components/ui/input'
-import confetti from 'react-canvas-confetti'
+import Realistic from 'react-canvas-confetti/dist/presets/realistic'
 
 interface GameViewProps {
   game: DictationGame
@@ -34,7 +34,9 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
   })
   const [input, setInput] = useState('')
   const [inputStatus, setInputStatus] = useState<'default' | 'correct' | 'incorrect'>('default')
+  const [hasInputChanged, setHasInputChanged] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const confettiController = useRef<any>(null)
 
   // Timer effect
   useEffect(() => {
@@ -43,12 +45,15 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
     const timer = setInterval(() => {
       setGameState(prev => {
         if (prev.timeLeft <= 0) {
-          handleIncorrectAnswer()
-          return {
-            ...prev,
-            timeLeft: game.quizParameters.activityTimeLimit,
-            fails: prev.fails + 1
+          handleIncorrectAnswer(true)
+          // Only reset timer if we still have hearts left
+          if (prev.hearts > 1) {
+            return {
+              ...prev,
+              timeLeft: game.quizParameters.activityTimeLimit
+            }
           }
+          return prev
         }
         return { ...prev, timeLeft: prev.timeLeft - 1 }
       })
@@ -69,6 +74,7 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setInput(value)
+    setHasInputChanged(true)
 
     // Check if the answer is correct on change
     if (value.toLowerCase().trim() === getCurrentWord().second.toLowerCase().trim()) {
@@ -77,14 +83,16 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
   }
 
   const handleInputBlur = () => {
-    if (!gameState.isGameOver) {
+    if (!gameState.isGameOver && hasInputChanged) {
       validateAnswer()
+      setHasInputChanged(false)
     }
   }
 
   const handleInputKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && hasInputChanged) {
       validateAnswer()
+      setHasInputChanged(false)
     }
   }
 
@@ -99,7 +107,8 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
 
   const handleCorrectAnswer = () => {
     setInputStatus('correct')
-    triggerConfetti()
+    setHasInputChanged(false)
+    confettiController.current?.shoot()
 
     // Move to next word after a short delay
     setTimeout(() => {
@@ -118,7 +127,7 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
     }, 500)
   }
 
-  const handleIncorrectAnswer = () => {
+  const handleIncorrectAnswer = (isTimeOut: boolean = false) => {
     setInputStatus('incorrect')
     const newHearts = gameState.hearts - 1
     const newFails = gameState.fails + 1
@@ -138,12 +147,20 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
     if (newHearts <= 0) {
       endGame()
     } else {
-      // Reset input and refocus after a short delay
-      setTimeout(() => {
-        setInput('')
-        setInputStatus('default')
-        inputRef.current?.focus()
-      }, 500)
+      // Only clear input and refocus if it was a timeout
+      if (isTimeOut) {
+        setTimeout(() => {
+          setInput('')
+          setInputStatus('default')
+          inputRef.current?.focus()
+        }, 500)
+      } else {
+        // Just refocus for incorrect answers on blur/enter
+        setTimeout(() => {
+          setInputStatus('default')
+          inputRef.current?.focus()
+        }, 500)
+      }
     }
   }
 
@@ -155,12 +172,8 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
     }))
   }
 
-  const triggerConfetti = () => {
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 }
-    })
+  const handleConfettiInit = ({ conductor }: { conductor: any }) => {
+    confettiController.current = conductor
   }
 
   const restartGame = () => {
@@ -176,6 +189,13 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
     })
     setInput('')
     setInputStatus('default')
+    setHasInputChanged(false)
+  }
+
+  const formatTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60)
+    const remainingSeconds = seconds % 60
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
   }
 
   if (gameState.isGameOver) {
@@ -188,7 +208,7 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
           </div>
           <p>Hearts remaining: {'❤️'.repeat(gameState.hearts)}</p>
           <p>Time: {gameState.totalTime} seconds</p>
-          <p>Words completed: {gameState.currentWordIndex}/{game.wordPairs.length}</p>
+          <p>Words completed: {gameState.currentWordIndex + 1}/{game.wordPairs.length}</p>
           <div className="space-x-4">
             <button
               onClick={restartGame}
@@ -210,19 +230,36 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
 
   return (
     <div className="max-w-2xl mx-auto">
+      <Realistic onInit={handleConfettiInit} />
+      
       {/* Game Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
-          Progress: {gameState.currentWordIndex + 1}/{game.wordPairs.length}
+          Progress: {gameState.currentWordIndex}/{game.wordPairs.length}
         </div>
-        <div>
-          {'❤️'.repeat(gameState.hearts)}
+        <div className="flex items-center gap-1">
+          <span>❤️</span>
+          <span className="font-medium">{gameState.hearts}</span>
         </div>
-        {game.quizParameters.activityTimeLimit > 0 && (
-          <div>
-            Time: {gameState.timeLeft}s
-          </div>
-        )}
+        <div className="flex items-center gap-4">
+          {game.quizParameters.activityTimeLimit > 0 && (
+            <>
+              <div className="flex items-center gap-1">
+                <span>⏱️</span>
+                <span className="font-mono font-medium">{formatTime(gameState.timeLeft)}</span>
+              </div>
+              <div className="w-24 h-1 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-indigo-600 transition-all duration-1000 ease-linear"
+                  style={{ 
+                    width: `${(gameState.timeLeft / game.quizParameters.activityTimeLimit) * 100}%`,
+                    backgroundColor: gameState.timeLeft <= 5 ? '#ef4444' : undefined
+                  }}
+                />
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Word Display */}

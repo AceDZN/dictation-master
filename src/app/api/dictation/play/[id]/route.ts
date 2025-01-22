@@ -10,44 +10,53 @@ export async function GET(
   try {
     const { id: dictationId } = await params
     const db = getFirestore(initAdminApp())
-    const session = await auth()
     
-    // First, try to find the game in all public games
-    const usersSnapshot = await db.collection('dictation_games').get()
-    let gameDoc = null
-
-    for (const userDoc of usersSnapshot.docs) {
-      const doc = await db
-        .collection('dictation_games')
-        .doc(userDoc.id)
-        .collection('games')
-        .doc(dictationId)
-        .get()
-
-      if (doc.exists) {
-        const data = doc.data()
-        // Check if the game is public or if it belongs to the current user
-        if (data?.isPublic || (session?.user?.id && userDoc.id === session.user.id)) {
-          gameDoc = doc
-          break
-        }
-      }
-    }
+    // Get all games and find the one with matching ID
+    const gamesQuery = await db.collectionGroup('games').get()
+    const gameDoc = gamesQuery.docs.find(doc => doc.id === dictationId)
 
     if (!gameDoc) {
-      console.log('Game not found or not accessible')
       return NextResponse.json(
-        { error: 'Game not found or not accessible' },
+        { error: 'Game not found' },
         { status: 404 }
       )
     }
-    console.log('Game found:', gameDoc.id)
-    const game = {
-      id: gameDoc.id,
-      ...gameDoc.data()
+
+    const gameData = gameDoc.data()
+
+    // First check if the game is public
+    if (gameData.isPublic) {
+      return NextResponse.json({
+        id: gameDoc.id,
+        ...gameData
+      })
     }
 
-    return NextResponse.json(game)
+    // If game is private, verify user session
+    const session = await auth()
+    const userId = session?.user?.id
+    console.log('userId', userId)
+    // If no session and game is private, deny access
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'Game not accessible' },
+        { status: 403 }
+      )
+    }
+
+    // Check if user owns the game
+    if (gameDoc.ref.parent.parent?.id !== userId) {
+      return NextResponse.json(
+        { error: 'Game not accessible' },
+        { status: 403 }
+      )
+    }
+
+    return NextResponse.json({
+      id: gameDoc.id,
+      ...gameData
+    })
+
   } catch (error) {
     console.error('Error retrieving dictation:', error)
     return NextResponse.json(
