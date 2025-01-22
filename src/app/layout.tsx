@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Alef } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { auth } from "@/lib/auth";
 import { Providers } from "@/components/Providers";
 
-const inter = Inter({
+const alef = Alef({
   subsets: ["latin"],
-  variable: "--font-inter",
+  weight: ['400', '700'],
+  variable: "--font-alef",
 });
 
 export const metadata: Metadata = {
@@ -27,7 +28,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className="h-full">
-      <body className={`${inter.variable} font-sans antialiased h-full`}>
+      <body className={`${alef.variable} font-alef antialiased h-full`}>
         <Providers session={session}>
           <Header />
           <main className="flex-1">
