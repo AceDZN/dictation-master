@@ -1,10 +1,11 @@
+import { APP_URL } from './server-constants'
 import { DictationGame } from './types'
 import { cookies } from 'next/headers'
 
 export async function getGame(id: string): Promise<DictationGame> {
   const cookieStore = await cookies()
   try {
-    const response = await fetch(`${process.env.APP_URL}/api/dictation/play/${id}`, {
+    const response = await fetch(`${APP_URL}/api/dictation/play/${id}`, {
       method: 'GET',
       headers: {
       'Content-Type': 'application/json',
@@ -21,6 +22,6 @@ export async function getGame(id: string): Promise<DictationGame> {
     return response.json()
   } catch (error) {
     console.error('Error fetching game:', error)
-    throw new Error(`Failed to fetch game ${process.env.APP_URL}/api/dictation/play/${id}`)
+    throw new Error(`Failed to fetch game ${APP_URL}/api/dictation/play/${id}`)
   }
 } 

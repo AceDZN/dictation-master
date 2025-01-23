@@ -1,3 +1,5 @@
+import { Timestamp } from 'firebase-admin/firestore'
+
 export interface WordPair {
   first: string
   second: string
@@ -43,4 +45,20 @@ export interface GameStructure {
       }>
     }>
   }>
+}
+
+export interface FirebaseGame {
+  id: string
+  title: string
+  description?: string
+  sourceLanguage: string
+  targetLanguage: string
+  wordPairs: Array<{
+    first: string
+    second: string
+    sentence?: string
+  }>
+  createdAt: Timestamp
+  isPublic: boolean
+  userId: string
 } 
