@@ -96,15 +96,15 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/75 backdrop-blur-lg">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center">
           <Image
             src="/logo.svg"
             alt="Dictation Master Logo"
             width={32}
             height={32}
-            className="h-8 w-8"
+            className="h-8 w-auto"
           />
-          <span className="font-semibold text-xl">Dictation Master</span>
+          <span className="font-semibold text-xl -ml-[5px]">Dictation Masters</span>
         </Link>
         
         <div className="flex items-center gap-4">

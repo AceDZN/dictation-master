@@ -66,8 +66,13 @@ export interface Game {
     second: string
     sentence?: string
   }>
-  createdAt: { toDate: () => Date }
+  createdAt: {
+    _seconds: number
+    _nanoseconds: number
+    toDate?: () => Date
+  }
   isPublic: boolean
+  playCount?: number
 }
 
 export async function getGames(): Promise<Game[]> {

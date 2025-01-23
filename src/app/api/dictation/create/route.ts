@@ -20,7 +20,8 @@ const createDictationSchema = z.object({
     activityTimeLimit: z.number(),
     quizModeEnabled: z.boolean()
   }),
-  isPublic: z.boolean().default(true)
+  isPublic: z.boolean().default(true),
+  playCount: z.number().default(0)
 })
 
 export async function POST(request: Request) {

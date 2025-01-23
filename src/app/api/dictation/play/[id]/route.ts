@@ -64,4 +64,38 @@ export async function GET(
       { status: 500 }
     )
   }
+}
+
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: dictationId } = await params
+    const db = getFirestore(initAdminApp())
+    
+    // Get all games and find the one with matching ID
+    const gamesQuery = await db.collectionGroup('games').get()
+    const gameDoc = gamesQuery.docs.find(doc => doc.id === dictationId)
+
+    if (!gameDoc) {
+      return NextResponse.json(
+        { error: 'Game not found' },
+        { status: 404 }
+      )
+    }
+
+    // Increment the play count
+    await gameDoc.ref.update({
+      playCount: (gameDoc.data().playCount || 0) + 1
+    })
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Error updating play count:', error)
+    return NextResponse.json(
+      { error: 'Failed to update play count' },
+      { status: 500 }
+    )
+  }
 } 

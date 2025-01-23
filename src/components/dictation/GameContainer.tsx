@@ -13,6 +13,24 @@ interface GameContainerProps {
 export function GameContainer({ game }: GameContainerProps) {
   const [isGameStarted, setIsGameStarted] = useState(false)
 
+  const incrementPlayCount = async () => {
+    try {
+      const response = await fetch(`/api/dictation/play/${game.id}`, {
+        method: 'POST',
+      })
+      if (!response.ok) {
+        console.error('Failed to increment play count')
+      }
+    } catch (error) {
+      console.error('Error incrementing play count:', error)
+    }
+  }
+
+  const handleGameStart = () => {
+    incrementPlayCount()
+    setIsGameStarted(true)
+  }
+
   if (!isGameStarted) {
     return (
       <div className="max-w-2xl mx-auto">
@@ -26,7 +44,7 @@ export function GameContainer({ game }: GameContainerProps) {
         <div className="mt-8 text-center">
           <Button 
             size="lg"
-            onClick={() => setIsGameStarted(true)}
+            onClick={handleGameStart}
             className="px-8"
           >
             Start Game
