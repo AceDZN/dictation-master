@@ -73,7 +73,7 @@ function GameCardContent({
   targetLanguage,
   wordPairs,
   createdAt,
-  isPublic,
+  //isPublic,
   playCount = 0,
   actions
 }: GameCardContentProps) {

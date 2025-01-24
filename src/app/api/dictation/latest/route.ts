@@ -22,7 +22,11 @@ export async function GET() {
       return {
         ...data,
         id: doc.id,
-        createdAt: data.createdAt
+        createdAt: {
+          _seconds: data.createdAt.seconds,
+          _nanoseconds: data.createdAt.nanoseconds,
+          toDate: () => data.createdAt.toDate()
+        }
       }
     }) as Game[]
 

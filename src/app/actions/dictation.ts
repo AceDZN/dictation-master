@@ -71,7 +71,7 @@ export interface Game {
     _nanoseconds: number
     toDate?: () => Date
   }
-  isPublic: boolean
+  isPublic?: boolean
   playCount?: number
 }
 
