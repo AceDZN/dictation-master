@@ -3,6 +3,7 @@ import { getFirestore } from 'firebase-admin/firestore'
 import { initAdminApp } from '@/lib/firebase-admin'
 import { auth } from '@/lib/auth'
 import { DictationGame } from '@/lib/types'
+import { getTTSUrls } from '@/lib/server/tts'
 
 // Initialize Firestore
 const db = getFirestore(initAdminApp())
@@ -53,19 +54,38 @@ export async function PUT(
     }
 
     const body = await req.json()
-    // Use the correct nested collection structure
     const docRef = db.collection('dictation_games')
       .doc(session.user.id)
       .collection('games')
       .doc(dictationId)
 
     const doc = await docRef.get()
-
     if (!doc.exists) {
       return NextResponse.json({ error: 'Dictation not found' }, { status: 404 })
     }
 
-    // No need to check userId since we're already in the user's collection
+    const currentData = doc.data() as DictationGame
+
+    // If word pairs are being updated, generate new TTS URLs
+    if (body.wordPairs) {
+      // Get all unique words for source and target languages
+      const sourceWords = body.wordPairs.map((pair: { first: string }) => pair.first)
+      const targetWords = body.wordPairs.map((pair: { second: string }) => pair.second)
+
+      // Generate TTS for all words in parallel
+      const [sourceAudioUrls, targetAudioUrls] = await Promise.all([
+        getTTSUrls(sourceWords, body.sourceLanguage || currentData.sourceLanguage),
+        getTTSUrls(targetWords, body.targetLanguage || currentData.targetLanguage)
+      ])
+
+      // Add audio URLs to word pairs
+      body.wordPairs = body.wordPairs.map((pair: { first: string; second: string }) => ({
+        ...pair,
+        firstAudioUrl: sourceAudioUrls[pair.first],
+        secondAudioUrl: targetAudioUrls[pair.second]
+      }))
+    }
+
     const updatedData: Partial<DictationGame> = {
       ...body,
       updatedAt: new Date(),

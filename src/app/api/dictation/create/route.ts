@@ -3,6 +3,7 @@ import { getFirestore } from 'firebase-admin/firestore'
 import { auth } from '@/lib/auth'
 import { initAdminApp } from '@/lib/firebase-admin'
 import { z } from 'zod'
+import { getTTSUrls } from '@/lib/server/tts'
 
 const createDictationSchema = z.object({
   title: z.string().min(3).max(30),
@@ -36,13 +37,31 @@ export async function POST(request: Request) {
     const body = await request.json()
     const validatedData = createDictationSchema.parse(body)
 
+    // Get all unique words for source and target languages
+    const sourceWords = validatedData.wordPairs.map(pair => pair.first)
+    const targetWords = validatedData.wordPairs.map(pair => pair.second)
+
+    // Generate TTS for all words in parallel
+    const [sourceAudioUrls, targetAudioUrls] = await Promise.all([
+      getTTSUrls(sourceWords, validatedData.sourceLanguage),
+      getTTSUrls(targetWords, validatedData.targetLanguage)
+    ])
+
+    // Add audio URLs to word pairs
+    const wordPairsWithAudio = validatedData.wordPairs.map(pair => ({
+      ...pair,
+      firstAudioUrl: sourceAudioUrls[pair.first],
+      secondAudioUrl: targetAudioUrls[pair.second]
+    }))
+
     // Initialize Firestore
     const db = getFirestore(initAdminApp())
     
-    // Create the game document
+    // Create the game document with audio URLs
     const timestamp = new Date()
     const gameData = {
       ...validatedData,
+      wordPairs: wordPairsWithAudio,
       userId: session.user.id,
       createdAt: timestamp,
       updatedAt: timestamp,
@@ -55,7 +74,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ 
       success: true, 
-      dictationId: docRef.id 
+      dictationId: userRef.id 
     })
   } catch (error) {
     console.error('Error creating dictation:', error)
