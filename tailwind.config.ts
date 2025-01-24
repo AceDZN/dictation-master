@@ -9,6 +9,15 @@ export default {
   ],
   theme: {
   	extend: {
+  		keyframes: {
+  			'bounce-slow': {
+  				'0%, 100%': { transform: 'translateY(0)' },
+  				'50%': { transform: 'translateY(-10px)' }
+  			}
+  		},
+  		animation: {
+  			'bounce-slow': 'bounce-slow 2s ease-in-out infinite'
+  		},
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',

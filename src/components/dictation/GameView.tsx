@@ -4,10 +4,11 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import { DictationGame, WordPair } from '@/lib/types'
 import { Input } from '@/components/ui/input'
 import Realistic from 'react-canvas-confetti/dist/presets/realistic'
-import { useAnimate } from 'framer-motion'
+import { useAnimate } from 'motion/react'
 import { ClockIcon } from '@heroicons/react/24/outline'
 import { useCallback } from 'react'
 import { useTranslations } from 'next-intl'
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
 
 interface GameViewProps {
   game: DictationGame
@@ -25,6 +26,7 @@ interface GameState {
   fails: number
   isPaused: boolean
   completedWords: number
+  currentWordGuesses: number
 }
 
 export function GameView({ game, onGameEnd }: GameViewProps) {
@@ -44,7 +46,8 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
     stars: 3,
     fails: 0,
     isPaused: false,
-    completedWords: 0
+    completedWords: 0,
+    currentWordGuesses: 0
   })
   const [input, setInput] = useState('')
   const [inputStatus, setInputStatus] = useState<'default' | 'correct' | 'incorrect'>('default')
@@ -78,7 +81,8 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
       stars: 3,
       fails: 0,
       isPaused: false,
-      completedWords: 0
+      completedWords: 0,
+      currentWordGuesses: 0
     })
     setInput('')
     setInputStatus('default')
@@ -127,25 +131,42 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
     // Pause the timer immediately
     setGameState(prev => ({ ...prev, isPaused: true, completedWords: prev.completedWords + 1 }))
 
-    // Move to next word after a longer delay
-    setTimeout(() => {
-      const nextIndex = gameState.currentWordIndex + 1
-      if (nextIndex >= game.wordPairs.length) {
-        setTimeout(() => {
-          endGame()
-        }, 1000) // Add delay before game end
-      } else {
-        setGameState(prev => ({
-          ...prev,
-          currentWordIndex: nextIndex,
-          timeLeft: game.quizParameters.activityTimeLimit,
-          isPaused: false
-        }))
-        setInput('')
-        setInputStatus('default')
-      }
-    }, 1000) // Increased from 500ms to 1000ms
-  }, [endGame,gameState.currentWordIndex, game.wordPairs.length, game.quizParameters.activityTimeLimit])
+    // Play audio if available and move to next word after completion
+    const currentWord = getCurrentWord()
+    if (currentWord.secondAudioUrl) {
+      const audio = new Audio(currentWord.secondAudioUrl)
+      audio.addEventListener('ended', () => {
+        moveToNextWord()
+      })
+      audio.play().catch(error => {
+        console.error('Error playing audio:', error)
+        moveToNextWord() // Move to next word even if audio fails
+      })
+    } else {
+      // If no audio, wait for a moment before moving to next word
+      setTimeout(moveToNextWord, 1000)
+    }
+  }, [endGame, gameState.currentWordIndex, game.wordPairs.length, game.quizParameters.activityTimeLimit, getCurrentWord])
+
+  // Extracted moveToNextWord logic into a separate function
+  const moveToNextWord = useCallback(() => {
+    const nextIndex = gameState.currentWordIndex + 1
+    if (nextIndex >= game.wordPairs.length) {
+      setTimeout(() => {
+        endGame()
+      }, 1000) // Add delay before game end
+    } else {
+      setGameState(prev => ({
+        ...prev,
+        currentWordIndex: nextIndex,
+        timeLeft: game.quizParameters.activityTimeLimit,
+        isPaused: false,
+        currentWordGuesses: 0
+      }))
+      setInput('')
+      setInputStatus('default')
+    }
+  }, [endGame, gameState.currentWordIndex, game.wordPairs.length, game.quizParameters.activityTimeLimit])
 
   const animateHeartLoss = useCallback(() => {
     if (!heartsContainerRef.current) return
@@ -153,7 +174,7 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
     // Create a falling heart element
     const fallingHeart = document.createElement('div')
     fallingHeart.innerHTML = '❤️'
-    fallingHeart.className = 'absolute text-4xl leading-none pointer-events-none z-10 origin-center'
+    fallingHeart.className = 'absolute text-lg leading-none pointer-events-none z-10 origin-center'
     fallingHeart.style.willChange = 'transform, opacity'
 
     // Get the heart element position
@@ -190,10 +211,17 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
     ])
   }, [animate])
 
+  const getHint = useCallback((word: string, guessCount: number) => {
+    const revealed = word.slice(0, Math.min(guessCount + 1, word.length))
+    const hidden = '_'.repeat(Math.max(0, word.length - revealed.length))
+    return revealed + hidden
+  }, [])
+
   const handleIncorrectAnswer = useCallback((isTimeOut: boolean = false) => {
     setInputStatus('incorrect')
     const newHearts = gameState.hearts - 1
     const newFails = gameState.fails + 1
+    const newGuesses = gameState.currentWordGuesses + 1
     
     // Only animate heart loss if we still have hearts
     if (gameState.hearts > 0) {
@@ -209,6 +237,7 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
       hearts: newHearts,
       fails: newFails,
       stars: newStars,
+      currentWordGuesses: newGuesses,
       timeLeft: isTimeOut ? game.quizParameters.activityTimeLimit : prev.timeLeft
     }))
 
@@ -220,7 +249,7 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
         inputRef.current?.focus()
       }, 500)
     }
-  }, [endGame, animateHeartLoss,gameState.hearts, gameState.fails,  game.quizParameters.activityTimeLimit])
+  }, [endGame, animateHeartLoss, gameState.hearts, gameState.fails, gameState.currentWordGuesses, game.quizParameters.activityTimeLimit])
 
 
   const validateAnswer = useCallback(() => {
@@ -348,23 +377,43 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
                 {getCurrentWord().first}
             </div>
             <div className="flex justify-center items-center">
-            <Input
-            ref={inputRef}
-            value={input}
-            onChange={handleInputChange}
-            onBlur={handleInputBlur}
-            onKeyDown={handleInputKeyDown}
-            className={`text-center text-xl md:text-4xl font-bold p-6 rounded-xl border-2 shadow-lg h-fit w-auto transition-all duration-300 ease-in-out transform preserve-3d hover:scale-105 focus:scale-105 ${
-                inputStatus === 'correct' ? 'bg-green-50 border-green-500 scale-105' :
-                inputStatus === 'incorrect' ? 'bg-red-50 border-red-500 shake' :
-                'border-indigo-200 hover:border-indigo-400 focus:border-indigo-600'
-            }`}
-            autoComplete="off"
-            style={{
-                transformStyle: 'preserve-3d',
-                transform: 'perspective(1000px) rotateX(2deg)',
-            }}
-            />
+            <div className="flex flex-col justify-center items-center relative">
+              <Input
+                ref={inputRef}
+                value={input}
+                onChange={handleInputChange}
+                onBlur={handleInputBlur}
+                onKeyDown={handleInputKeyDown}
+                maxLength={getCurrentWord().second.length}
+                className={`text-center text-xl md:text-4xl font-bold p-6 rounded-xl border-2 shadow-lg h-fit w-auto transition-all duration-300 ease-in-out transform preserve-3d hover:scale-105 focus:scale-105 ${
+                    inputStatus === 'correct' ? 'bg-green-50 border-green-500 scale-105' :
+                    inputStatus === 'incorrect' ? 'bg-red-50 border-red-500 shake' :
+                    'border-indigo-200 hover:border-indigo-400 focus:border-indigo-600'
+                }`}
+                autoComplete="off"
+                style={{
+                    transformStyle: 'preserve-3d',
+                    transform: 'perspective(1000px) rotateX(2deg)',
+                }}
+              />
+              {/* Floating hint tooltip */}
+              {gameState.currentWordGuesses > 0 && inputStatus !== 'correct' && (
+                <TooltipProvider>
+                  <Tooltip open={true}>
+                    <TooltipTrigger asChild>
+                      <div className="absolute -bottom-20 left-1/2 transform -translate-x-1/2 w-1 h-1" />
+                    </TooltipTrigger>
+                    <TooltipContent 
+                      className="bg-red-500 text-white font-mono text-lg px-4 py-2 shadow-lg relative overflow-visible"
+                      sideOffset={16}
+                    >
+                      <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[8px] border-b-red-500" />
+                      {getHint(getCurrentWord().second, gameState.currentWordGuesses - 1)}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
             </div>
             <div className="text-xl  text-gray-600 mt-20">
                 {getCurrentWord().sentence}

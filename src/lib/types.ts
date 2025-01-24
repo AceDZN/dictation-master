@@ -4,6 +4,8 @@ export interface WordPair {
   first: string
   second: string
   sentence?: string
+  firstAudioUrl?: string
+  secondAudioUrl?: string
 }
 
 export interface QuizParameters {
