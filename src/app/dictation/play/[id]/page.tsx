@@ -31,6 +31,7 @@ export async function generateMetadata({ params }: PlayDictationPageProps): Prom
       image: `/og/play-dictation.png` // Dynamic OG image endpoint we'll create later
     })
   } catch (error) {
+    console.error(error)
     return generateSiteMetadata(locale, {})
   }
 }
