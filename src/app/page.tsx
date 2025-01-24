@@ -1,7 +1,10 @@
 import Link from 'next/link'
 import { LatestGames } from '@/components/dictation/LatestGames'
+import { getTranslations } from 'next-intl/server'
 
-export default function Home() {
+export default async function Home() {
+  const t = await getTranslations();
+  
   return (
     <div className="relative isolate">
       {/* Background gradient */}
@@ -22,20 +25,20 @@ export default function Home() {
       <div className="px-6 py-24 sm:py-32 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-            Master Languages Through Interactive Dictation
+            {t('HomePage.title')}
           </h1>
           <p className="mt-6 text-lg leading-8 text-gray-600">
-            Create personalized dictation games to enhance vocabulary learning across multiple languages. Perfect for educators and language learners.
+            {t('HomePage.description')}
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6">
             <Link
               href="/dictation/create"
               className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
-              Create Your First Game
+              {t('HomePage.createGame')}
             </Link>
             <Link href="#features" className="text-sm font-semibold leading-6 text-gray-900">
-              Learn more <span aria-hidden="true">→</span>
+              {t('HomePage.learnMore')} <span aria-hidden="true">→</span>
             </Link>
           </div>
         </div>

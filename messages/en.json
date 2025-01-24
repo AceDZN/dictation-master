@@ -1,0 +1,41 @@
+{
+  "HomePage": {
+    "title": "Master Languages Through Interactive Dictation",
+    "description": "Create personalized dictation games to enhance vocabulary learning across multiple languages. Perfect for educators and language learners.",
+    "createGame": "Create Your First Game",
+    "learnMore": "Learn more"
+  },
+  "LatestGames": {
+    "title": "Latest Dictation Games",
+    "description": "Check out the most recent public dictation games created by our community."
+    },
+  "Profile": {
+    "title": "Profile",
+    "editProfile": "Edit Profile",
+    "publishedGames": "Published Games",
+    "draftGames": "Draft Games",
+    "noPublishedGames": "You haven't published any games yet.",
+    "noDraftGames": "You don't have any drafts.",
+    "editTitle": "Edit Profile",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "profileImage": "Profile Image",
+    "change": "Change",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "updateSuccess": "Profile updated successfully!",
+    "updateError": "Failed to update profile",
+    "imageSizeError": "Image size should be less than 5MB"
+  },
+  "Language": {
+    "select": "Select Language",
+    "en": "English",
+    "he": "Hebrew"
+  },
+  "Header": {
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "profile": "Profile",
+    "appName": "Dictation Masters"
+  }
+} 

@@ -4,6 +4,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useSession } from 'next-auth/react'
 import { handleSignOut } from '@/app/auth/actions'
+import { LanguageSelector } from '@/components/LanguageSelector'
+import { useTranslations } from 'next-intl'
 /*
 function getInitials(name: string | null | undefined) {
   if (!name) return '?'
@@ -17,6 +19,7 @@ function getInitials(name: string | null | undefined) {
 */
 function UserButton() {
   const { data: session } = useSession()
+  const t = useTranslations('Header')
 
   if (!session?.user) {
     return (
@@ -25,7 +28,7 @@ function UserButton() {
         className="relative rounded-full bg-gray-100 p-1 hover:bg-gray-200"
       >
         <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
-          <span className="sr-only">Sign in</span>
+          <span className="sr-only">{t('signIn')}</span>
           <svg
             className="h-5 w-5 text-gray-500"
             fill="none"
@@ -77,14 +80,14 @@ function UserButton() {
           href="/profile"
           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
         >
-          Profile
+          {t('profile')}
         </Link>
         <form action={handleSignOut}>
           <button
             type="submit"
             className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
           >
-            Sign out
+            {t('signOut')}
           </button>
         </form>
       </div>
@@ -93,21 +96,24 @@ function UserButton() {
 }
 
 export function Header() {
+  const t = useTranslations('Header')
+  
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/75 backdrop-blur-lg">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center">
           <Image
             src="/logo.svg"
-            alt="Dictation Master Logo"
+            alt={t('appName')}
             width={32}
             height={32}
             className="h-8 w-auto"
           />
-          <span className="font-semibold text-xl -ml-[5px]">Dictation Masters</span>
+          <span className="font-semibold text-xl -ml-[5px]">{t('appName')}</span>
         </Link>
         
         <div className="flex items-center gap-4">
+          <LanguageSelector />
           {UserButton()}
         </div>
       </div>

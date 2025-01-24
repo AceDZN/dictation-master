@@ -5,9 +5,11 @@ import Image from "next/image"
 import { useFormStatus } from "react-dom"
 import { updateUserProfile } from "./actions"
 import { useSession } from "next-auth/react"
+import { useTranslations } from 'next-intl'
 
 function SubmitButton() {
   const { pending } = useFormStatus()
+  const t = useTranslations('Profile')
   
   return (
     <button
@@ -21,10 +23,10 @@ function SubmitButton() {
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          Saving...
+          {t('saving')}
         </div>
       ) : (
-        'Save Changes'
+        t('saveChanges')
       )}
     </button>
   )
@@ -38,6 +40,7 @@ interface ProfileFormProps {
 
 export default function ProfileForm({ userId, initialName, initialImage }: ProfileFormProps) {
   const { update } = useSession()
+  const t = useTranslations('Profile')
   const [previewImage, setPreviewImage] = useState<string>(initialImage)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [firstName, setFirstName] = useState(initialName.split(' ')[0] || '')
@@ -53,7 +56,7 @@ export default function ProfileForm({ userId, initialName, initialImage }: Profi
     const file = e.target.files?.[0]
     if (file) {
       if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        setError("Image size should be less than 5MB")
+        setError(t('imageSizeError'))
         return
       }
       
@@ -96,7 +99,7 @@ export default function ProfileForm({ userId, initialName, initialImage }: Profi
         }
       }
     } else {
-      setError(result.error || "Failed to update profile")
+      setError(result.error || t('updateError'))
     }
   }
 
@@ -105,7 +108,7 @@ export default function ProfileForm({ userId, initialName, initialImage }: Profi
       <div className="space-y-6">
         {/* Profile Image */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Profile Image</label>
+          <label className="block text-sm font-medium text-gray-700">{t('profileImage')}</label>
           <div className="mt-2 flex items-center space-x-6">
             <div 
               onClick={handleImageClick}
@@ -113,7 +116,7 @@ export default function ProfileForm({ userId, initialName, initialImage }: Profi
             >
               <Image
                 src={previewImage || '/default-avatar.png'}
-                alt="Profile"
+                alt={t('profileImage')}
                 fill
                 className="object-cover"
               />
@@ -130,7 +133,7 @@ export default function ProfileForm({ userId, initialName, initialImage }: Profi
               onClick={handleImageClick}
               className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
             >
-              Change
+              {t('change')}
             </button>
           </div>
         </div>
@@ -139,7 +142,7 @@ export default function ProfileForm({ userId, initialName, initialImage }: Profi
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div>
             <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-              First Name
+              {t('firstName')}
             </label>
             <input
               type="text"
@@ -152,7 +155,7 @@ export default function ProfileForm({ userId, initialName, initialImage }: Profi
 
           <div>
             <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-              Last Name
+              {t('lastName')}
             </label>
             <input
               type="text"
@@ -172,7 +175,7 @@ export default function ProfileForm({ userId, initialName, initialImage }: Profi
         )}
         {success && (
           <div className="rounded-md bg-green-50 p-4">
-            <div className="text-sm text-green-700">Profile updated successfully!</div>
+            <div className="text-sm text-green-700">{t('updateSuccess')}</div>
           </div>
         )}
 

@@ -4,6 +4,9 @@ import "./globals.css";
 import { Header } from "@/components/Header";
 import { auth } from "@/lib/auth";
 import { Providers } from "@/components/Providers";
+import { NextIntlClientProvider } from 'next-intl';
+import { getLangDir } from 'rtl-detect';
+import { getLocale, getMessages } from 'next-intl/server';
 
 const alef = Alef({
   subsets: ["latin"],
@@ -22,19 +25,25 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
+  const locale = await getLocale();
+  console.log('locale', locale)
   const session = await auth();
+  const messages = await getMessages();
+  const direction = getLangDir(locale);
 
   return (
-    <html lang="en" className="h-full">
+    <html lang={locale} className="h-full" dir={direction}>
       <body className={`${alef.variable} font-alef antialiased h-full`}>
-        <Providers session={session}>
-          <Header />
-          <main className="flex-1">
-            {children}
-          </main>
-        </Providers>
+        <NextIntlClientProvider messages={messages} locale={locale}>
+          <Providers session={session}>
+            <Header />
+            <main className="flex-1">
+              {children}
+            </main>
+          </Providers>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
