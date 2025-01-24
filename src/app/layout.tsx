@@ -7,6 +7,7 @@ import { Providers } from "@/components/Providers";
 import { NextIntlClientProvider } from 'next-intl';
 import { getLangDir } from 'rtl-detect';
 import { getLocale, getMessages } from 'next-intl/server';
+import { generateMetadata as generateSiteMetadata } from '@/lib/metadata';
 
 const alef = Alef({
   subsets: ["latin"],
@@ -14,13 +15,10 @@ const alef = Alef({
   variable: "--font-alef",
 });
 
-export const metadata: Metadata = {
-  title: "Dictation Master",
-  description: "Create and manage language learning games through dictation exercises",
-  icons: {
-    icon: "/favicon.ico",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  return generateSiteMetadata(locale);
+}
 
 export default async function RootLayout({
   children,
