@@ -4,6 +4,7 @@ import * as React from "react"
 import type { WordPairsList } from "@/lib/openai"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useTranslations } from 'next-intl'
 
 interface FileUploadProps {
   onStart: () => void
@@ -13,6 +14,8 @@ interface FileUploadProps {
 }
 
 export function FileUpload({ onStart, onComplete, onError, disabled = false }: FileUploadProps) {
+  const t = useTranslations('Dictation.form')
+
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
@@ -41,11 +44,11 @@ export function FileUpload({ onStart, onComplete, onError, disabled = false }: F
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="file-upload">Upload Word Pairs</Label>
+      <Label htmlFor="file-upload">{t('uploadWordPairs')}</Label>
       <Input
         id="file-upload"
         type="file"
-        accept=".txt,.csv"
+        accept=".txt,.csv,image/*"
         onChange={handleFileChange}
         disabled={disabled}
       />

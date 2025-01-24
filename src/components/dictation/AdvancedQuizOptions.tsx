@@ -4,6 +4,7 @@ import { QuizParameters as QuizParametersType } from "@/lib/types"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
+import { useTranslations } from 'next-intl'
 
 interface AdvancedQuizOptionsProps {
   value: QuizParametersType
@@ -12,6 +13,8 @@ interface AdvancedQuizOptionsProps {
 }
 
 export function AdvancedQuizOptions({ value, onChange, disabled }: AdvancedQuizOptionsProps) {
+  const t = useTranslations('Dictation.form')
+
   const handleChange = (field: keyof QuizParametersType, newValue: number | boolean) => {
     onChange({
       ...value,
@@ -22,13 +25,13 @@ export function AdvancedQuizOptions({ value, onChange, disabled }: AdvancedQuizO
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline">Advanced Mode</Button>
+        <Button variant="outline">{t('advancedMode')}</Button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-4">
-        <h2 className="text-lg font-semibold mb-4">Advanced Quiz Options</h2>
+        <h2 className="text-lg font-semibold mb-4">{t('advancedOptions')}</h2>
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <Label htmlFor="quiz-mode" className="cursor-pointer">Quiz Mode</Label>
+            <Label htmlFor="quiz-mode" className="cursor-pointer">{t('quizMode')}</Label>
             <Switch
               id="quiz-mode"
               checked={value.quizModeEnabled}
@@ -39,7 +42,7 @@ export function AdvancedQuizOptions({ value, onChange, disabled }: AdvancedQuizO
 
           <div className="space-y-4">
             <div>
-              <Label htmlFor="global-time-limit">Global Time Limit (minutes)</Label>
+              <Label htmlFor="global-time-limit">{t('globalTimeLimit')}</Label>
               <Input
                 id="global-time-limit"
                 type="number"
@@ -53,7 +56,7 @@ export function AdvancedQuizOptions({ value, onChange, disabled }: AdvancedQuizO
             </div>
 
             <div>
-              <Label htmlFor="activity-time-limit">Activity Time Limit (seconds)</Label>
+              <Label htmlFor="activity-time-limit">{t('activityTimeLimit')}</Label>
               <Input
                 id="activity-time-limit"
                 type="number"
@@ -67,7 +70,7 @@ export function AdvancedQuizOptions({ value, onChange, disabled }: AdvancedQuizO
             </div>
 
             <div>
-              <Label htmlFor="global-lives-limit">Lives Limit</Label>
+              <Label htmlFor="global-lives-limit">{t('livesLimit')}</Label>
               <Input
                 id="global-lives-limit"
                 type="number"

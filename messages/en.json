@@ -30,12 +30,88 @@
   "Language": {
     "select": "Select Language",
     "en": "English",
-    "he": "Hebrew"
+    "he": "Hebrew",
+    "languages": {
+      "English": "English",
+      "Hebrew": "Hebrew",
+      "Spanish": "Spanish",
+      "French": "French",
+      "German": "German",
+      "Italian": "Italian",
+      "Portuguese": "Portuguese",
+      "Russian": "Russian",
+      "Chinese": "Chinese",
+      "Japanese": "Japanese",
+      "Korean": "Korean",
+      "Arabic": "Arabic"
+    }
   },
   "Header": {
     "signIn": "Sign in",
     "signOut": "Sign out",
     "profile": "Profile",
     "appName": "Dictation Masters"
+  },
+  "Dictation": {
+    "create": {
+      "title": "Create New Dictation",
+      "description": "Create a new dictation game by filling out the form below."
+    },
+    "edit": {
+      "title": "Edit Dictation",
+      "description": "Edit your dictation game"
+    },
+    "form": {
+      "basicInfo": "Basic Information",
+      "title": "Title",
+      "titlePlaceholder": "Enter game title",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter game description",
+      "public": "Public",
+      "sourceLanguage": "Source Language",
+      "targetLanguage": "Target Language",
+      "swapLanguages": "Swap languages",
+      "wordPairs": "Word Pairs",
+      "uploadWordPairs": "Upload Word Pairs",
+      "addWordPair": "Add Word Pair",
+      "sourceWord": "{language} word",
+      "targetWord": "{language} word",
+      "exampleSentence": "Example sentence (optional)",
+      "advancedOptions": "Advanced Options",
+      "advancedMode": "Advanced Mode",
+      "quizMode": "Quiz Mode",
+      "globalTimeLimit": "Global Time Limit (minutes)",
+      "activityTimeLimit": "Activity Time Limit (seconds)",
+      "livesLimit": "Lives Limit",
+      "cancel": "Cancel",
+      "deleteDraft": "Delete Draft",
+      "deleting": "Deleting...",
+      "saveChanges": "Save Changes",
+      "saving": "Saving...",
+      "populateData": "Populate Data",
+      "generating": "Generating...",
+      "saveAsDraft": "Save as Draft",
+      "createDictation": "Create Dictation",
+      "creating": "Creating...",
+      "processingFile": "Processing File..."
+    },
+    "game": {
+      "startGame": "Start Game",
+      "gameOver": "Game Over!",
+      "playAgain": "Play Again",
+      "exit": "Exit",
+      "timeLeft": "Time Left",
+      "progress": "Progress",
+      "hearts": "Hearts",
+      "words": "words",
+      "created": "Created"
+    },
+    "card": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "play": "Play",
+      "words": "{count} words",
+      "created": "Created"
+    }
   }
 } 

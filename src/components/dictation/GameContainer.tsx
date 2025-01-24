@@ -5,6 +5,7 @@ import { DictationGame } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { WordPairDisplay } from '@/components/dictation/WordPairDisplay'
 import { GameView } from '@/components/dictation/GameView'
+import { useTranslations } from 'next-intl'
 
 interface GameContainerProps {
   game: DictationGame
@@ -12,6 +13,7 @@ interface GameContainerProps {
 
 export function GameContainer({ game }: GameContainerProps) {
   const [isGameStarted, setIsGameStarted] = useState(false)
+  const t = useTranslations('Dictation.game')
 
   const incrementPlayCount = async () => {
     try {
@@ -47,7 +49,7 @@ export function GameContainer({ game }: GameContainerProps) {
             onClick={handleGameStart}
             className="px-8"
           >
-            Start Game
+            {t('startGame')}
           </Button>
         </div>
       </div>

@@ -30,12 +30,88 @@
   "Language": {
     "select": "בחר שפה",
     "en": "אנגלית",
-    "he": "עברית"
+    "he": "עברית",
+    "languages": {
+      "English": "אנגלית",
+      "Hebrew": "עברית",
+      "Spanish": "ספרדית",
+      "French": "צרפתית",
+      "German": "גרמנית",
+      "Italian": "איטלקית",
+      "Portuguese": "פורטוגזית",
+      "Russian": "רוסית",
+      "Chinese": "סינית",
+      "Japanese": "יפנית",
+      "Korean": "קוריאנית",
+      "Arabic": "ערבית"
+    }
   },
   "Header": {
     "signIn": "התחבר",
     "signOut": "התנתק",
     "profile": "פרופיל",
     "appName": "מאסטר הכתבות"
+  },
+  "Dictation": {
+    "create": {
+      "title": "צור הכתבה חדשה",
+      "description": "צור משחק הכתבה חדש על ידי מילוי הטופס למטה."
+    },
+    "edit": {
+      "title": "ערוך הכתבה",
+      "description": "ערוך את משחק ההכתבה שלך"
+    },
+    "form": {
+      "basicInfo": "מידע בסיסי",
+      "title": "כותרת",
+      "titlePlaceholder": "הזן כותרת משחק",
+      "description": "תיאור",
+      "descriptionPlaceholder": "הזן תיאור משחק",
+      "public": "ציבורי",
+      "sourceLanguage": "שפת מקור",
+      "targetLanguage": "שפת יעד",
+      "swapLanguages": "החלף שפות",
+      "wordPairs": "זוגות מילים",
+      "uploadWordPairs": "העלה זוגות מילים",
+      "addWordPair": "הוסף זוג מילים",
+      "sourceWord": "מילה ב-{language}",
+      "targetWord": "מילה ב-{language}",
+      "exampleSentence": "משפט לדוגמה (אופציונלי)",
+      "advancedOptions": "אפשרויות מתקדמות",
+      "advancedMode": "מצב מתקדם",
+      "quizMode": "מצב חידון",
+      "globalTimeLimit": "מגבלת זמן כללית (דקות)",
+      "activityTimeLimit": "מגבלת זמן לפעילות (שניות)",
+      "livesLimit": "מגבלת חיים",
+      "cancel": "ביטול",
+      "deleteDraft": "מחק טיוטה",
+      "deleting": "מוחק...",
+      "saveChanges": "שמור שינויים",
+      "saving": "שומר...",
+      "populateData": "מלא נתונים",
+      "generating": "מייצר...",
+      "saveAsDraft": "שמור כטיוטה",
+      "createDictation": "צור הכתבה",
+      "creating": "יוצר...",
+      "processingFile": "מעבד קובץ..."
+    },
+    "game": {
+      "startGame": "התחל משחק",
+      "gameOver": "המשחק נגמר!",
+      "playAgain": "שחק שוב",
+      "exit": "יציאה",
+      "timeLeft": "זמן נותר",
+      "progress": "התקדמות",
+      "hearts": "חיים",
+      "words": "מילים",
+      "created": "נוצר"
+    },
+    "card": {
+      "edit": "ערוך",
+      "delete": "מחק",
+      "play": "שחק",
+      "words": "{count} מילים",
+      "created": "נוצר"
+    }
   }
 } 

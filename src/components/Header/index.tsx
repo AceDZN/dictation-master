@@ -72,7 +72,7 @@ function UserButton() {
         </div>
       </Link>
 
-      <div className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+      <div className="absolute ltr:right-0 rtl:left-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
         <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
           {session.user.name || session.user.email}
         </div>
@@ -109,7 +109,7 @@ export function Header() {
             height={32}
             className="h-8 w-auto"
           />
-          <span className="font-semibold text-xl -ml-[5px]">{t('appName')}</span>
+          <span className="font-semibold text-xl ltr:-ml-[5px] rtl:mr-[5px]">{t('appName')}</span>
         </Link>
         
         <div className="flex items-center gap-4">

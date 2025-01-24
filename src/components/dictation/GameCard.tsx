@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Game } from '@/app/actions/dictation'
 import { GameCardActions } from '@/components/dictation/GameCardActions'
 import { Button } from '@/components/ui/button'
+import { useTranslations } from 'next-intl'
 
 export function GameCard({ 
   id, 
@@ -76,6 +77,7 @@ function GameCardContent({
   playCount = 0,
   actions
 }: GameCardContentProps) {
+  const t = useTranslations('Dictation.card')
   const formatDate = (timestamp: Game['createdAt']) => {
     if (timestamp.toDate) {
       return timestamp.toDate().toLocaleDateString()
@@ -102,10 +104,10 @@ function GameCardContent({
             </div>
           </div>
           <div className="text-sm text-gray-500">
-            {wordPairs.length} words
+            {t('words', { count: wordPairs.length })}
           </div>
           <div className="text-xs text-gray-400">
-            Created {formatDate(createdAt)}
+            {t('created')} {formatDate(createdAt)}
           </div>
           {actions}
         </div>

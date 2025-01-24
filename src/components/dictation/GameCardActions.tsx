@@ -5,6 +5,7 @@ import { TrashIcon } from '@heroicons/react/24/outline'
 import { deleteGame } from '@/app/actions/dictation'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 
 interface GameCardActionsProps {
   id: string
@@ -12,6 +13,7 @@ interface GameCardActionsProps {
 
 export function GameCardActions({ id }: GameCardActionsProps) {
   const router = useRouter()
+  const t = useTranslations('Dictation.card')
 
   const handleDelete = async () => {
     try {
@@ -36,7 +38,7 @@ export function GameCardActions({ id }: GameCardActionsProps) {
           router.push(`/dictation/edit/${id}`)
         }}
       >
-        Edit
+        {t('edit')}
       </Button>
       <Button 
         variant="destructive" 

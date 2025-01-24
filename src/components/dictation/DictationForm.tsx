@@ -14,6 +14,7 @@ import { AdvancedQuizOptions } from "./AdvancedQuizOptions"
 import { getLanguageCodeFromName } from "@/lib/utils"
 import { Spinner } from "@/components/ui/spinner"
 import { ArrowsRightLeftIcon } from "@heroicons/react/24/outline"
+import { useTranslations } from 'next-intl'
 
 const DEFAULT_LANGUAGES = {
   source: 'Hebrew',
@@ -35,6 +36,7 @@ interface FormData extends CreateDictationInput {
 
 export function DictationForm({ id, initialData }: DictationFormProps) {
   const router = useRouter()
+  const t = useTranslations('Dictation.form')
   const [formData, setFormData] = useState<FormData>(() => {
     const isPublic = initialData?.isPublic
     return {
@@ -280,14 +282,14 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
 
       {/* Basic Information */}
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-indigo-600">Basic Information</h2>
+        <h2 className="text-xl font-semibold text-indigo-600">{t('basicInfo')}</h2>
         <div className="space-y-2">
-          <Label htmlFor="title">Title</Label>
+          <Label htmlFor="title">{t('title')}</Label>
           <Input
             id="title"
             value={formData.title}
             onChange={e => setFormData({ ...formData, title: e.target.value })}
-            placeholder="Enter game title"
+            placeholder={t('titlePlaceholder')}
             maxLength={100}
             required
             disabled={isLoadingState}
@@ -296,33 +298,33 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="description">Description</Label>
+          <Label htmlFor="description">{t('description')}</Label>
           <Input
             id="description"
             value={formData.description ?? ''}
             onChange={e => setFormData({ ...formData, description: e.target.value || undefined })}
-            placeholder="Enter game description"
+            placeholder={t('descriptionPlaceholder')}
             maxLength={200}
             disabled={isLoadingState}
             className="transition duration-200 ease-in-out focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 gap-2">
           <Switch
             id="public"
             checked={formData.isPublic}
             onCheckedChange={(checked: boolean) => setFormData({ ...formData, isPublic: checked })}
             disabled={isLoadingState}
           />
-          <Label htmlFor="public">Public</Label>
+          <Label htmlFor="public">{t('public')}</Label>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <LanguageSelector
             key={`source-${selectorKey}`}
             id="source-language"
-            label="Source Language"
+            label={t('sourceLanguage')}
             value={formData.sourceLanguage}
             onChange={value => setFormData({ ...formData, sourceLanguage: value })}
             excludeLanguage={formData.targetLanguage}
@@ -338,13 +340,13 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
               className="mb-[2px]"
             >
               <ArrowsRightLeftIcon className="h-4 w-4" />
-              <span className="sr-only">Swap languages</span>
+              <span className="sr-only">{t('swapLanguages')}</span>
             </Button>
           </div>
           <LanguageSelector
             key={`target-${selectorKey}`}
             id="target-language"
-            label="Target Language"
+            label={t('targetLanguage')}
             value={formData.targetLanguage}
             onChange={value => setFormData({ ...formData, targetLanguage: value })}
             excludeLanguage={formData.sourceLanguage}
@@ -355,7 +357,7 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
 
       {/* Word Pairs */}
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-indigo-600">Word Pairs</h2>
+        <h2 className="text-xl font-semibold text-indigo-600">{t('wordPairs')}</h2>
         <WordPairList
           wordPairs={formData.wordPairs}
           onChange={wordPairs => setFormData({ ...formData, wordPairs })}
@@ -370,7 +372,7 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
 
       {/* Advanced Quiz Options */}
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-indigo-600">Advanced Options</h2>
+        <h2 className="text-xl font-semibold text-indigo-600">{t('advancedOptions')}</h2>
         <AdvancedQuizOptions
           value={formData.quizParameters}
           onChange={quizParameters => setFormData({ ...formData, quizParameters })}
@@ -389,7 +391,7 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
               onClick={() => router.push('/profile')}
               disabled={isLoadingState || isDeleting}
             >
-              Cancel
+              {t('cancel')}
             </Button>
             {!formData.isPublic && (
               <Button 
@@ -402,10 +404,10 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
                 {isDeleting ? (
                   <div className="flex items-center gap-2">
                     <Spinner size="sm" />
-                    <span>Deleting...</span>
+                    <span>{t('deleting')}</span>
                   </div>
                 ) : (
-                  'Delete Draft'
+                  t('deleteDraft')
                 )}
               </Button>
             )}
@@ -417,10 +419,10 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
               {isSubmitting ? (
                 <div className="flex items-center gap-2">
                   <Spinner size="sm" />
-                  <span>Saving...</span>
+                  <span>{t('saving')}</span>
                 </div>
               ) : (
-                'Save Changes'
+                t('saveChanges')
               )}
             </Button>
           </>
@@ -436,10 +438,10 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
               {isProcessingFile ? (
                 <div className="flex items-center gap-2">
                   <Spinner size="sm" />
-                  <span>Generating...</span>
+                  <span>{t('generating')}</span>
                 </div>
               ) : (
-                'Populate Data'
+                t('populateData')
               )}
             </Button>
             <Button 
@@ -449,7 +451,7 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
               disabled={isLoadingState}
               onClick={handleSaveDraft}
             >
-              Save as Draft
+              {t('saveAsDraft')}
             </Button>
             <Button 
               type="submit" 
@@ -459,15 +461,15 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
               {isSubmitting ? (
                 <div className="flex items-center gap-2">
                   <Spinner size="sm" />
-                  <span>Creating...</span>
+                  <span>{t('creating')}</span>
                 </div>
               ) : isProcessingFile ? (
                 <div className="flex items-center gap-2">
                   <Spinner size="sm" />
-                  <span>Processing File...</span>
+                  <span>{t('processingFile')}</span>
                 </div>
               ) : (
-                'Create Dictation'
+                t('createDictation')
               )}
             </Button>
           </>

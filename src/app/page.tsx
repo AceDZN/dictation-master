@@ -1,10 +1,12 @@
 import Link from 'next/link'
 import { LatestGames } from '@/components/dictation/LatestGames'
-import { getTranslations } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
+import { getLangDir } from 'rtl-detect';
 
 export default async function Home() {
+  const locale = await getLocale();
   const t = await getTranslations();
-  
+  const direction = getLangDir(locale);
   return (
     <div className="relative isolate">
       {/* Background gradient */}
@@ -38,7 +40,7 @@ export default async function Home() {
               {t('HomePage.createGame')}
             </Link>
             <Link href="#features" className="text-sm font-semibold leading-6 text-gray-900">
-              {t('HomePage.learnMore')} <span aria-hidden="true">→</span>
+              {t('HomePage.learnMore')} <span aria-hidden="true">{direction === 'rtl' ? '←' : '→'}</span>
             </Link>
           </div>
         </div>

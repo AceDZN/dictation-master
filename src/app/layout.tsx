@@ -28,7 +28,6 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const locale = await getLocale();
-  console.log('locale', locale)
   const session = await auth();
   const messages = await getMessages();
   const direction = getLangDir(locale);

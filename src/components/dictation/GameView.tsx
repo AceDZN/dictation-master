@@ -7,6 +7,7 @@ import Realistic from 'react-canvas-confetti/dist/presets/realistic'
 import { useAnimate } from 'framer-motion'
 import { ClockIcon } from '@heroicons/react/24/outline'
 import { useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 
 interface GameViewProps {
   game: DictationGame
@@ -27,6 +28,7 @@ interface GameState {
 }
 
 export function GameView({ game, onGameEnd }: GameViewProps) {
+  const t = useTranslations('Dictation.game')
   // Randomize word pairs on initial load
   const randomizedWordPairs = useMemo(() => {
     return [...game.wordPairs].sort(() => Math.random() - 0.5)
@@ -256,34 +258,42 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
   if (gameState.isGameOver) {
     return (
       <div className="max-w-md mx-auto text-center p-8 bg-white rounded-xl shadow-2xl">
-        <h2 className="text-4xl font-bold mb-6 text-indigo-600">Game Over!</h2>
+        <h2 className="text-4xl font-bold mb-6 text-indigo-600">{t('gameOver')}</h2>
         <div className="space-y-6 grid ">
-          <div className="text-6xl mb-6 animate-bounce">
-            {'⭐'.repeat(gameState.stars)}
+          <div className="text-6xl mb-6">
+            <div className="flex items-center justify-center gap-4">
+              <span className={`text-6xl transition-all ${gameState.stars >= 1 ? 'text-yellow-400' : 'text-gray-300 [filter:grayscale(100%)]'}`}>⭐</span>
+              <span className={`text-8xl transition-all ${gameState.stars === 3 ? 'text-yellow-400' : 'text-gray-300 [filter:grayscale(100%)]'}`}>⭐</span>
+              <span className={`text-6xl transition-all ${gameState.stars >= 2 ? 'text-yellow-400' : 'text-gray-300 [filter:grayscale(100%)]'}`}>⭐</span>
+            </div>
           </div>
           <div className="flex flex-col gap-4">
-            <p className="text-xl flex items-center justify-center gap-2">
-              <span>❤️</span>
-              <span>{gameState.hearts}</span>
-            </p>
-            <p className="text-xl flex items-center justify-center gap-2">
-              <ClockIcon className="h-6 w-6" />
-              <span>{formatTime(gameState.totalTime)}</span>
-            </p>
-            <p className="text-xl">{gameState.completedWords}/{game.wordPairs.length}</p>
+            <div className="grid gap-4 text-xl" style={{ gridTemplateColumns: '1fr 1fr' }}>
+              <p className="flex justify-end items-center	text-3xl">❤️</p>
+              <p className="flex justify-start items-center	">{gameState.hearts}</p>
+            </div>
+            <div className="grid gap-4 text-xl" style={{ gridTemplateColumns: '1fr 1fr' }}>
+              <p className="flex justify-end items-center	"><ClockIcon className="h-8 w-8" /></p>
+              <p className="flex justify-start items-center	">{formatTime(gameState.totalTime)}</p>
+            </div>
+            <div className="grid gap-4 text-xl" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
+              <p className="justify-end items-center	flex">{gameState.fails}</p>
+              <p className="text-center items-center flex">/</p>
+              <p className="justify-start items-center flex">{gameState.completedWords}</p>
+            </div>
           </div>
-          <div className="space-x-6 mt-8">
+          <div className="mt-8 flex flex-row gap-4 justify-center items-center">
             <button
               onClick={restartGame}
               className="bg-indigo-600 text-white px-8 py-3 rounded-xl text-lg font-bold hover:bg-indigo-700 transform hover:scale-105 transition-all shadow-lg"
             >
-              Play Again
+              {t('playAgain')}
             </button>
             <button
               onClick={onGameEnd}
               className="bg-gray-600 text-white px-8 py-3 rounded-xl text-lg font-bold hover:bg-gray-700 transform hover:scale-105 transition-all shadow-lg"
             >
-              Exit
+              {t('exit')}
             </button>
           </div>
         </div>
