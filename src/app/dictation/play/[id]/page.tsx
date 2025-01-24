@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: PlayDictationPageProps): Prom
       title: game.title,
       description,
       path: `/dictation/play/${dictationId}`,
-      image: `/api/og/dictation/${dictationId}` // Dynamic OG image endpoint we'll create later
+      image: `/og/play-dictation.png` // Dynamic OG image endpoint we'll create later
     })
   } catch (error) {
     return generateSiteMetadata(locale, {})
