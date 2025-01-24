@@ -123,6 +123,26 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
   }
 
 
+  // Extracted moveToNextWord logic into a separate function
+  const moveToNextWord = useCallback(() => {
+    const nextIndex = gameState.currentWordIndex + 1
+    if (nextIndex >= game.wordPairs.length) {
+      setTimeout(() => {
+        endGame()
+      }, 1000) // Add delay before game end
+    } else {
+      setGameState(prev => ({
+        ...prev,
+        currentWordIndex: nextIndex,
+        timeLeft: game.quizParameters.activityTimeLimit,
+        isPaused: false,
+        currentWordGuesses: 0
+      }))
+      setInput('')
+      setInputStatus('default')
+    }
+  }, [endGame, gameState.currentWordIndex, game.wordPairs.length, game.quizParameters.activityTimeLimit])
+
   const handleCorrectAnswer = useCallback(() => {
     setInputStatus('correct')
     setHasInputChanged(false)
@@ -146,27 +166,7 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
       // If no audio, wait for a moment before moving to next word
       setTimeout(moveToNextWord, 1000)
     }
-  }, [endGame, gameState.currentWordIndex, game.wordPairs.length, game.quizParameters.activityTimeLimit, getCurrentWord])
-
-  // Extracted moveToNextWord logic into a separate function
-  const moveToNextWord = useCallback(() => {
-    const nextIndex = gameState.currentWordIndex + 1
-    if (nextIndex >= game.wordPairs.length) {
-      setTimeout(() => {
-        endGame()
-      }, 1000) // Add delay before game end
-    } else {
-      setGameState(prev => ({
-        ...prev,
-        currentWordIndex: nextIndex,
-        timeLeft: game.quizParameters.activityTimeLimit,
-        isPaused: false,
-        currentWordGuesses: 0
-      }))
-      setInput('')
-      setInputStatus('default')
-    }
-  }, [endGame, gameState.currentWordIndex, game.wordPairs.length, game.quizParameters.activityTimeLimit])
+  }, [endGame, gameState.currentWordIndex, game.wordPairs.length, game.quizParameters.activityTimeLimit, getCurrentWord, moveToNextWord])
 
   const animateHeartLoss = useCallback(() => {
     if (!heartsContainerRef.current) return

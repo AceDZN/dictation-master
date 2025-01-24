@@ -4,7 +4,6 @@ import { getStorage } from 'firebase-admin/storage'
 import { initAdminApp } from '@/lib/firebase-admin'
 import crypto from 'crypto'
 import { Readable } from 'stream'
-import { getLanguageCodeFromName } from '@/lib/utils'
 
 const storage = getStorage(initAdminApp())
 const bucket = storage.bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET)
