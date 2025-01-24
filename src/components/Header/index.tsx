@@ -112,7 +112,7 @@ export function Header() {
           <span className="font-semibold text-xl ltr:-ml-[5px] rtl:mr-[5px]">{t('appName')}</span>
         </Link>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           <LanguageSelector />
           {UserButton()}
         </div>

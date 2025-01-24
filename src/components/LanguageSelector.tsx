@@ -3,12 +3,12 @@
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { setUserLocale } from '@/lib/locale'
+import { Globe } from 'lucide-react'
 import {
   Select,
   SelectContent,
   SelectItem,
-  SelectTrigger,
-  SelectValue,
+  SelectTrigger
 } from "@/components/ui/select"
 
 export function LanguageSelector() {
@@ -22,8 +22,9 @@ export function LanguageSelector() {
 
   return (
     <Select onValueChange={handleLanguageChange}>
-      <SelectTrigger className="w-[140px]">
-        <SelectValue placeholder={t('select')} />
+      <SelectTrigger className="w-12 text-center p-0">
+        <Globe className="h-4 w-full" />
+        
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="en">{t('en')}</SelectItem>
