@@ -36,8 +36,7 @@ export default function PrivacyPolicy() {
 					</p>
 					<p className="text-gray-700 dark:text-gray-300 mt-2">
 						You can learn more about how Google uses data when you use our site by
-						visiting{' '}
-						<a
+						visiting <a
 							href="https://policies.google.com/technologies/partner-sites"
 							className="text-blue-600 dark:text-blue-400 hover:underline"
 							target="_blank"
