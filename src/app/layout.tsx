@@ -37,33 +37,12 @@ export default async function RootLayout({
     <html lang={locale} className="h-full" dir={direction}>
       <head>
         <Script
-          id="google-adsense-init"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.googletag = window.googletag || {cmd: []};
-              googletag.cmd.push(function() {
-                googletag.pubads().setPrivacySettings({
-                  'restrictDataProcessing': true
-                });
-              });
-            `
-          }}
-        />
-        <Script
+          id="google-adsense"
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7458209475481910"
           crossOrigin="anonymous"
           strategy="afterInteractive"
-          data-ad-client="ca-pub-7458209475481910"
-        />{/*
-        <Script
-          async
-          src="https://pagead2.googlesync.com/pagead/js/adsbygoogle.js?client=ca-pub-7458209475481910"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-          data-ad-client="ca-pub-7458209475481910"
-        />*/}
+        />
       </head>
       <body className={`${alef.variable} font-alef antialiased min-h-screen flex flex-col`}>
         <NextIntlClientProvider messages={messages} locale={locale}>
