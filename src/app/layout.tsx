@@ -11,6 +11,7 @@ import { getLocale, getMessages } from 'next-intl/server';
 import { generateMetadata as generateSiteMetadata } from '@/lib/metadata';
 import Script from 'next/script';
 import { AdBlockDetector } from '@/components/ui/AdBlockDetector';
+import Head from "next/head";
 
 const alef = Alef({
   subsets: ["latin"],
@@ -35,15 +36,14 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} className="h-full" dir={direction}>
-      <head>
+      <Head>
         <Script
-          id="google-adsense"
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7458209475481910"
           crossOrigin="anonymous"
-          strategy="afterInteractive"
+          strategy="beforeInteractive"
         />
-      </head>
+      </Head>
       <body className={`${alef.variable} font-alef antialiased min-h-screen flex flex-col`}>
         <NextIntlClientProvider messages={messages} locale={locale}>
           <Providers session={session}>
