@@ -2,9 +2,9 @@ import Link from 'next/link'
 
 export function Footer() {
 	return (
-		<footer className="w-full border-t border-gray-200 bg-white/75">
-			<div className="container mx-auto px-4 py-6">
-				<div className="flex justify-between items-center">
+		<footer className="mt-auto py-6 border-t border-gray-200 bg-white/75 backdrop-blur-lg">
+			<div className="container mx-auto px-4">
+				<div className="flex flex-col sm:flex-row justify-between items-center gap-4">
 					<div className="text-sm text-gray-500">
 						© {new Date().getFullYear()} Dictation Master
 					</div>

@@ -166,7 +166,7 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
       // If no audio, wait for a moment before moving to next word
       setTimeout(moveToNextWord, 1000)
     }
-  }, [endGame, gameState.currentWordIndex, game.wordPairs.length, game.quizParameters.activityTimeLimit, getCurrentWord, moveToNextWord])
+  }, [ getCurrentWord, moveToNextWord])
 
   const animateHeartLoss = useCallback(() => {
     if (!heartsContainerRef.current) return

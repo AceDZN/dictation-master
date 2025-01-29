@@ -10,6 +10,7 @@ import { getLangDir } from 'rtl-detect';
 import { getLocale, getMessages } from 'next-intl/server';
 import { generateMetadata as generateSiteMetadata } from '@/lib/metadata';
 import Script from 'next/script';
+import { AdBlockDetector } from '@/components/ui/AdBlockDetector';
 
 const alef = Alef({
   subsets: ["latin"],
@@ -64,14 +65,19 @@ export default async function RootLayout({
           data-ad-client="ca-pub-7458209475481910"
         />*/}
       </head>
-      <body className={`${alef.variable} font-alef antialiased h-full flex flex-col`}>
+      <body className={`${alef.variable} font-alef antialiased min-h-screen flex flex-col`}>
         <NextIntlClientProvider messages={messages} locale={locale}>
           <Providers session={session}>
-            <Header />
-            <main className="flex-1 flex flex-col min-h-0">
-              {children}
-            </main>
-            <Footer />
+            <div className="flex flex-col min-h-screen">
+              <Header />
+              <main className="flex-grow">
+                <div className="container mx-auto px-4">
+                  <AdBlockDetector />
+                  {children}
+                </div>
+              </main>
+              <Footer />
+            </div>
           </Providers>
         </NextIntlClientProvider>
       </body>
