@@ -42,7 +42,7 @@ export default function PrivacyPolicy() {
 							target="_blank"
 							rel="noopener noreferrer"
 						>
-							{`Google's Privacy & Terms site`}
+							{`Google Privacy & Terms`}
 						</a>
 						.
 					</p>
