@@ -9,7 +9,6 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getLangDir } from 'rtl-detect';
 import { getLocale, getMessages } from 'next-intl/server';
 import { generateMetadata as generateSiteMetadata } from '@/lib/metadata';
-import Script from 'next/script';
 import { AdBlockDetector } from '@/components/ui/AdBlockDetector';
 import Head from "next/head";
 
