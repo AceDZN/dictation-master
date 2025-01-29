@@ -37,12 +37,11 @@ export default async function RootLayout({
   return (
     <html lang={locale} className="h-full" dir={direction}>
       <Head>
-        <Script
+        <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7458209475481910"
           crossOrigin="anonymous"
-          strategy="beforeInteractive"
-        />
+        ></script>
       </Head>
       <body className={`${alef.variable} font-alef antialiased min-h-screen flex flex-col`}>
         <NextIntlClientProvider messages={messages} locale={locale}>
