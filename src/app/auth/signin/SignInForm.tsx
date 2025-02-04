@@ -1,7 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { useFormStatus } from "react-dom"
+import { useFormState, useFormStatus } from "react-dom"
+import { useRouter } from "next/navigation"
 import { handleCredentialsSignIn, handleGoogleSignIn } from "../actions"
 
 function SubmitButton() {
@@ -73,6 +74,23 @@ function GoogleSignInButton() {
 }
 
 export default function SignInForm({ from }: { from: string }) {
+  const router = useRouter()
+  const [state, formAction] = useFormState(
+    async (prevState: any, formData: FormData) => {
+      const email = formData.get("email") as string
+      const password = formData.get("password") as string
+      const result = await handleCredentialsSignIn(email, password, from)
+      
+      if (result.success) {
+        router.push(result.redirectTo || '/')
+        return null
+      }
+      
+      return result
+    },
+    null
+  )
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -83,14 +101,29 @@ export default function SignInForm({ from }: { from: string }) {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white px-4 py-8 shadow sm:rounded-lg sm:px-10">
-          <form
-            action={async (formData: FormData) => {
-              const email = formData.get("email") as string
-              const password = formData.get("password") as string
-              await handleCredentialsSignIn(email, password, from)
-            }}
-            className="space-y-6"
-          >
+          {state?.error && (
+            <div className="rounded-md bg-red-50 p-4 mb-6">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800">
+                    {state.error}
+                  </h3>
+                  {process.env.NODE_ENV === 'development' && state.errorCode && (
+                    <p className="mt-1 text-xs text-red-600">
+                      Error code: {state.errorCode}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <form action={formAction} className="space-y-6">
             <div>
               <label
                 htmlFor="email"
@@ -111,12 +144,22 @@ export default function SignInForm({ from }: { from: string }) {
             </div>
 
             <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Password
-              </label>
+              <div className="flex items-center justify-between">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Password
+                </label>
+                <div className="text-sm">
+                  <Link
+                    href="/auth/reset-password"
+                    className="font-medium text-indigo-600 hover:text-indigo-500"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+              </div>
               <div className="mt-1">
                 <input
                   id="password"
