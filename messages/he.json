@@ -105,7 +105,8 @@
       "hearts": "חיים",
       "words": "מילים",
       "created": "נוצר",
-      "hideSentences": "הסתר משפטי דוגמה"
+      "showExamples": "הצג משפטי דוגמה",
+      "hideExamples": "הסתר משפטי דוגמה"
     },
     "card": {
       "edit": "ערוך",

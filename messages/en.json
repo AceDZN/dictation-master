@@ -105,7 +105,8 @@
       "hearts": "Hearts",
       "words": "words",
       "created": "Created",
-      "hideSentences": "Hide Example Sentences"
+      "showExamples": "Show example sentences",
+      "hideExamples": "Hide example sentences"
     },
     "card": {
       "edit": "Edit",

@@ -5,14 +5,17 @@ import { DictationGame, WordPair } from '@/lib/types'
 import { Input } from '@/components/ui/input'
 import Realistic from 'react-canvas-confetti/dist/presets/realistic'
 import { useAnimate } from 'motion/react'
-import { ClockIcon } from '@heroicons/react/24/outline'
+import { ClockIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 import { useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
+import { Button } from '@/components/ui/button'
 
 interface GameViewProps {
   game: DictationGame
   onGameEnd: () => void
+  hideExampleSentences?: boolean
+  onToggleExampleSentences?: () => void
 }
 
 interface GameState {
@@ -29,7 +32,12 @@ interface GameState {
   currentWordGuesses: number
 }
 
-export function GameView({ game, onGameEnd }: GameViewProps) {
+export function GameView({ 
+  game, 
+  onGameEnd,
+  hideExampleSentences = false,
+  onToggleExampleSentences
+}: GameViewProps) {
   const t = useTranslations('Dictation.game')
   // Randomize word pairs on initial load
   const randomizedWordPairs = useMemo(() => {
@@ -336,9 +344,9 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
       <h1 className="text-md mb-12 text-center text-gray-300">{game.title}</h1>
       
       {/* Game Header */}
-      <div className="flex justify-between items-center mb-12 relative  text-lg font-bold">
+      <div className="flex justify-between items-center mb-12 relative text-lg font-bold">
         {/* Hearts Container */}
-        <div ref={heartsContainerRef} className="relative flex items-center gap-2 ">
+        <div ref={heartsContainerRef} className="relative flex items-center gap-2">
           <div className="flex items-center gap-2">
             <span className="heart animate-pulse">❤️</span>
             <span className="heart-count">{gameState.hearts}</span>
@@ -353,7 +361,6 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
         {/* Timer */}
         {game.quizParameters.activityTimeLimit > 0 && (
           <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 flex flex-col items-center">
-            
             <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-indigo-600 transition-all duration-1000 ease-linear"
@@ -363,20 +370,36 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
                 }}
               />
             </div>
-            <div className=" font-mono mt-2">
+            <div className="font-mono mt-2">
               {formatTime(gameState.timeLeft)}
             </div>
           </div>
         )}
+
+        {/* Example Sentences Toggle */}
+        {onToggleExampleSentences && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onToggleExampleSentences}
+            className="absolute right-0 top-1/2 -translate-y-1/2"
+            title={hideExampleSentences ? t('showExamples') : t('hideExamples')}
+          >
+            {hideExampleSentences ? (
+              <EyeSlashIcon className="h-5 w-5" />
+            ) : (
+              <EyeIcon className="h-5 w-5" />
+            )}
+          </Button>
+        )}
       </div>
 
-      {/* Word Display */}
       <div className="text-center mb-12 w-full min-h-[50vh] flex flex-col justify-center items-center">
         <div className="flex flex-col justify-center items-center h-auto">
-            <div className="text-6xl font-bold mb-12 text-indigo-600">
-                {getCurrentWord().first}
-            </div>
-            <div className="flex justify-center items-center">
+          <div className="text-6xl font-bold mb-12 text-indigo-600">
+            {getCurrentWord().first}
+          </div>
+          <div className="flex justify-center items-center">
             <div className="flex flex-col justify-center items-center relative">
               <Input
                 ref={inputRef}
@@ -386,17 +409,16 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
                 onKeyDown={handleInputKeyDown}
                 maxLength={getCurrentWord().second.length}
                 className={`text-center text-xl md:text-4xl font-bold p-6 rounded-xl border-2 shadow-lg h-fit w-auto transition-all duration-300 ease-in-out transform preserve-3d hover:scale-105 focus:scale-105 ${
-                    inputStatus === 'correct' ? 'bg-green-50 border-green-500 scale-105' :
-                    inputStatus === 'incorrect' ? 'bg-red-50 border-red-500 shake' :
-                    'border-indigo-200 hover:border-indigo-400 focus:border-indigo-600'
+                  inputStatus === 'correct' ? 'bg-green-50 border-green-500 scale-105' :
+                  inputStatus === 'incorrect' ? 'bg-red-50 border-red-500 shake' :
+                  'border-indigo-200 hover:border-indigo-400 focus:border-indigo-600'
                 }`}
                 autoComplete="off"
                 style={{
-                    transformStyle: 'preserve-3d',
-                    transform: 'perspective(1000px) rotateX(2deg)',
+                  transformStyle: 'preserve-3d',
+                  transform: 'perspective(1000px) rotateX(2deg)',
                 }}
               />
-              {/* Floating hint tooltip */}
               {gameState.currentWordGuesses > 0 && inputStatus !== 'correct' && (
                 <TooltipProvider>
                   <Tooltip open={true}>
@@ -414,13 +436,12 @@ export function GameView({ game, onGameEnd }: GameViewProps) {
                 </TooltipProvider>
               )}
             </div>
-            </div>
-            <div className="text-xl  text-gray-600 mt-20">
-                {getCurrentWord().sentence}
-            </div>
+          </div>
+          <div className={`example-sentence text-xl text-gray-600 mt-20 transition-opacity duration-300 ${hideExampleSentences ? 'opacity-0' : 'opacity-100'}`}>
+            {getCurrentWord().sentence}
+          </div>
         </div>
       </div>
-      
     </div>
   )
 } 
