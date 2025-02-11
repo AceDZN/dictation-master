@@ -6,7 +6,7 @@ import { z } from 'zod'
 import { getTTSUrls } from '@/lib/server/tts'
 
 const createDictationSchema = z.object({
-  title: z.string().min(3).max(30),
+  title: z.string().max(30),
   description: z.string().max(100).optional(),
   sourceLanguage: z.string(),
   targetLanguage: z.string(),

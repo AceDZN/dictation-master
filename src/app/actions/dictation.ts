@@ -8,19 +8,19 @@ import { initAdminApp } from '@/lib/firebase-admin'
 
 const CreateDictationSchema = z.object({
   id: z.string().optional(),
-  title: z.string().min(3).max(30),
+  title: z.string().max(30),
   description: z.string().max(100).optional(),
-  sourceLanguage: z.string().min(1),
-  targetLanguage: z.string().min(1),
+  sourceLanguage: z.string(),
+  targetLanguage: z.string(),
   wordPairs: z.array(z.object({
-    first: z.string().min(1).max(50),
-    second: z.string().min(1).max(50),
+    first: z.string().max(50),
+    second: z.string().max(50),
     sentence: z.string().max(200).optional(),
   })).min(1).max(50),
   quizParameters: z.object({
-    globalTimeLimit: z.number().min(0).max(3600),
-    globalLivesLimit: z.number().min(1).max(10),
-    activityTimeLimit: z.number().min(0).max(300),
+    globalTimeLimit: z.number().max(3600),
+    globalLivesLimit: z.number().max(10),
+    activityTimeLimit: z.number().max(300),
     quizModeEnabled: z.boolean(),
   }),
 })

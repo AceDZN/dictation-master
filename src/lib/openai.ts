@@ -10,7 +10,7 @@ const openai = new OpenAI({
 
 
 const WordPairsList = z.object({
-  title: z.string().min(3).max(30),
+  title: z.string().max(30),
   description: z.string().max(100).optional(),
   wordPairs: z.array(
     z.object({
