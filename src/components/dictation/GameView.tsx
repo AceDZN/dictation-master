@@ -340,8 +340,28 @@ export function GameView({
 
   return (
     <div className="max-w-3xl mx-auto p-6">
+
       <Realistic onInit={handleConfettiInit} />
-      <h1 className="text-md mb-12 text-center text-gray-300">{game.title}</h1>
+      <h1 className="text-md mb-12 text-center text-gray-300 relative">
+        {game.title}
+
+        {/* Example Sentences Toggle */}
+        {onToggleExampleSentences && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onToggleExampleSentences}
+            className="absolute right-0 top-1/2 -translate-y-1/2"
+            title={hideExampleSentences ? t('showExamples') : t('hideExamples')}
+          >
+            {hideExampleSentences ? (
+              <EyeSlashIcon className="h-5 w-5" />
+            ) : (
+              <EyeIcon className="h-5 w-5" />
+            )}
+          </Button>
+        )}
+      </h1>
       
       {/* Game Header */}
       <div className="flex justify-between items-center mb-12 relative text-lg font-bold">
@@ -376,22 +396,6 @@ export function GameView({
           </div>
         )}
 
-        {/* Example Sentences Toggle */}
-        {onToggleExampleSentences && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onToggleExampleSentences}
-            className="absolute right-0 top-1/2 -translate-y-1/2"
-            title={hideExampleSentences ? t('showExamples') : t('hideExamples')}
-          >
-            {hideExampleSentences ? (
-              <EyeSlashIcon className="h-5 w-5" />
-            ) : (
-              <EyeIcon className="h-5 w-5" />
-            )}
-          </Button>
-        )}
       </div>
 
       <div className="text-center mb-12 w-full min-h-[50vh] flex flex-col justify-center items-center">
