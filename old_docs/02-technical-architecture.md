@@ -24,8 +24,8 @@ export function DictationForm() {
   const [quizParameters, setQuizParameters] = useState<QuizParameters>({
     globalTimeLimit: 0,
     globalLivesLimit: 3,
-    activityTimeLimit: 0,
-    quizModeEnabled: false
+    activityTimeLimit: 10,
+    quizModeEnabled: true
   })
 }
 ```
