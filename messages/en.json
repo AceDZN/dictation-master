@@ -104,7 +104,8 @@
       "progress": "Progress",
       "hearts": "Hearts",
       "words": "words",
-      "created": "Created"
+      "created": "Created",
+      "hideSentences": "Hide Example Sentences"
     },
     "card": {
       "edit": "Edit",

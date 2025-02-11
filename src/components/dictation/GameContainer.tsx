@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { WordPairDisplay } from '@/components/dictation/WordPairDisplay'
 import { GameView } from '@/components/dictation/GameView'
 import { useTranslations } from 'next-intl'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 
 interface GameContainerProps {
   game: DictationGame
@@ -13,6 +15,7 @@ interface GameContainerProps {
 
 export function GameContainer({ game }: GameContainerProps) {
   const [isGameStarted, setIsGameStarted] = useState(false)
+  const [hideSentences, setHideSentences] = useState(false)
   const t = useTranslations('Dictation.game')
 
   const incrementPlayCount = async () => {
@@ -37,9 +40,17 @@ export function GameContainer({ game }: GameContainerProps) {
     return (
       <div className="max-w-2xl mx-auto">
         <h1 className="text-2xl font-bold mb-8 text-center">{game.title}</h1>
+        <div className="flex items-center justify-end space-x-2 mb-4">
+          <Switch
+            id="hide-sentences"
+            checked={hideSentences}
+            onCheckedChange={setHideSentences}
+          />
+          <Label htmlFor="hide-sentences">{t('hideSentences')}</Label>
+        </div>
         <WordPairDisplay 
           wordPairs={game.wordPairs} 
-          hideSentences 
+          hideSentences={hideSentences}
           sourceLanguage={game.sourceLanguage}
           targetLanguage={game.targetLanguage}
         />

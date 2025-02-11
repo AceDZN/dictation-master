@@ -104,7 +104,8 @@
       "progress": "התקדמות",
       "hearts": "חיים",
       "words": "מילים",
-      "created": "נוצר"
+      "created": "נוצר",
+      "hideSentences": "הסתר משפטי דוגמה"
     },
     "card": {
       "edit": "ערוך",
