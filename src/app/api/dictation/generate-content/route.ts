@@ -21,14 +21,14 @@ const WordPairsList = z.object({
 })
 
 const RequestSchema = z.object({
-  sourceLanguage: z.string().optional(),
-  targetLanguage: z.string().optional(),
-  title: z.string().optional(),
-  description: z.string().optional(),
+  sourceLanguage: z.string(),
+  targetLanguage: z.string(),
+  title: z.string(),
+  description: z.string(),
   wordPairs: z.array(z.object({
-    first: z.string().optional(),
-    second: z.string().optional(),
-    sentence: z.string().optional(),
+    first: z.string(),
+    second: z.string(),
+    sentence: z.string(),
   })),
 })
 

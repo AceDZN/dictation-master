@@ -11,9 +11,11 @@ interface FileUploadProps {
   onComplete: (data: WordPairsList) => void
   onError: (error: string) => void
   disabled?: boolean
+  sourceLanguage: string
+  targetLanguage: string
 }
 
-export function FileUpload({ onStart, onComplete, onError, disabled = false }: FileUploadProps) {
+export function FileUpload({ onStart, onComplete, onError, disabled = false, sourceLanguage, targetLanguage }: FileUploadProps) {
   const t = useTranslations('Dictation.form')
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,6 +27,8 @@ export function FileUpload({ onStart, onComplete, onError, disabled = false }: F
     try {
       const formData = new FormData()
       formData.append('file', file)
+      formData.append('firstLanguage', sourceLanguage)
+      formData.append('secondLanguage', targetLanguage)
 
       const response = await fetch('/api/dictation/upload', {
         method: 'POST',

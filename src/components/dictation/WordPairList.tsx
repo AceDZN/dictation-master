@@ -54,6 +54,8 @@ export function WordPairList({
           onComplete={onFileUploadComplete}
           onError={onFileUploadError}
           disabled={disabled}
+          sourceLanguage={sourceLanguage}
+          targetLanguage={targetLanguage}
         />
       )}
       
