@@ -14,7 +14,7 @@ interface GameContainerProps {
 export function GameContainer({ game }: GameContainerProps) {
   const [isGameStarted, setIsGameStarted] = useState(false)
   const [hideExampleSentences, setHideExampleSentences] = useState(false)
-  const t = useTranslations('Dictation.game')2
+  const t = useTranslations('Dictation.game')
 
   const incrementPlayCount = async () => {
     try {
