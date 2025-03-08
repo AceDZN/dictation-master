@@ -179,9 +179,18 @@ export function BubbleShooterGameView({
   }, [endGame, gameState.hearts, gameState.fails])
 
   const handleShoot = useCallback((direction: THREE.Vector3) => {
-    // This tracks that a shot has been fired
-    // The actual hit detection and matching happens in the TargetBubble component
-    console.log('Shot fired with direction:', direction)
+    console.log('🚀 Shot fired with direction:', direction)
+    
+    // After a shot, we need to wait a short time before allowing a new shot
+    // We could add a cooldown period here if needed
+    
+    // The actual hit detection and matching happens in the ShotBubble and TargetBubble components
+  }, [])
+
+  // Function to advance to the next round (called after a shot bubble is removed)
+  const advanceToNextRound = useCallback(() => {
+    console.log('Advancing to next round')
+    // If you want to add specific logic for advancing, you can add it here
   }, [])
 
   useEffect(() => {

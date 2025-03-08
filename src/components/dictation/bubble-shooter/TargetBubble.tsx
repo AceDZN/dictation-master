@@ -12,44 +12,50 @@ export function TargetBubble({
   currentTarget,
   isPowerUp = false
 }: TargetBubbleProps) {
-  const [isActive, setIsActive] = useState(true)
+  // Use state to control visibility
+  const [active, setActive] = useState(true)
 
+  // Handle collisions with shot bubbles
   const handleCollision = useCallback(
     (e: any) => {
-      if (!isActive || !currentTarget) return
+      // Skip if already inactive or no current target
+      if (!active || !currentTarget) return
       
-      // The correct matching logic for the game:
-      // We want to match the first field (language key) of the target bubble with the current target
-      const isMatch = wordPair.first === currentTarget.first;
+      // Check if this bubble matches the current target word
+      const isMatch = wordPair.first === currentTarget.first
       
-      console.log('Collision detected!', {
-        bubbleWordPair: wordPair,
-        currentWordPair: currentTarget,
+      console.log('🎯 Target bubble hit:', {
+        targetBubble: wordPair.second,
+        targetFirst: wordPair.first,
+        currentTargetFirst: currentTarget.first,
         isMatch
       })
 
       if (isMatch) {
-        // When hit by the correct bubble, both should disappear
-        console.log('✅ MATCH FOUND! Activating match effect')
-        setIsActive(false) // This bubble will disappear
-        onMatch(1) // Signal a match to the game
+        // This is the correct bubble - both bubbles should disappear
+        console.log('✅ CORRECT MATCH! Target bubble will disappear')
+        // Set inactive to remove from rendering
+        setActive(false)
+        // Call onMatch to update score and advance to next word
+        onMatch(1)
       } else {
-        // When hit by the wrong bubble, only the shooter bubble should disappear
-        // We don't need to do anything here as the shooter bubble will remove itself
-        console.log('❌ MISMATCH. Only shooter bubble will disappear')
-        // We don't call onMiss() anymore as we don't want to penalize the player
-        // for hitting the wrong bubble - the shooter bubble will just disappear
+        // Incorrect bubble hit - only shot bubble should disappear
+        console.log('❌ INCORRECT. Shot bubble will disappear but target stays')
+        // We don't need to do anything here - the shot bubble will remove itself
       }
     },
-    [wordPair, currentTarget, onMatch, isActive]
+    [wordPair, currentTarget, onMatch, active]
   )
 
-  return isActive ? (
+  // Don't render if not active
+  if (!active) return null
+
+  return (
     <Bubble
       word={wordPair.second} // Display 'second' word on target bubbles
       position={position}
       color={isPowerUp ? 'yellow' : 'red'}
       onCollide={handleCollision}
     />
-  ) : null
+  )
 } 

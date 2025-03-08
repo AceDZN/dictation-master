@@ -14,17 +14,27 @@ export function Shooter({
   currentIndex,
   onShoot
 }: ShooterProps) {
+  // Create shooter physics body
   const [ref] = useSphere(() => ({
     mass: 0,
     position: [0, -4, 0],
     args: [0.5]
   }))
+  
+  // Track active shot bubbles
   const [shotBubbles, setShotBubbles] = useState<
     { word: string; key: number; direction: THREE.Vector3 }[]
   >([])
+  
+  // Track shooting direction
   const directionRef = useRef(new THREE.Vector3())
   const { mouse } = useThree()
-
+  
+  // Add a cooldown to prevent rapid-firing
+  const [canShoot, setCanShoot] = useState(true)
+  const cooldownTime = 500 // milliseconds
+  
+  // Update shooter orientation to face mouse cursor
   useFrame(() => {
     if (ref.current) {
       const target = new THREE.Vector3(mouse.x * 5, mouse.y * 5, 0)
@@ -33,35 +43,59 @@ export function Shooter({
     }
   })
 
+  // Handle shooting
   const shoot = useCallback(() => {
+    // Only shoot if cooled down and we have a valid word pair
+    if (!canShoot || currentIndex >= wordPairs.length) return
+    
+    // Create a new shot bubble
     const newKey = Date.now()
-    const word = wordPairs[currentIndex]?.first || '' // Use 'first' word
+    const word = wordPairs[currentIndex]?.first || ''
     const direction = directionRef.current.clone()
+    
+    // Log shooting action
+    console.log('🔫 Shooting bubble:', { word, direction: [direction.x, direction.y] })
+    
+    // Add to active shot bubbles
     setShotBubbles((prev) => [...prev, { word, key: newKey, direction }])
+    
+    // Trigger cooldown
+    setCanShoot(false)
+    setTimeout(() => setCanShoot(true), cooldownTime)
+    
+    // Notify parent component
     onShoot(direction)
-  }, [currentIndex, wordPairs, onShoot])
+  }, [currentIndex, wordPairs, onShoot, canShoot])
 
+  // Attach click event listener
   useEffect(() => {
     window.addEventListener('click', shoot)
     return () => window.removeEventListener('click', shoot)
   }, [shoot])
+  
+  // Handle removal of a shot bubble
+  const handleRemoveShotBubble = useCallback((key: number) => {
+    console.log('📤 Removing shot bubble with key:', key)
+    setShotBubbles(prev => prev.filter(b => b.key !== key))
+  }, [])
 
   return (
     <>
+      {/* Shooter cone with current word */}
       <Bubble
-        word={wordPairs[currentIndex]?.first || ''} // Use 'first' word
+        word={wordPairs[currentIndex]?.first || ''}
         position={[0, -4, 0]}
-        color="green"
+        color={canShoot ? "green" : "gray"}
         isShooter={true}
       />
+      
+      {/* Active shot bubbles */}
       {shotBubbles.map((bubble) => (
         <ShotBubble
           key={bubble.key}
           word={bubble.word}
           direction={bubble.direction}
-          onRemove={() =>
-            setShotBubbles((prev) => prev.filter((b) => b.key !== bubble.key))
-          }
+          onRemove={() => handleRemoveShotBubble(bubble.key)}
         />
       ))}
     </>
