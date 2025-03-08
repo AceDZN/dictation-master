@@ -1,0 +1,80 @@
+'use client'
+
+import { ClockIcon } from '@heroicons/react/24/outline'
+import { useTranslations } from 'next-intl'
+
+interface GameOverViewProps {
+  stars: number
+  hearts: number
+  totalTime: number
+  fails: number
+  completedWords: number
+  onPlayAgain: () => void
+  onExit: () => void
+}
+
+/**
+ * GameOverView - Reusable component for displaying the game over screen
+ * Shows star rating, hearts remaining, time spent, and score
+ */
+export function GameOverView({
+  stars,
+  hearts,
+  totalTime,
+  fails,
+  completedWords,
+  onPlayAgain,
+  onExit
+}: GameOverViewProps) {
+  const t = useTranslations('Dictation.game')
+
+  const formatTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60)
+    const remainingSeconds = seconds % 60
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
+  }
+
+  return (
+    <div className="max-w-md mx-auto text-center p-8 bg-white rounded-xl shadow-2xl">
+      <h2 className="text-4xl font-bold mb-6 text-indigo-600">{t('gameOver')}</h2>
+      <div className="space-y-6 grid">
+        <div className="text-6xl mb-6">
+          <div className="flex items-center justify-center gap-4">
+            <span className={`text-6xl transition-all ${stars >= 1 ? 'text-yellow-400' : 'text-gray-300 [filter:grayscale(100%)]'}`}>⭐</span>
+            <span className={`text-8xl transition-all ${stars === 3 ? 'text-yellow-400' : 'text-gray-300 [filter:grayscale(100%)]'}`}>⭐</span>
+            <span className={`text-6xl transition-all ${stars >= 2 ? 'text-yellow-400' : 'text-gray-300 [filter:grayscale(100%)]'}`}>⭐</span>
+          </div>
+        </div>
+        <div className="flex flex-col gap-4">
+          <div className="grid gap-4 text-xl" style={{ gridTemplateColumns: '1fr 1fr' }}>
+            <p className="flex justify-end items-center text-3xl">❤️</p>
+            <p className="flex justify-start items-center">{hearts}</p>
+          </div>
+          <div className="grid gap-4 text-xl" style={{ gridTemplateColumns: '1fr 1fr' }}>
+            <p className="flex justify-end items-center"><ClockIcon className="h-8 w-8" /></p>
+            <p className="flex justify-start items-center">{formatTime(totalTime)}</p>
+          </div>
+          <div className="grid gap-4 text-xl" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
+            <p className="justify-end items-center flex">{fails}</p>
+            <p className="text-center items-center flex">/</p>
+            <p className="justify-start items-center flex">{completedWords}</p>
+          </div>
+        </div>
+        <div className="mt-8 flex flex-row gap-4 justify-center items-center">
+          <button
+            onClick={onPlayAgain}
+            className="bg-indigo-600 text-white px-8 py-3 rounded-xl text-lg font-bold hover:bg-indigo-700 transform hover:scale-105 transition-all shadow-lg"
+          >
+            {t('playAgain')}
+          </button>
+          <button
+            onClick={onExit}
+            className="bg-gray-600 text-white px-8 py-3 rounded-xl text-lg font-bold hover:bg-gray-700 transform hover:scale-105 transition-all shadow-lg"
+          >
+            {t('exit')}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+} 
