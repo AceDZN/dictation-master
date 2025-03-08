@@ -107,7 +107,11 @@
       "created": "נוצר",
       "showExamples": "הצג משפטי דוגמה",
       "hideExamples": "הסתר משפטי דוגמה",
-      "back": "חזרה"
+      "back": "חזרה",
+      "selectGameMode": "בחר מצב משחק",
+      "changeMode": "שנה מצב",
+      "writerMode": "מצב כתיבה",
+      "bubbleShooterMode": "משחק בועות"
     },
     "card": {
       "edit": "ערוך",

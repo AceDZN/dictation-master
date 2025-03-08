@@ -107,7 +107,11 @@
       "created": "Created",
       "showExamples": "Show example sentences",
       "hideExamples": "Hide example sentences",
-      "back": "Back"
+      "back": "Back",
+      "selectGameMode": "Select Game Mode",
+      "changeMode": "Change Mode",
+      "writerMode": "Writer Mode",
+      "bubbleShooterMode": "Bubble Shooter"
     },
     "card": {
       "edit": "Edit",

@@ -6,7 +6,7 @@ import { DictationGame } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { WordPairDisplay } from '@/components/dictation/WordPairDisplay'
 import { useTranslations } from 'next-intl'
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
+import { EyeIcon, EyeSlashIcon, PencilSquareIcon, PuzzlePieceIcon } from '@heroicons/react/24/outline'
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
 
 interface GameContainerProps {
@@ -31,9 +31,14 @@ export function GameContainer({ game }: GameContainerProps) {
     }
   }
 
-  const handleGameStart = () => {
+  const handleStartWriterGame = () => {
     incrementPlayCount()
     router.push(`/dictation/play/${game.id}/writer-game?hideExamples=${hideExampleSentences.toString()}`)
+  }
+
+  const handleStartBubbleShooterGame = () => {
+    incrementPlayCount()
+    router.push(`/dictation/play/${game.id}/bubble-shooter?hideExamples=${hideExampleSentences.toString()}`)
   }
 
   return (
@@ -68,13 +73,32 @@ export function GameContainer({ game }: GameContainerProps) {
         sourceLanguage={game.sourceLanguage}
         targetLanguage={game.targetLanguage}
       />
-      <div className="mt-8 text-center">
+      
+      <h2 className="text-xl my-8 text-center">{t('selectGameMode')}</h2>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         <Button 
-          size="lg"
-          onClick={handleGameStart}
-          className="px-8"
+          onClick={handleStartWriterGame}
+          variant="outline"
+          className="p-6 h-auto flex flex-col items-center gap-3 hover:bg-gray-50 hover:border-indigo-300 transition-all"
         >
-          {t('startGame')}
+          <PencilSquareIcon className="h-12 w-12 text-indigo-600" />
+          <div className="text-lg font-semibold">Writer Mode</div>
+          <p className="text-gray-600 text-center text-sm">
+            Type the correct translation for each word
+          </p>
+        </Button>
+        
+        <Button 
+          onClick={handleStartBubbleShooterGame}
+          variant="outline"
+          className="p-6 h-auto flex flex-col items-center gap-3 hover:bg-gray-50 hover:border-indigo-300 transition-all"
+        >
+          <PuzzlePieceIcon className="h-12 w-12 text-indigo-600" />
+          <div className="text-lg font-semibold">Bubble Shooter</div>
+          <p className="text-gray-600 text-center text-sm">
+            Match word translations by shooting bubbles
+          </p>
         </Button>
       </div>
     </div>

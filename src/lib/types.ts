@@ -1,6 +1,7 @@
 import { Timestamp } from 'firebase-admin/firestore'
 
 export interface WordPair {
+  id?: string
   first: string
   second: string
   sentence?: string
