@@ -1,3 +1,4 @@
+// src/components/dictation/GameView.tsx
 'use client'
 
 import { useState, useEffect, useRef, useMemo } from 'react'
@@ -5,12 +6,13 @@ import { DictationGame, WordPair } from '@/lib/types'
 import { Input } from '@/components/ui/input'
 import Realistic from 'react-canvas-confetti/dist/presets/realistic'
 import { useAnimate } from 'motion/react'
-import { ClockIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
+import {  EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 import { useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
 import { Button } from '@/components/ui/button'
 import { GameOverView } from './GameOverView'
+import { GameHeader, GameHeaderRef } from './GameHeader'
 
 interface GameViewProps {
   game: DictationGame
@@ -64,6 +66,7 @@ export function GameView({
   const inputRef = useRef<HTMLInputElement>(null)
   const confettiController = useRef<any>(null)
   const heartsContainerRef = useRef<HTMLDivElement>(null)
+  const gameHeaderRef = useRef<GameHeaderRef>(null)
   // eslint-disable-next-line 
   const [scope, animate] = useAnimate()
 
@@ -177,49 +180,6 @@ export function GameView({
     }
   }, [ getCurrentWord, moveToNextWord])
 
-  const animateHeartLoss = useCallback(() => {
-    if (!heartsContainerRef.current) return
-
-    // Create a falling heart element
-    const fallingHeart = document.createElement('div')
-    fallingHeart.innerHTML = '❤️'
-    fallingHeart.className = 'absolute text-lg leading-none pointer-events-none z-10 origin-center'
-    fallingHeart.style.willChange = 'transform, opacity'
-
-    // Get the heart element position
-    const heartElement = heartsContainerRef.current.querySelector('.heart')
-    if (!heartElement) return
-
-    const heartRect = heartElement.getBoundingClientRect()
-    const containerRect = heartsContainerRef.current.getBoundingClientRect()
-
-    // Add the falling heart to the container
-    heartsContainerRef.current.appendChild(fallingHeart)
-
-    // Position the falling heart exactly over the heart display
-    fallingHeart.style.left = `${heartRect.left - containerRect.left}px`
-    fallingHeart.style.top = `${heartRect.top - containerRect.top}px`
-
-    // Animate the falling heart
-    animate([
-      [
-        fallingHeart,
-        {
-          transform: [
-            'translate(0, 0) rotate(0deg) scale(1)',
-            `translate(${Math.random() * 100 - 50}px, ${window.innerHeight}px) rotate(${Math.random() * 360}deg) scale(0.5)`
-          ],
-          opacity: [1, 0]
-        },
-        {
-          duration: 5,
-          ease: [0.23, 1, 0.32, 1], // Cubic bezier for natural falling motion
-          onComplete: () => fallingHeart.remove()
-        }
-      ]
-    ])
-  }, [animate])
-
   const getHint = useCallback((word: string, guessCount: number) => {
     const revealed = word.slice(0, Math.min(guessCount + 1, word.length))
     const hidden = '_'.repeat(Math.max(0, word.length - revealed.length))
@@ -234,7 +194,7 @@ export function GameView({
     
     // Only animate heart loss if we still have hearts
     if (gameState.hearts > 0) {
-      animateHeartLoss()
+      gameHeaderRef.current?.animateHeartLoss()
     }
     
     let newStars = 3
@@ -258,7 +218,7 @@ export function GameView({
         inputRef.current?.focus()
       }, 500)
     }
-  }, [endGame, animateHeartLoss, gameState.hearts, gameState.fails, gameState.currentWordGuesses, game.quizParameters.activityTimeLimit])
+  }, [endGame, gameState.hearts, gameState.fails, gameState.currentWordGuesses, game.quizParameters.activityTimeLimit])
 
 
   const validateAnswer = useCallback(() => {
@@ -332,40 +292,16 @@ export function GameView({
         )}
       </h1>
       
-      {/* Game Header */}
-      <div className="flex justify-between items-center mb-12 relative text-lg font-bold">
-        {/* Hearts Container */}
-        <div ref={heartsContainerRef} className="relative flex items-center gap-2">
-          <div className="flex items-center gap-2">
-            <span className="heart animate-pulse">❤️</span>
-            <span className="heart-count">{gameState.hearts}</span>
-          </div>
-        </div>
-
-        {/* Progress */}
-        <div className="">
-          {gameState.currentWordIndex}/{game.wordPairs.length}
-        </div>
-
-        {/* Timer */}
-        {game.quizParameters.activityTimeLimit > 0 && (
-          <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 flex flex-col items-center">
-            <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-indigo-600 transition-all duration-1000 ease-linear"
-                style={{ 
-                  width: `${(gameState.timeLeft / game.quizParameters.activityTimeLimit) * 100}%`,
-                  backgroundColor: gameState.timeLeft <= 5 ? '#ef4444' : undefined
-                }}
-              />
-            </div>
-            <div className="font-mono mt-2">
-              {formatTime(gameState.timeLeft)}
-            </div>
-          </div>
-        )}
-
-      </div>
+      <GameHeader 
+        ref={gameHeaderRef}
+        hearts={gameState.hearts}
+        currentWordIndex={gameState.currentWordIndex}
+        totalWords={game.wordPairs.length}
+        timeLeft={gameState.timeLeft}
+        timeLimit={game.quizParameters.activityTimeLimit}
+        formatTime={formatTime}
+        heartsContainerRef={heartsContainerRef}
+      />
 
       <div className="text-center mb-12 w-full min-h-[50vh] flex flex-col justify-center items-center">
         <div className="flex flex-col justify-center items-center h-auto">
