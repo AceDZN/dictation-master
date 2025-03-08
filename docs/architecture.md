@@ -158,7 +158,8 @@ src/
       {
         first: string,
         second: string,
-        sentence?: string
+        sentence?: string,
+        secondAudioUrl?: string
       }
     ],
     quizParameters: {
