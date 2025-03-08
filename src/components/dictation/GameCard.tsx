@@ -1,3 +1,4 @@
+// src/components/dictation/GameCard.tsx
 import { EyeIcon, PlayIcon } from '@heroicons/react/24/outline'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'

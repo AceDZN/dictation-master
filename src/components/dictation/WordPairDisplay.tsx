@@ -1,3 +1,4 @@
+// src/components/dictation/WordPairDisplay.tsx
 import { WordPair } from "@/lib/types"
 
 interface WordPairDisplayProps {

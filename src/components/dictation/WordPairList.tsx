@@ -1,3 +1,4 @@
+// src/components/dictation/WordPairList.tsx
 'use client'
 
 import { Button } from "@/components/ui/button"
