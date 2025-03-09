@@ -3,14 +3,6 @@ import { Game } from '@/app/actions/dictation'
 import { APP_URL } from '@/lib/server-constants'
 import { getTranslations } from 'next-intl/server'
 
-interface FirebaseTimestamp {
-  _seconds: number
-  _nanoseconds: number
-}
-
-interface APIGame extends Omit<Game, 'createdAt'> {
-  createdAt: FirebaseTimestamp
-}
 
 async function getLatestGames(): Promise<Game[]> {
   const response = await fetch(`${APP_URL}/api/dictation/latest`, {
@@ -21,12 +13,11 @@ async function getLatestGames(): Promise<Game[]> {
     throw new Error('Failed to fetch latest games')
   }
   const data = await response.json()
-  return data.games.map((game: APIGame) => ({
-    ...game,
-    createdAt: {
-      toDate: () => new Date(game.createdAt._seconds * 1000)
-    }
-  }))
+  console.log('DEBUG - Raw data from API:', data.games[0]?.createdAt)
+  
+  // Return the games directly without transforming the timestamp
+  // The API is already sending the data in the correct format
+  return data.games;
 }
 
 export async function LatestGames() {

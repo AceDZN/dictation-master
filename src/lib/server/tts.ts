@@ -15,7 +15,6 @@ export async function getTTSUrls(words: string[], language: string): Promise<Rec
     body: JSON.stringify({ words, language })
   })
   const data = await response.json()
-  console.log('response data', data)
   if (!data.success) {
     throw new Error('Failed to generate TTS')
   }
