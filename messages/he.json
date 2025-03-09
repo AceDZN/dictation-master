@@ -97,6 +97,11 @@
     },
     "game": {
       "startGame": "התחל משחק",
+      "startWriterGame": "מצב כתיבה",
+      "startQuizGame": "מצב חידון",
+      "writerGameDescription": "הקלד את התרגומים לכל מילה",
+      "quizGameDescription": "בחר את התרגום הנכון מבין האפשרויות",
+      "translate": "תרגם",
       "gameOver": "המשחק נגמר!",
       "playAgain": "שחק שוב",
       "exit": "יציאה",
@@ -106,7 +111,11 @@
       "words": "מילים",
       "created": "נוצר",
       "showExamples": "הצג משפטי דוגמה",
-      "hideExamples": "הסתר משפטי דוגמה"
+      "hideExamples": "הסתר משפטי דוגמה",
+      "back": "חזרה",
+      "playAudio": "נגן שמע",
+      "retryAudio": "נסה שוב",
+      "loading": "טוען..."
     },
     "card": {
       "edit": "ערוך",
