@@ -8,6 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 export const SUPPORTED_LANGUAGES = [
   { code: 'he', name: 'Hebrew' },
   { code: 'en', name: 'English' },
+  /*
   { code: 'zh', name: 'Mandarin Chinese' },
   { code: 'hi', name: 'Hindi' },
   { code: 'es', name: 'Spanish' },
@@ -17,6 +18,7 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'ru', name: 'Russian' },
   { code: 'pt', name: 'Portuguese' },
   { code: 'id', name: 'Indonesian' },
+  */
 ] as const
 
 export function getLanguageNameFromCode(code: string): string {

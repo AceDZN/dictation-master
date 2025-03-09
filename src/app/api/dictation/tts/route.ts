@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { ElevenLabsClient } from 'elevenlabs'
 import { getStorage } from 'firebase-admin/storage'
@@ -27,7 +28,6 @@ async function streamToBuffer(stream: Readable): Promise<Buffer> {
 
 // Function to get or create TTS file
 async function getOrCreateTTS(word: string): Promise<string> {
-  console.log('getOrCreateTTS', word)
   const hashedWord = hashWord(word)
   const filePath = `tts/en/${hashedWord}.mp3`
   const file = bucket.file(filePath)
@@ -41,12 +41,10 @@ async function getOrCreateTTS(word: string): Promise<string> {
         action: 'read',
         expires: Date.now() + 86400000 // 24 hours (was 3600000 for 1 hour)
       })
-      console.log('getDownloadURL url', url, word)
       return url
     }
 
     // File doesn't exist, generate new TTS
-    console.log('generating new TTS', word)
     try {
       const ttsResponse = await client.textToSpeech.convert('JBFqnCBsd6RMkjVDRZzb', {
         output_format: 'mp3_44100_128',

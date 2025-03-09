@@ -15,10 +15,10 @@ export const defaultMetadata = {
 
 export const siteConfig = {
   name: 'Dictation Masters',
-  url: 'https://dictation.acedzn.com', // Update with your actual domain
-  ogImage: '/og-image.png', // Default OG image
+  url: 'https://acedzn.xyz',
+  ogImage: '/og-image.png', 
   author: 'Dictation Masters Team',
-  twitter: '@dictationmaster', // Update with your actual Twitter handle
+  twitter: '@dictationmaster',
 }
 
 export function generateMetadata(
