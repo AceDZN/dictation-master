@@ -105,7 +105,6 @@ export async function POST(request: NextRequest) {
 
     // Handle single word or array of words
     const wordsArray = Array.isArray(words) ? words : [words]
-    console.log('wordsArray', wordsArray)
     
     // Process all words and handle failures gracefully
     const settledResults = await Promise.allSettled(
@@ -119,7 +118,6 @@ export async function POST(request: NextRequest) {
       error: result.status === 'rejected' ? result.reason?.message : undefined
     }))
 
-    console.log('results', results)
     return NextResponse.json({ 
       success: true, 
       results,

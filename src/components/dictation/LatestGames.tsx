@@ -3,14 +3,6 @@ import { Game } from '@/app/actions/dictation'
 import { APP_URL } from '@/lib/server-constants'
 import { getTranslations } from 'next-intl/server'
 
-interface FirebaseTimestamp {
-  _seconds: number
-  _nanoseconds: number
-}
-
-interface APIGame extends Omit<Game, 'createdAt'> {
-  createdAt: FirebaseTimestamp
-}
 
 async function getLatestGames(): Promise<Game[]> {
   const response = await fetch(`${APP_URL}/api/dictation/latest`, {

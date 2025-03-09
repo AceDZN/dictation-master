@@ -1,5 +1,4 @@
 // src/components/dictation/GameCard.tsx
-import { Card } from '@/components/ui/card'
 import { GameCardClient } from '@/components/dictation/GameCardClient'
 
 interface Game {

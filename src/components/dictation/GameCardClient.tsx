@@ -118,33 +118,46 @@ export function GameCardClient(props: Game) {
   }
   
   return (
-    <Card>
+    <Card className="relative">
+        {isOwner && (
+            <div className="absolute top-0 left-0">
+                <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <EllipsisVerticalIcon className="h-8 w-8" />
+                    <span className="sr-only">Open menu</span>
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => router.push(`/dictation/edit/${id}`)}>
+                    <PencilIcon className="h-4 w-4 mr-2" />
+                    <span>{t('edit')}</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleDelete} className="text-red-600 focus:text-red-600">
+                    <TrashIcon className="h-4 w-4 mr-2" />
+                    <span>{t('delete')}</span>
+                    </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+            )}
       <CardHeader>
-        <div className="flex justify-between items-start">
+        <div className="flex justify-between items-start relative">
           <div>
-            <CardTitle>{title}</CardTitle>
+            {isPublic ? (
+              <span className="flex items-center gap-1.5 text-green-600 text-xs absolute -top-6 -right-6">
+                <span className="h-3 w-3 bg-green-600 rounded-tl-none rounded-b-none rounded-tr-lg rounded-bl-lg"></span>
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5 text-red-600  text-xs absolute  -top-6 -right-6">
+                <span className="h-3 w-3 bg-red-600 rounded-tl-none rounded-b-none rounded-tr-lg rounded-bl-lg"></span>
+              </span>
+            )}
+             
+            <CardTitle className="text-xl font-bold text-center mb-4">{title}</CardTitle>
             {description && <CardDescription>{description}</CardDescription>}
           </div>
-          {isOwner && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <EllipsisVerticalIcon className="h-4 w-4" />
-                  <span className="sr-only">Open menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => router.push(`/dictation/edit/${id}`)}>
-                  <PencilIcon className="h-4 w-4 mr-2" />
-                  <span>{t('edit')}</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleDelete} className="text-red-600 focus:text-red-600">
-                  <TrashIcon className="h-4 w-4 mr-2" />
-                  <span>{t('delete')}</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+         
         </div>
       </CardHeader>
       <CardContent>
