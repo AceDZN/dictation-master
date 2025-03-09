@@ -87,32 +87,6 @@ export function QuizGameView({
   const handleConfettiInit = useCallback(({ conductor }: { conductor: any }) => {
     confettiController.current = conductor
   }, [])
-
-  const restartGame = useCallback(() => {
-    setGameState({
-      currentWordIndex: 0,
-      hearts: game.quizParameters.globalLivesLimit,
-      timeLeft: game.quizParameters.activityTimeLimit,
-      gameStartTime: Date.now(),
-      totalTime: 0,
-      isGameOver: false,
-      stars: 3,
-      fails: 0,
-      isPaused: false,
-      completedWords: 0,
-      selectedOption: null,
-      mistakesOnCurrentWord: 0
-    })
-    setShowCorrectAnswer(false)
-    generateOptions()
-  }, [game.quizParameters.globalLivesLimit, game.quizParameters.activityTimeLimit])
-
-  const formatTime = useCallback((seconds: number): string => {
-    const minutes = Math.floor(seconds / 60)
-    const remainingSeconds = seconds % 60
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
-  }, [])
-
   const getCurrentWord = useCallback((): WordPair => 
     randomizedWordPairs[gameState.currentWordIndex], 
     [randomizedWordPairs, gameState.currentWordIndex]
@@ -137,7 +111,33 @@ export function QuizGameView({
     const allOptions = [correctOption, ...wrongOptions].sort(() => Math.random() - 0.5)
     
     setQuizOptions(allOptions)
-  }, [getCurrentWord, gameState.currentWordIndex, randomizedWordPairs])
+  }, [getCurrentWord, gameState.currentWordIndex, randomizedWordPairs, setQuizOptions])
+
+  const restartGame = useCallback(() => {
+    setGameState({
+      currentWordIndex: 0,
+      hearts: game.quizParameters.globalLivesLimit,
+      timeLeft: game.quizParameters.activityTimeLimit,
+      gameStartTime: Date.now(),
+      totalTime: 0,
+      isGameOver: false,
+      stars: 3,
+      fails: 0,
+      isPaused: false,
+      completedWords: 0,
+      selectedOption: null,
+      mistakesOnCurrentWord: 0
+    })
+    setShowCorrectAnswer(false)
+    generateOptions()
+  }, [game.quizParameters.globalLivesLimit, game.quizParameters.activityTimeLimit, generateOptions])
+
+  const formatTime = useCallback((seconds: number): string => {
+    const minutes = Math.floor(seconds / 60)
+    const remainingSeconds = seconds % 60
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
+  }, [])
+
 
   // Generate options when the current word changes
   useEffect(() => {
