@@ -41,12 +41,10 @@ async function getOrCreateTTS(word: string): Promise<string> {
         action: 'read',
         expires: Date.now() + 86400000 // 24 hours (was 3600000 for 1 hour)
       })
-      console.log('getDownloadURL url', url, word)
       return url
     }
 
     // File doesn't exist, generate new TTS
-    console.log('generating new TTS', word)
     try {
       const ttsResponse = await client.textToSpeech.convert('JBFqnCBsd6RMkjVDRZzb', {
         output_format: 'mp3_44100_128',
