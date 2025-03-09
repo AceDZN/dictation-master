@@ -163,37 +163,6 @@ export function QuizGameView({
     }
   }, [endGame, gameState.currentWordIndex, game.wordPairs.length, game.quizParameters.activityTimeLimit])
 
-  // This function calls our API to get a fresh signed URL
-  const refreshAudioUrl = useCallback(async (wordPair: WordPair): Promise<string | null> => {
-    if (!wordPair.secondAudioUrl) return null;
-    
-    try {
-      // Create a unique ID for the word - in a real app, you'd have actual IDs
-      const wordId = `${wordPair.first}-${wordPair.second}`.replace(/\s+/g, '-').toLowerCase();
-      
-      const response = await fetch('/api/dictation/refresh-audio', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          wordId,
-          audioUrl: wordPair.secondAudioUrl
-        })
-      });
-      
-      if (!response.ok) {
-        console.error('Failed to refresh audio URL:', await response.text());
-        return wordPair.secondAudioUrl; // Return original URL as fallback
-      }
-      
-      const data = await response.json();
-      return data.refreshedUrl;
-    } catch (error) {
-      console.error('Error refreshing audio URL:', error);
-      return wordPair.secondAudioUrl; // Return original URL as fallback
-    }
-  }, []);
 
   const playSecondAudio = useCallback(async () => {
     const currentWord = getCurrentWord();
@@ -208,16 +177,10 @@ export function QuizGameView({
     
     try {
       // Try to refresh the audio URL before playing
-      const freshUrl = await refreshAudioUrl(currentWord);
-      if (!freshUrl) {
-        setAudioError("Audio not available");
-        toast.error("The audio for this word couldn't be loaded");
-        setIsAudioLoading(false);
-        return;
-      }
+      
       
       // Play the audio with the fresh URL
-      const audio = new Audio(freshUrl);
+      const audio = new Audio(currentWord?.secondAudioUrl);
       
       // Add event listener for when audio finishes playing
       audio.addEventListener('ended', () => {
@@ -227,31 +190,7 @@ export function QuizGameView({
       // Handle audio errors
       audio.addEventListener('error', (e) => {
         console.error('Error playing audio:', e);
-        
-        // If the error is likely due to an expired token, try refreshing once more
-        if (audio.error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED || 
-            audio.error?.code === MediaError.MEDIA_ERR_NETWORK) {
-          // Try one more time with a forced refresh
-          refreshAudioUrl(currentWord).then(retryUrl => {
-            if (retryUrl) {
-              const retryAudio = new Audio(retryUrl);
-              retryAudio.play().catch(retryError => {
-                console.error('Error on retry playback:', retryError);
-                setAudioError("Audio playback failed after retry");
-                toast.error("There was a problem playing the audio even after refreshing the URL.");
-                setIsAudioLoading(false);
-              });
-            } else {
-              setAudioError("Audio playback failed");
-              toast.error("There was a problem playing the audio. The URL might have expired.");
-              setIsAudioLoading(false);
-            }
-          });
-        } else {
-          setAudioError("Audio playback failed");
-          toast.error("There was a problem playing the audio. The URL might have expired.");
-          setIsAudioLoading(false);
-        }
+        setIsAudioLoading(false);
       });
       
       // Play the audio
@@ -262,7 +201,7 @@ export function QuizGameView({
       toast.error("There was an error preparing the audio");
       setIsAudioLoading(false);
     }
-  }, [getCurrentWord, refreshAudioUrl])
+  }, [getCurrentWord])
   
   const handleOptionSelect = useCallback((optionIndex: number) => {
     const isCorrect = quizOptions[optionIndex].isCorrect
@@ -430,14 +369,6 @@ export function QuizGameView({
     quizOptions
   ])
 
-  // Add an audio button to manually trigger the audio
-//   const handlePlayAudio = useCallback(() => {
-//     playSecondAudio().catch(error => {
-//       console.error("Error in handlePlayAudio:", error)
-//       toast.error("Failed to play audio")
-//     })
-//   }, [playSecondAudio])
-
   // If game is over, show the game over view
   if (gameState.isGameOver) {
     return (
@@ -473,33 +404,6 @@ export function QuizGameView({
           {currentWord.first}
         </div>
         
-        {currentWord.secondAudioUrl && (
-          <div className="mb-4">
-            {/*<Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handlePlayAudio}
-              disabled={isAudioLoading}
-            >
-              {isAudioLoading ? (
-                <>
-                  <div className="animate-spin h-4 w-4 mr-2 border-2 border-b-transparent rounded-full"></div>
-                  {t('loading')}
-                </>
-              ) : (
-                <>
-                  <SpeakerWaveIcon className="h-5 w-5 mr-2" />
-                  {audioError ? t('retryAudio') : t('playAudio')}
-                </>
-              )}
-            </Button>
-            {audioError && (
-              <div className="text-red-500 text-sm mt-1">
-                {audioError}
-              </div>
-            )*/}
-          </div>
-        )}
         
         {currentWord.sentence && !hideExampleSentences && (
           <div className="mt-2 text-gray-600 italic text-sm p-2 bg-gray-50 rounded-md">
