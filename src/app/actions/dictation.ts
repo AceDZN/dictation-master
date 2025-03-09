@@ -96,27 +96,55 @@ export async function getGames(): Promise<Game[]> {
 
 export async function deleteGame(id: string): Promise<boolean> {
   try {
+    // Get the current user's session
     const session = await auth()
-    if (!session?.user?.id) {
-      return false
-    }
+    if (!session?.user) return false
 
-    const db = getFirestore(initAdminApp())
-    const docRef = db
-      .collection('dictation_games')
-      .doc(session.user.id)
-      .collection('games')
-      .doc(id)
-    
-    const doc = await docRef.get()
-    if (!doc.exists) {
-      return false
-    }
+    // Initialize Firestore
+    initAdminApp()
+    const db = getFirestore()
 
-    await docRef.delete()
+    // Get the game document
+    const gameDoc = await db.collection('dictation_games').doc(id).get()
+    if (!gameDoc.exists) return false
+
+    const gameData = gameDoc.data()
+    if (!gameData) return false
+
+    // Check if the user owns the game
+    if (gameData.userId !== session.user.id) return false
+
+    // Delete the game
+    await db.collection('dictation_games').doc(id).delete()
     return true
   } catch (error) {
     console.error('Error deleting game:', error)
     return false
+  }
+}
+
+/**
+ * Refreshes an audio URL to get a new signed URL
+ * Note: In a real implementation, this would interact with your cloud storage provider
+ */
+export async function refreshAudioUrl(audioUrl: string): Promise<string | null> {
+  try {
+    // Get the current user's session
+    const session = await auth()
+    if (!session?.user) return null
+    
+    // In a real implementation, this would:
+    // 1. Parse the original URL to get the path
+    // 2. Use your cloud storage SDK to generate a new signed URL
+    // 3. Return the fresh URL
+    
+    // For demonstration purposes, we'll just modify the URL
+    const baseUrl = audioUrl.split('?')[0]
+    const refreshedUrl = `${baseUrl}?refreshed=true&ts=${Date.now()}`
+    
+    return refreshedUrl
+  } catch (error) {
+    console.error('Error refreshing audio URL:', error)
+    return null
   }
 } 

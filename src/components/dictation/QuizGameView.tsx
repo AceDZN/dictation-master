@@ -1,0 +1,554 @@
+'use client'
+
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { DictationGame, WordPair } from '@/lib/types'
+import Realistic from 'react-canvas-confetti/dist/presets/realistic'
+import { useAnimate } from 'motion/react'
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
+import { useTranslations } from 'next-intl'
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
+import { Button } from '@/components/ui/button'
+import { GameOverView } from './GameOverView'
+import { GameHeader, GameHeaderRef } from './GameHeader'
+import { toast } from 'sonner'
+
+interface QuizGameViewProps {
+  game: DictationGame
+  onGameEnd: () => void
+  hideExampleSentences?: boolean
+  onToggleExampleSentences?: () => void
+}
+
+interface GameState {
+  currentWordIndex: number
+  hearts: number
+  timeLeft: number
+  gameStartTime: number
+  totalTime: number
+  isGameOver: boolean
+  stars: number
+  fails: number
+  isPaused: boolean
+  completedWords: number
+  selectedOption: number | null
+  mistakesOnCurrentWord: number
+}
+
+interface QuizOption {
+  value: string
+  isCorrect: boolean
+}
+
+export function QuizGameView({ 
+  game, 
+  onGameEnd,
+  hideExampleSentences = false,
+  onToggleExampleSentences
+}: QuizGameViewProps) {
+  const t = useTranslations('Dictation.game')
+  
+  // Randomize word pairs on initial load
+  const randomizedWordPairs = useMemo(() => {
+    return [...game.wordPairs].sort(() => Math.random() - 0.5)
+  }, [game.wordPairs])
+
+  const [gameState, setGameState] = useState<GameState>({
+    currentWordIndex: 0,
+    hearts: game.quizParameters.globalLivesLimit,
+    timeLeft: game.quizParameters.activityTimeLimit,
+    gameStartTime: Date.now(),
+    totalTime: 0,
+    isGameOver: false,
+    stars: 3,
+    fails: 0,
+    isPaused: false,
+    completedWords: 0,
+    selectedOption: null,
+    mistakesOnCurrentWord: 0
+  })
+  
+  const [quizOptions, setQuizOptions] = useState<QuizOption[]>([])
+  const [showCorrectAnswer, setShowCorrectAnswer] = useState(false)
+  const [ , setIsAudioLoading] = useState(false)
+  const [ , setAudioError] = useState<string | null>(null)
+  const confettiController = useRef<any>(null)
+  const gameHeaderRef = useRef<GameHeaderRef>(null)
+  // eslint-disable-next-line 
+  const [scope, animate] = useAnimate()
+
+  const endGame = useCallback(() => {
+    setGameState(prev => ({
+      ...prev,
+      isGameOver: true,
+      totalTime: Math.floor((Date.now() - prev.gameStartTime) / 1000)
+    }))
+  }, [])
+
+  const handleConfettiInit = useCallback(({ conductor }: { conductor: any }) => {
+    confettiController.current = conductor
+  }, [])
+
+  const restartGame = useCallback(() => {
+    setGameState({
+      currentWordIndex: 0,
+      hearts: game.quizParameters.globalLivesLimit,
+      timeLeft: game.quizParameters.activityTimeLimit,
+      gameStartTime: Date.now(),
+      totalTime: 0,
+      isGameOver: false,
+      stars: 3,
+      fails: 0,
+      isPaused: false,
+      completedWords: 0,
+      selectedOption: null,
+      mistakesOnCurrentWord: 0
+    })
+    setShowCorrectAnswer(false)
+    generateOptions()
+  }, [game.quizParameters.globalLivesLimit, game.quizParameters.activityTimeLimit])
+
+  const formatTime = useCallback((seconds: number): string => {
+    const minutes = Math.floor(seconds / 60)
+    const remainingSeconds = seconds % 60
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
+  }, [])
+
+  const getCurrentWord = useCallback((): WordPair => 
+    randomizedWordPairs[gameState.currentWordIndex], 
+    [randomizedWordPairs, gameState.currentWordIndex]
+  )
+
+  const generateOptions = useCallback(() => {
+    const currentWord = getCurrentWord()
+    const correctOption = { value: currentWord.second, isCorrect: true }
+    
+    // Generate 2 wrong options from other word pairs
+    const availableOptions = randomizedWordPairs
+      .filter((_, index) => index !== gameState.currentWordIndex)
+      .map(pair => pair.second)
+    
+    // Shuffle and take first 2
+    const wrongOptions = [...availableOptions]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 2)
+      .map(value => ({ value, isCorrect: false }))
+    
+    // Combine correct and wrong options, then shuffle
+    const allOptions = [correctOption, ...wrongOptions].sort(() => Math.random() - 0.5)
+    
+    setQuizOptions(allOptions)
+  }, [getCurrentWord, gameState.currentWordIndex, randomizedWordPairs])
+
+  // Generate options when the current word changes
+  useEffect(() => {
+    generateOptions()
+  }, [gameState.currentWordIndex, generateOptions])
+
+  const moveToNextWord = useCallback(() => {
+    const nextIndex = gameState.currentWordIndex + 1
+    if (nextIndex >= game.wordPairs.length) {
+      setTimeout(() => {
+        endGame()
+      }, 1000) // Add delay before game end
+    } else {
+      setGameState(prev => ({
+        ...prev,
+        currentWordIndex: nextIndex,
+        timeLeft: game.quizParameters.activityTimeLimit,
+        isPaused: false,
+        selectedOption: null,
+        mistakesOnCurrentWord: 0
+      }))
+      setShowCorrectAnswer(false)
+    }
+  }, [endGame, gameState.currentWordIndex, game.wordPairs.length, game.quizParameters.activityTimeLimit])
+
+  // This function calls our API to get a fresh signed URL
+  const refreshAudioUrl = useCallback(async (wordPair: WordPair): Promise<string | null> => {
+    if (!wordPair.secondAudioUrl) return null;
+    
+    try {
+      // Create a unique ID for the word - in a real app, you'd have actual IDs
+      const wordId = `${wordPair.first}-${wordPair.second}`.replace(/\s+/g, '-').toLowerCase();
+      
+      const response = await fetch('/api/dictation/refresh-audio', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          wordId,
+          audioUrl: wordPair.secondAudioUrl
+        })
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to refresh audio URL:', await response.text());
+        return wordPair.secondAudioUrl; // Return original URL as fallback
+      }
+      
+      const data = await response.json();
+      return data.refreshedUrl;
+    } catch (error) {
+      console.error('Error refreshing audio URL:', error);
+      return wordPair.secondAudioUrl; // Return original URL as fallback
+    }
+  }, []);
+
+  const playSecondAudio = useCallback(async () => {
+    const currentWord = getCurrentWord()
+    return new Promise<void>((resolve) => {
+      if (!currentWord.secondAudioUrl) {
+        // If no audio URL is available, resolve after a short delay
+        setTimeout(resolve, 3000)
+        return
+      }
+
+      setIsAudioLoading(true)
+      setAudioError(null)
+      
+      // Try to refresh the audio URL before playing
+      refreshAudioUrl(currentWord)
+        .then(freshUrl => {
+          if (!freshUrl) {
+            setAudioError("Audio not available")
+            toast.error("The audio for this word couldn't be loaded")
+            setIsAudioLoading(false)
+            resolve()
+            return
+          }
+
+          const audio = new Audio(freshUrl)
+          
+          audio.addEventListener('ended', () => {
+            setIsAudioLoading(false)
+            resolve()
+          })
+          
+          audio.addEventListener('error', (e) => {
+            console.error('Error playing audio:', e)
+            setAudioError("Audio playback failed")
+            toast.error("There was a problem playing the audio. The URL might have expired.")
+            setIsAudioLoading(false)
+            setTimeout(resolve, 3000)
+          })
+          
+          audio.play().catch(error => {
+            console.error('Error playing audio:', error)
+            setAudioError("Audio playback failed")
+            toast.error("There was a problem playing the audio. The URL might have expired.")
+            setIsAudioLoading(false)
+            setTimeout(resolve, 3000)
+            
+          })
+        })
+        .catch(error => {
+          console.error('Error refreshing audio URL:', error)
+          setAudioError("Audio preparation failed")
+          toast.error("There was an error preparing the audio")
+          setIsAudioLoading(false)
+          resolve()
+        })
+    })
+  }, [getCurrentWord, refreshAudioUrl])
+  
+  const handleOptionSelect = useCallback((optionIndex: number) => {
+    const isCorrect = quizOptions[optionIndex].isCorrect
+    
+    setGameState(prev => ({ 
+      ...prev, 
+      selectedOption: optionIndex,
+      isPaused: true
+    }))
+    
+    if (isCorrect) {
+      confettiController.current?.shoot()
+      setGameState(prev => ({ 
+        ...prev, 
+        completedWords: prev.completedWords + 1
+      }))
+      
+      // Play audio if available and move to next word after completion
+      playSecondAudio().then(() => {
+        setShowCorrectAnswer(false)
+        moveToNextWord()
+      })
+    } else {
+      // Incorrect answer
+      setGameState(prev => {
+        const newMistakesOnCurrentWord = prev.mistakesOnCurrentWord + 1
+        const newHearts = prev.hearts - 1
+        const newFails = prev.fails + 1
+        
+        // Only animate heart loss if we still have hearts
+        if (prev.hearts > 0) {
+          gameHeaderRef.current?.animateHeartLoss()
+        }
+        
+        let newStars = 3
+        if (newFails >= 5) newStars = 1
+        else if (newFails >= 3) newStars = 2
+
+        // Store these values to use in the setTimeout
+        const updatedHearts = newHearts
+        const updatedMistakes = newMistakesOnCurrentWord
+        
+        // Use setTimeout to determine next steps
+        setTimeout(() => {
+          if (updatedHearts <= 0) { // If this was the last heart
+            endGame()
+          } else if (updatedMistakes >= 2) { 
+            // This is the second mistake on this word
+            // Show correct answer and play audio before proceeding
+            setShowCorrectAnswer(true)
+            
+            // Find the correct option index
+            const correctOptionIndex = quizOptions.findIndex(option => option.isCorrect)
+            
+            // Set the correct option as selected
+            setGameState(prevState => ({ 
+              ...prevState, 
+              selectedOption: correctOptionIndex
+            }))
+            
+            // Play the audio and then move to next word
+            playSecondAudio().then(() => {
+              setShowCorrectAnswer(false)
+              moveToNextWord()
+            })
+          } else {
+            // First mistake, reset selection and allow another try
+            setGameState(prevState => ({ 
+              ...prevState, 
+              selectedOption: null,
+              isPaused: false
+            }))
+          }
+        }, 1000)
+
+        return {
+          ...prev,
+          hearts: newHearts,
+          fails: newFails,
+          stars: newStars,
+          mistakesOnCurrentWord: newMistakesOnCurrentWord
+        }
+      })
+    }
+  }, [quizOptions, playSecondAudio, moveToNextWord, endGame])
+
+  // Timer effect
+  useEffect(() => {
+    if (gameState.isGameOver || !game.quizParameters.activityTimeLimit || gameState.isPaused) return
+
+    const timer = setInterval(() => {
+      if (gameState.timeLeft <= 0) {
+        // Handle timeout - count as wrong answer
+        setGameState(prev => {
+          const newMistakesOnCurrentWord = prev.mistakesOnCurrentWord + 1
+          const newHearts = prev.hearts - 1
+          const newFails = prev.fails + 1
+          
+          gameHeaderRef.current?.animateHeartLoss()
+          
+          let newStars = 3
+          if (newFails >= 5) newStars = 1
+          else if (newFails >= 3) newStars = 2
+          
+          // Store these values to use in the setTimeout
+          const updatedHearts = newHearts
+          const updatedMistakes = newMistakesOnCurrentWord
+          
+          // Use setTimeout to determine next steps
+          setTimeout(() => {
+            if (updatedHearts <= 0) { // If this was the last heart
+              endGame()
+            } else if (updatedMistakes >= 2) { 
+              // This is the second mistake on this word
+              // Show correct answer and play audio before proceeding
+              setShowCorrectAnswer(true)
+              
+              // Find the correct option index
+              const correctOptionIndex = quizOptions.findIndex(option => option.isCorrect)
+              
+              // Set the correct option as selected
+              setGameState(prevState => ({ 
+                ...prevState, 
+                selectedOption: correctOptionIndex
+              }))
+              
+              // Play the audio and then move to next word
+              playSecondAudio().then(() => {
+                setShowCorrectAnswer(false)
+                moveToNextWord()
+              })
+            } else {
+              // First mistake, reset the timer and allow another try
+              setGameState(prevState => ({ 
+                ...prevState, 
+                timeLeft: game.quizParameters.activityTimeLimit,
+                isPaused: false
+              }))
+            }
+          }, 1000)
+          
+          return {
+            ...prev,
+            isPaused: true,
+            hearts: newHearts,
+            fails: newFails,
+            stars: newStars,
+            mistakesOnCurrentWord: newMistakesOnCurrentWord
+          }
+        })
+      } else {
+        setGameState(prev => ({ ...prev, timeLeft: prev.timeLeft - 1 }))
+      }
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [
+    endGame, 
+    gameState.isGameOver, 
+    game.quizParameters.activityTimeLimit, 
+    gameState.timeLeft, 
+    gameState.isPaused,
+    moveToNextWord,
+    playSecondAudio,
+    quizOptions
+  ])
+
+  // Add an audio button to manually trigger the audio
+//   const handlePlayAudio = useCallback(() => {
+//     playSecondAudio().catch(error => {
+//       console.error("Error in handlePlayAudio:", error)
+//       toast.error("Failed to play audio")
+//     })
+//   }, [playSecondAudio])
+
+  // If game is over, show the game over view
+  if (gameState.isGameOver) {
+    return (
+      <GameOverView
+        stars={gameState.stars}
+        hearts={gameState.hearts}
+        totalTime={gameState.totalTime}
+        fails={gameState.fails}
+        completedWords={gameState.completedWords}
+        totalWords={game.wordPairs.length}
+        onPlayAgain={restartGame}
+        onExit={onGameEnd}
+      />
+    )
+  }
+
+  const currentWord = getCurrentWord()
+  const progress = Math.round((gameState.currentWordIndex / game.wordPairs.length) * 100)
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[70vh] w-full max-w-2xl mx-auto">
+      <GameHeader
+        ref={gameHeaderRef}
+        hearts={gameState.hearts}
+        timeLeft={gameState.timeLeft}
+        timeLimit={game.quizParameters.activityTimeLimit}
+        progress={progress}
+        formatTime={formatTime}
+      />
+      
+      <div className="mb-8 text-center">
+        <div className="text-6xl font-bold mb-12 text-indigo-600">
+          {currentWord.first}
+        </div>
+        
+        {currentWord.secondAudioUrl && (
+          <div className="mb-4">
+            {/*<Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handlePlayAudio}
+              disabled={isAudioLoading}
+            >
+              {isAudioLoading ? (
+                <>
+                  <div className="animate-spin h-4 w-4 mr-2 border-2 border-b-transparent rounded-full"></div>
+                  {t('loading')}
+                </>
+              ) : (
+                <>
+                  <SpeakerWaveIcon className="h-5 w-5 mr-2" />
+                  {audioError ? t('retryAudio') : t('playAudio')}
+                </>
+              )}
+            </Button>
+            {audioError && (
+              <div className="text-red-500 text-sm mt-1">
+                {audioError}
+              </div>
+            )*/}
+          </div>
+        )}
+        
+        {currentWord.sentence && !hideExampleSentences && (
+          <div className="mt-2 text-gray-600 italic text-sm p-2 bg-gray-50 rounded-md">
+            {currentWord.sentence}
+          </div>
+        )}
+        
+        {currentWord.sentence && (
+          <div className="mt-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={onToggleExampleSentences}
+                  >
+                    {hideExampleSentences ? (
+                      <><EyeIcon className="h-4 w-4 mr-2" /> {t('showExamples')}</>
+                    ) : (
+                      <><EyeSlashIcon className="h-4 w-4 mr-2" /> {t('hideExamples')}</>
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {hideExampleSentences ? t('showExamples') : t('hideExamples')}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        )}
+      </div>
+      
+      <div className="w-full space-y-4 mb-8 flex flex-col items-center justify-center">
+        {quizOptions.map((option, index) => (
+          <Button
+            key={index}
+            className={`w-full text-left justify-start text-2xl bold py-6 ${
+              // If an option is selected, show it as green if correct, red if incorrect
+              gameState.selectedOption === index
+                ? option.isCorrect 
+                  ? 'bg-green-100 hover:bg-green-200 text-green-800 border-green-500'
+                  : 'bg-red-100 hover:bg-red-200 text-red-800 border-red-500'
+                // If showing correct answer (after second mistake), highlight all options accordingly
+                : showCorrectAnswer
+                  ? option.isCorrect
+                    ? 'bg-green-100 hover:bg-green-200 text-green-800 border-green-500'
+                    : 'bg-red-100 hover:bg-red-200 text-red-800 border-red-500'
+                  // Default styling for unselected options
+                  : 'bg-white hover:bg-gray-50 text-gray-800 border-gray-300'
+            } border-2`}
+            variant="outline"
+            disabled={gameState.selectedOption !== null || showCorrectAnswer}
+            onClick={() => handleOptionSelect(index)}
+          >
+            {option.value}
+          </Button>
+        ))}
+      </div>
+      
+      <Realistic onInit={handleConfettiInit} />
+    </div>
+  )
+} 

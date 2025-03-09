@@ -97,6 +97,11 @@
     },
     "game": {
       "startGame": "Start Game",
+      "startWriterGame": "Writing Mode",
+      "startQuizGame": "Quiz Mode",
+      "writerGameDescription": "Type the translations for each word",
+      "quizGameDescription": "Choose the correct translation from options",
+      "translate": "Translate",
       "gameOver": "Game Over!",
       "playAgain": "Play Again",
       "exit": "Exit",
@@ -107,7 +112,10 @@
       "created": "Created",
       "showExamples": "Show example sentences",
       "hideExamples": "Hide example sentences",
-      "back": "Back"
+      "back": "Back",
+      "playAudio": "Play Audio",
+      "retryAudio": "Retry Audio",
+      "loading": "Loading..."
     },
     "card": {
       "edit": "Edit",

@@ -8,6 +8,7 @@ import { WordPairDisplay } from '@/components/dictation/WordPairDisplay'
 import { useTranslations } from 'next-intl'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
+import { PencilIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline'
 
 interface GameContainerProps {
   game: DictationGame
@@ -31,9 +32,14 @@ export function GameContainer({ game }: GameContainerProps) {
     }
   }
 
-  const handleGameStart = () => {
+  const handleWriterGameStart = () => {
     incrementPlayCount()
     router.push(`/dictation/play/${game.id}/writer-game?hideExamples=${hideExampleSentences.toString()}`)
+  }
+
+  const handleQuizGameStart = () => {
+    incrementPlayCount()
+    router.push(`/dictation/play/${game.id}/quiz-game?hideExamples=${hideExampleSentences.toString()}`)
   }
 
   return (
@@ -68,14 +74,43 @@ export function GameContainer({ game }: GameContainerProps) {
         sourceLanguage={game.sourceLanguage}
         targetLanguage={game.targetLanguage}
       />
-      <div className="mt-8 text-center">
-        <Button 
-          size="lg"
-          onClick={handleGameStart}
-          className="px-8"
-        >
-          {t('startGame')}
-        </Button>
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 max-w-md mx-auto">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                size="lg"
+                onClick={handleWriterGameStart}
+                className="px-8 flex items-center"
+              >
+                <PencilIcon className="w-5 h-5 mr-2" />
+                {t('startWriterGame')}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {t('writerGameDescription')}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                size="lg"
+                onClick={handleQuizGameStart}
+                className="px-8 flex items-center"
+                variant="secondary"
+              >
+                <QuestionMarkCircleIcon className="w-5 h-5 mr-2" />
+                {t('startQuizGame')}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {t('quizGameDescription')}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </div>
   )

@@ -5,10 +5,11 @@ import { useTranslations } from 'next-intl'
 
 interface GameOverViewProps {
   stars: number
-  hearts: number
+  hearts?: number
   totalTime: number
-  fails: number
+  fails?: number
   completedWords: number
+  totalWords?: number
   onPlayAgain: () => void
   onExit: () => void
 }
@@ -19,10 +20,11 @@ interface GameOverViewProps {
  */
 export function GameOverView({
   stars,
-  hearts,
+  hearts = 0,
   totalTime,
-  fails,
+  fails = 0,
   completedWords,
+  totalWords,
   onPlayAgain,
   onExit
 }: GameOverViewProps) {
@@ -57,7 +59,9 @@ export function GameOverView({
           <div className="grid gap-4 text-xl" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
             <p className="justify-end items-center flex">{fails}</p>
             <p className="text-center items-center flex">/</p>
-            <p className="justify-start items-center flex">{completedWords}</p>
+            <p className="justify-start items-center flex">
+              {totalWords ? `${completedWords}/${totalWords}` : completedWords}
+            </p>
           </div>
         </div>
         <div className="mt-8 flex flex-row gap-4 justify-center items-center">
