@@ -18,7 +18,7 @@ const getActionCodeSettings = (action: string) => ({
     installApp: true,
     minimumVersion: '12'
   },
-  dynamicLinkDomain: 'www.acedzn.xyz'
+  dynamicLinkDomain: 'acedzn.xyz'
 })
 
 export async function handleCredentialsSignIn(email: string, password: string, redirectTo: string) {

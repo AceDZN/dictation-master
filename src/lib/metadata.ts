@@ -15,7 +15,7 @@ export const defaultMetadata = {
 
 export const siteConfig = {
   name: 'Dictation Masters',
-  url: 'https://www.acedzn.xyz',
+  url: 'https://acedzn.xyz',
   ogImage: '/og-image.png', 
   author: 'Dictation Masters Team',
   twitter: '@dictationmaster',
