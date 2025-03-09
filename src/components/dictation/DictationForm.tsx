@@ -49,8 +49,8 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
       quizParameters: initialData?.quizParameters || {
         globalTimeLimit: 0,
         globalLivesLimit: 3,
-        activityTimeLimit: 0,
-        quizModeEnabled: false,
+        activityTimeLimit: 30,
+        quizModeEnabled: true,
       },
       isPublic: typeof isPublic === 'boolean' ? isPublic : true,
     }
