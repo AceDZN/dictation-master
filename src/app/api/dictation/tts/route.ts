@@ -36,10 +36,10 @@ async function getOrCreateTTS(word: string): Promise<string> {
     // Check if file exists
     const [exists] = await file.exists()
     if (exists) {
-      // Get signed URL that expires in 1 hour
+      // Get signed URL that expires in 24 hours instead of 1 hour
       const [url] = await file.getSignedUrl({
         action: 'read',
-        expires: Date.now() + 3600000 // 1 hour
+        expires: Date.now() + 86400000 // 24 hours (was 3600000 for 1 hour)
       })
       console.log('getDownloadURL url', url, word)
       return url
@@ -68,10 +68,10 @@ async function getOrCreateTTS(word: string): Promise<string> {
       })
       console.log('file saved')
       
-      // Get signed URL
+      // Get signed URL with extended expiration time
       const [url] = await file.getSignedUrl({
         action: 'read',
-        expires: Date.now() + 3600000 // 1 hour
+        expires: Date.now() + 86400000 // 24 hours (was 3600000 for 1 hour)
       })
       return url
     } catch(error) {

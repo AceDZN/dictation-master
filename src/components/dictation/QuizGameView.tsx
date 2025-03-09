@@ -196,60 +196,72 @@ export function QuizGameView({
   }, []);
 
   const playSecondAudio = useCallback(async () => {
-    const currentWord = getCurrentWord()
-    return new Promise<void>((resolve) => {
-      if (!currentWord.secondAudioUrl) {
-        // If no audio URL is available, resolve after a short delay
-        setTimeout(resolve, 3000)
-        return
-      }
-
-      setIsAudioLoading(true)
-      setAudioError(null)
-      
+    const currentWord = getCurrentWord();
+    
+    if (!currentWord.secondAudioUrl) {
+      // If no audio URL is available, resolve after a short delay
+      return new Promise<void>(resolve => setTimeout(resolve, 500));
+    }
+    
+    setIsAudioLoading(true);
+    setAudioError(null);
+    
+    try {
       // Try to refresh the audio URL before playing
-      refreshAudioUrl(currentWord)
-        .then(freshUrl => {
-          if (!freshUrl) {
-            setAudioError("Audio not available")
-            toast.error("The audio for this word couldn't be loaded")
-            setIsAudioLoading(false)
-            resolve()
-            return
-          }
-
-          const audio = new Audio(freshUrl)
-          
-          audio.addEventListener('ended', () => {
-            setIsAudioLoading(false)
-            resolve()
-          })
-          
-          audio.addEventListener('error', (e) => {
-            console.error('Error playing audio:', e)
-            setAudioError("Audio playback failed")
-            toast.error("There was a problem playing the audio. The URL might have expired.")
-            setIsAudioLoading(false)
-            setTimeout(resolve, 3000)
-          })
-          
-          audio.play().catch(error => {
-            console.error('Error playing audio:', error)
-            setAudioError("Audio playback failed")
-            toast.error("There was a problem playing the audio. The URL might have expired.")
-            setIsAudioLoading(false)
-            setTimeout(resolve, 3000)
-            
-          })
-        })
-        .catch(error => {
-          console.error('Error refreshing audio URL:', error)
-          setAudioError("Audio preparation failed")
-          toast.error("There was an error preparing the audio")
-          setIsAudioLoading(false)
-          resolve()
-        })
-    })
+      const freshUrl = await refreshAudioUrl(currentWord);
+      if (!freshUrl) {
+        setAudioError("Audio not available");
+        toast.error("The audio for this word couldn't be loaded");
+        setIsAudioLoading(false);
+        return;
+      }
+      
+      // Play the audio with the fresh URL
+      const audio = new Audio(freshUrl);
+      
+      // Add event listener for when audio finishes playing
+      audio.addEventListener('ended', () => {
+        setIsAudioLoading(false);
+      });
+      
+      // Handle audio errors
+      audio.addEventListener('error', (e) => {
+        console.error('Error playing audio:', e);
+        
+        // If the error is likely due to an expired token, try refreshing once more
+        if (audio.error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED || 
+            audio.error?.code === MediaError.MEDIA_ERR_NETWORK) {
+          // Try one more time with a forced refresh
+          refreshAudioUrl(currentWord).then(retryUrl => {
+            if (retryUrl) {
+              const retryAudio = new Audio(retryUrl);
+              retryAudio.play().catch(retryError => {
+                console.error('Error on retry playback:', retryError);
+                setAudioError("Audio playback failed after retry");
+                toast.error("There was a problem playing the audio even after refreshing the URL.");
+                setIsAudioLoading(false);
+              });
+            } else {
+              setAudioError("Audio playback failed");
+              toast.error("There was a problem playing the audio. The URL might have expired.");
+              setIsAudioLoading(false);
+            }
+          });
+        } else {
+          setAudioError("Audio playback failed");
+          toast.error("There was a problem playing the audio. The URL might have expired.");
+          setIsAudioLoading(false);
+        }
+      });
+      
+      // Play the audio
+      await audio.play();
+    } catch (error) {
+      console.error('Error refreshing audio URL:', error);
+      setAudioError("Audio preparation failed");
+      toast.error("There was an error preparing the audio");
+      setIsAudioLoading(false);
+    }
   }, [getCurrentWord, refreshAudioUrl])
   
   const handleOptionSelect = useCallback((optionIndex: number) => {
