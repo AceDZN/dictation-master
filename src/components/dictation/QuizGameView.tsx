@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { GameOverView } from './GameOverView'
 import { GameHeader, GameHeaderRef } from './GameHeader'
 import { toast } from 'sonner'
+import { trackEvent } from '@/lib/posthog-utils'
 
 interface QuizGameViewProps {
   game: DictationGame
@@ -32,6 +33,7 @@ interface GameState {
   completedWords: number
   selectedOption: number | null
   mistakesOnCurrentWord: number
+  isStarted: boolean
 }
 
 interface QuizOption {
@@ -64,7 +66,8 @@ export function QuizGameView({
     isPaused: false,
     completedWords: 0,
     selectedOption: null,
-    mistakesOnCurrentWord: 0
+    mistakesOnCurrentWord: 0,
+    isStarted: false
   })
   
   const [quizOptions, setQuizOptions] = useState<QuizOption[]>([])
@@ -76,13 +79,25 @@ export function QuizGameView({
   // eslint-disable-next-line 
   const [scope, animate] = useAnimate()
 
-  const endGame = useCallback(() => {
+  const endGame = useCallback((isWin: boolean = false) => {
+    trackEvent('game_over', {
+      game_id: game.id,
+      game_title: game.title,
+      game_mode: 'quiz',
+      score: gameState.stars,
+      hearts_remaining: gameState.hearts,
+      time_taken: game.quizParameters.activityTimeLimit - gameState.timeLeft,
+      fails_count: gameState.fails,
+      completed_words_count: gameState.currentWordIndex,
+      total_words_count: game.wordPairs.length,
+      is_win: isWin
+    })
     setGameState(prev => ({
       ...prev,
       isGameOver: true,
       totalTime: Math.floor((Date.now() - prev.gameStartTime) / 1000)
     }))
-  }, [])
+  }, [game, gameState])
 
   const handleConfettiInit = useCallback(({ conductor }: { conductor: any }) => {
     confettiController.current = conductor
@@ -126,11 +141,12 @@ export function QuizGameView({
       isPaused: false,
       completedWords: 0,
       selectedOption: null,
-      mistakesOnCurrentWord: 0
+      mistakesOnCurrentWord: 0,
+      isStarted: true
     })
     setShowCorrectAnswer(false)
     generateOptions()
-  }, [game.quizParameters.globalLivesLimit, game.quizParameters.activityTimeLimit, generateOptions])
+  }, [game, generateOptions])
 
   const formatTime = useCallback((seconds: number): string => {
     const minutes = Math.floor(seconds / 60)
@@ -213,6 +229,16 @@ export function QuizGameView({
     }))
     
     if (isCorrect) {
+      trackEvent('answer_correct', {
+        game_id: game.id,
+        game_title: game.title,
+        source_language: game.sourceLanguage,
+        target_language: game.targetLanguage,
+        game_mode: 'quiz',
+        word_index: gameState.currentWordIndex,
+        word_first: getCurrentWord().first,
+        word_second: getCurrentWord().second
+      })
       confettiController.current?.shoot()
       setGameState(prev => ({ 
         ...prev, 
@@ -225,6 +251,18 @@ export function QuizGameView({
         moveToNextWord()
       })
     } else {
+      trackEvent('answer_incorrect', {
+        game_id: game.id,
+        game_title: game.title,
+        source_language: game.sourceLanguage,
+        target_language: game.targetLanguage,
+        game_mode: 'quiz',
+        word_index: gameState.currentWordIndex,
+        word_first: getCurrentWord().first,
+        word_second: getCurrentWord().second,
+        hearts_remaining: gameState.hearts - 1,
+        time_left: gameState.timeLeft
+      })
       // Incorrect answer
       setGameState(prev => {
         const newMistakesOnCurrentWord = prev.mistakesOnCurrentWord + 1
@@ -286,7 +324,7 @@ export function QuizGameView({
         }
       })
     }
-  }, [quizOptions, playSecondAudio, moveToNextWord, endGame])
+  }, [quizOptions, playSecondAudio, moveToNextWord, endGame, game, gameState, getCurrentWord])
 
   // Timer effect
   useEffect(() => {
@@ -368,6 +406,18 @@ export function QuizGameView({
     playSecondAudio,
     quizOptions
   ])
+
+  useEffect(() => {
+    if (gameState.isStarted) {
+      trackEvent('play_started', {
+        game_id: game.id,
+        game_title: game.title,
+        source_language: game.sourceLanguage,
+        target_language: game.targetLanguage,
+        game_mode: 'quiz'
+      })
+    }
+  }, [gameState.isStarted, game])
 
   // If game is over, show the game over view
   if (gameState.isGameOver) {

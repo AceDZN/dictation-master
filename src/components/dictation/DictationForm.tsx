@@ -15,6 +15,7 @@ import { getLanguageCodeFromName } from "@/lib/utils"
 import { Spinner } from "@/components/ui/spinner"
 import { ArrowsRightLeftIcon } from "@heroicons/react/24/outline"
 import { useTranslations } from 'next-intl'
+import { trackEvent } from '@/lib/posthog-utils'
 
 const DEFAULT_LANGUAGES = {
   source: 'Hebrew',
@@ -90,6 +91,7 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
 
   const handleGenerateContent = async () => {
     setIsProcessingFile(true)
+    setError(undefined)
     try {
       const response = await fetch('/api/dictation/generate-content', {
         method: 'POST',
@@ -117,6 +119,11 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
         title: data.title || prev.title,
         description: data.description || prev.description,
       }))
+      trackEvent('game_content_generated', {
+        source_language: formData.sourceLanguage,
+        target_language: formData.targetLanguage,
+        word_pairs_generated_count: data.wordPairs.length
+      })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate content')
     } finally {
@@ -148,6 +155,14 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
         throw new Error(data.error || 'Failed to save draft')
       }
 
+      trackEvent('game_draft_saved', { 
+        game_id: data.dictationId,
+        game_title: formData.title,
+        source_language: formData.sourceLanguage,
+        target_language: formData.targetLanguage,
+        word_pairs_count: formData.wordPairs.length
+      })
+
       router.push(`/profile?saved=${data.dictationId}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save draft')
@@ -170,6 +185,8 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
       if (!response.ok) {
         throw new Error('Failed to delete draft')
       }
+
+      trackEvent('game_deleted', { game_id: formData.id })
 
       router.push('/profile')
     } catch (err) {
@@ -215,6 +232,14 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
       if (!response.ok) {
         throw new Error(data.error || `Failed to ${id ? 'update' : 'create'} dictation`)
       }
+
+      trackEvent('game_published', {
+        game_id: data.dictationId,
+        game_title: formData.title,
+        source_language: formData.sourceLanguage,
+        target_language: formData.targetLanguage,
+        word_pairs_count: formData.wordPairs.length
+      })
 
       router.push(`/profile`)
     } catch (err) {
