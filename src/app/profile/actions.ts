@@ -5,6 +5,7 @@ import { getAuth } from "firebase-admin/auth"
 import { initAdminApp } from "@/lib/firebase-admin"
 import { uploadProfileImage, deleteProfileImage } from "@/lib/storage"
 import { revalidatePath } from "next/cache"
+import { trackEvent } from '@/lib/posthog-utils'
 
 export async function updateUserProfile(
   userId: string,
@@ -57,6 +58,11 @@ export async function updateUserProfile(
 
       // Force revalidation of the profile page
       revalidatePath('/profile')
+
+      const updatedFields = ['name', 'image'].filter(() => updatedUser.displayName || updatedUser.photoURL)
+      trackEvent('profile_changes_saved', {
+        fields_updated: updatedFields
+      })
 
       return { 
         success: true,

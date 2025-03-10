@@ -144,7 +144,7 @@ export function GameCardClient(props: Game) {
       <CardHeader>
         <div className="flex justify-between items-start relative">
           <div>
-            {isPublic ? (
+            {isOwner ? isPublic ? (
               <span className="flex items-center gap-1.5 text-green-600 text-xs absolute -top-6 -right-6">
                 <span className="h-3 w-3 bg-green-600 rounded-tl-none rounded-b-none rounded-tr-lg rounded-bl-lg"></span>
               </span>
@@ -152,7 +152,7 @@ export function GameCardClient(props: Game) {
               <span className="flex items-center gap-1.5 text-red-600  text-xs absolute  -top-6 -right-6">
                 <span className="h-3 w-3 bg-red-600 rounded-tl-none rounded-b-none rounded-tr-lg rounded-bl-lg"></span>
               </span>
-            )}
+            ) : null}
              
             <CardTitle className="text-xl font-bold text-center mb-4">{title}</CardTitle>
             {description && <CardDescription>{description}</CardDescription>}
