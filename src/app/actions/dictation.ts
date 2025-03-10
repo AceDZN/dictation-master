@@ -88,10 +88,17 @@ export async function getGames(): Promise<Game[]> {
     .collection('games')
     .get()
 
-  return gamesSnapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  })) as Game[]
+  return gamesSnapshot.docs.map(doc => {
+    const data = doc.data()
+    return {
+      id: doc.id,
+      ...data,
+      createdAt: {
+        _seconds: data.createdAt?.seconds || 0,
+        _nanoseconds: data.createdAt?.nanoseconds || 0
+      }
+    }
+  }) as Game[]
 }
 
 export async function deleteGame(id: string): Promise<boolean> {
