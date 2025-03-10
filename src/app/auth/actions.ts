@@ -4,6 +4,7 @@ import { signIn, signOut } from "@/lib/auth"
 import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, verifyBeforeUpdateEmail } from "firebase/auth"
 import { initFirebaseApp } from "@/lib/firebase"
 import { APP_URL } from "@/lib/server-constants"
+import { captureServerEvent } from "@/lib/posthog"
 
 // Common action code settings
 const getActionCodeSettings = (action: string) => ({
@@ -192,6 +193,17 @@ export async function handleEmailChange(user: any, newEmail: string) {
         errorMessage = 'Please sign in again to change your email'
         break
     }
+
+    // Track failed email change request
+    await captureServerEvent(
+      user.email || user.id || 'anonymous',
+      'auth_email_change_failed',
+      {
+        new_email: newEmail,
+        error_code: error.code,
+        error_message: errorMessage
+      }
+    )
 
     return {
       success: false,

@@ -13,6 +13,7 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/comp
 import { Button } from '@/components/ui/button'
 import { GameOverView } from './GameOverView'
 import { GameHeader, GameHeaderRef } from './GameHeader'
+import { trackEvent } from '@/lib/posthog-utils'
 
 interface GameViewProps {
   game: DictationGame
@@ -33,6 +34,8 @@ interface GameState {
   isPaused: boolean
   completedWords: number
   currentWordGuesses: number
+  isStarted: boolean
+  score: number
 }
 
 export function GameView({ 
@@ -58,7 +61,9 @@ export function GameView({
     fails: 0,
     isPaused: false,
     completedWords: 0,
-    currentWordGuesses: 0
+    currentWordGuesses: 0,
+    isStarted: false,
+    score: 0
   })
   const [input, setInput] = useState('')
   const [inputStatus, setInputStatus] = useState<'default' | 'correct' | 'incorrect'>('default')
@@ -70,13 +75,25 @@ export function GameView({
   // eslint-disable-next-line 
   const [scope, animate] = useAnimate()
 
-  const endGame = useCallback(() => {
+  const endGame = useCallback((isWin: boolean = false) => {
     setGameState(prev => ({
       ...prev,
       isGameOver: true,
       totalTime: Math.floor((Date.now() - prev.gameStartTime) / 1000)
     }))
-  }, [])
+    trackEvent('game_over', {
+      game_id: game.id,
+      game_title: game.title,
+      game_mode: 'writer',
+      score: gameState.score,
+      hearts_remaining: gameState.hearts,
+      time_taken: game.quizParameters.activityTimeLimit - gameState.timeLeft,
+      fails_count: gameState.fails,
+      completed_words_count: gameState.currentWordIndex,
+      total_words_count: game.wordPairs.length,
+      is_win: isWin
+    })
+  }, [game, gameState])
 
   const handleConfettiInit = useCallback(({ conductor }: { conductor: any }) => {
     confettiController.current = conductor
@@ -94,7 +111,9 @@ export function GameView({
       fails: 0,
       isPaused: false,
       completedWords: 0,
-      currentWordGuesses: 0
+      currentWordGuesses: 0,
+      isStarted: false,
+      score: 0
     })
     setInput('')
     setInputStatus('default')
@@ -178,7 +197,18 @@ export function GameView({
       // If no audio, wait for a moment before moving to next word
       setTimeout(moveToNextWord, 1000)
     }
-  }, [ getCurrentWord, moveToNextWord])
+
+    trackEvent('answer_correct', {
+      game_id: game.id,
+      game_title: game.title,
+      source_language: game.sourceLanguage,
+      target_language: game.targetLanguage,
+      game_mode: 'writer',
+      word_index: gameState.currentWordIndex,
+      word_first: currentWord.first,
+      word_second: currentWord.second
+    })
+  }, [ getCurrentWord, moveToNextWord, game, gameState.currentWordIndex])
 
   const getHint = useCallback((word: string, guessCount: number) => {
     const revealed = word.slice(0, Math.min(guessCount + 1, word.length))
@@ -218,7 +248,20 @@ export function GameView({
         inputRef.current?.focus()
       }, 500)
     }
-  }, [endGame, gameState.hearts, gameState.fails, gameState.currentWordGuesses, game.quizParameters.activityTimeLimit])
+
+    trackEvent('answer_incorrect', {
+      game_id: game.id,
+      game_title: game.title,
+      source_language: game.sourceLanguage,
+      target_language: game.targetLanguage,
+      game_mode: 'writer',
+      word_index: gameState.currentWordIndex,
+      word_first: getCurrentWord().first,
+      word_second: getCurrentWord().second,
+      hearts_remaining: newHearts,
+      time_left: gameState.timeLeft
+    })
+  }, [endGame, game, gameState, getCurrentWord])
 
 
   const validateAnswer = useCallback(() => {
@@ -252,6 +295,17 @@ export function GameView({
     }
   }, [gameState.currentWordIndex, gameState.isGameOver])
 
+  useEffect(() => {
+    if (gameState.isStarted) {
+      trackEvent('play_started', {
+        game_id: game.id,
+        game_title: game.title,
+        source_language: game.sourceLanguage,
+        target_language: game.targetLanguage,
+        game_mode: 'writer'
+      })
+    }
+  }, [gameState.isStarted, game])
 
   if (gameState.isGameOver) {
     return (
