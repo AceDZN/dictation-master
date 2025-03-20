@@ -1,6 +1,5 @@
 // src/components/dictation/GameCard.tsx
 import { EyeIcon } from '@heroicons/react/24/outline'
-import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { GameCardActions } from './GameCardActions'
 

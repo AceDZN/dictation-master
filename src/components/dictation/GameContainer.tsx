@@ -39,7 +39,7 @@ export function GameContainer({ game }: GameContainerProps) {
                 variant="ghost" 
                 size="icon" 
                 onClick={() => setHideExampleSentences(prev => !prev)}
-                aria-label={hideExampleSentences ? t('showExamples') : t('hideExamples')}
+                ariaLabel={hideExampleSentences ? t('showExamples') : t('hideExamples')}
               >
                 {hideExampleSentences ? (
                   <EyeIcon className="h-5 w-5" />

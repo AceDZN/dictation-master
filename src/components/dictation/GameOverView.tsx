@@ -42,7 +42,7 @@ export function GameOverView({
   useEffect(() => {
     if (!gameId) return
     incrementPlayCount(gameId)
-  }, [])
+  }, [gameId])
 
   return (
     <div className="max-w-md mx-auto text-center p-8 bg-white rounded-xl shadow-2xl">

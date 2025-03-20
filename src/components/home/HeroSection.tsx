@@ -3,11 +3,10 @@ import { getTranslations } from 'next-intl/server'
 import { TypewriterEffect } from '@/components/ui/typewriter-effect'
 
 interface HeroSectionProps {
-  locale: string
   direction: string
 }
 
-export async function HeroSection({ locale, direction }: HeroSectionProps) {
+export async function HeroSection({  direction }: HeroSectionProps) {
   const t = await getTranslations('HomePage')
 
   return (
@@ -22,7 +21,7 @@ export async function HeroSection({ locale, direction }: HeroSectionProps) {
               <div className="inline-block mb-4 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-100">
                 <p className="text-sm font-medium text-indigo-600">
                   <span className="inline-block w-2 h-2 rounded-full bg-indigo-600 mr-2 animate-pulse"></span>
-                  {locale === 'he' ? 'גרסה חדשה זמינה' : 'New Version Available'}
+                  {t('newVersionAvailable')}
                 </p>
               </div>
               

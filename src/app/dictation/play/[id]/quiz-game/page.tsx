@@ -4,7 +4,6 @@ import { getGame } from '@/lib/game'
 import { generateMetadata as generateSiteMetadata } from '@/lib/metadata'
 import { QuizGameClient } from '@/components/dictation/QuizGameClient'
 import { DictationGame } from '@/lib/types'
-import { incrementPlayCount } from '../helpers'
 
 interface QuizGamePageProps {
   params: Promise<{ id: string }>

@@ -1,10 +1,10 @@
 import { LatestGames } from '@/components/dictation/LatestGames'
-import { getLocale, getTranslations } from 'next-intl/server'
+import { getLocale } from 'next-intl/server'
 import { getLangDir } from 'rtl-detect'
 import { generateMetadata as generateSiteMetadata } from '@/lib/metadata'
 import { Metadata } from 'next'
 import { HeroSection } from '@/components/home/HeroSection'
-import { BackgroundGradient } from '@/components/ui/background-gradient'
+
 import { FeaturesSection } from '@/components/home/FeaturesSection'
 import { HowItWorksSection } from '@/components/home/HowItWorksSection'
 export async function generateMetadata(): Promise<Metadata> {
@@ -17,7 +17,6 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Home() {
   const locale = await getLocale()
-  const t = await getTranslations()
   const direction = getLangDir(locale)
 
   return (
@@ -25,13 +24,13 @@ export default async function Home() {
       <>
       
       {/* Hero section */}
-      <HeroSection locale={locale} direction={direction} />
+      <HeroSection  direction={direction} />
        
       {/* Features section */}
-      <FeaturesSection locale={locale} />
+      <FeaturesSection  />
       
       {/* How it works section */}
-      <HowItWorksSection locale={locale} direction={direction} />
+      <HowItWorksSection/>
       
       {/* Latest Games Section */}
       <LatestGames />

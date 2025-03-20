@@ -1,12 +1,8 @@
 import { getTranslations } from 'next-intl/server'
-import Image from 'next/image'
 
-interface HowItWorksSectionProps {
-  locale: string
-  direction: string
-}
 
-export async function HowItWorksSection({ locale, direction }: HowItWorksSectionProps) {
+
+export async function HowItWorksSection() {
   const t = await getTranslations('HowItWorks')
   
   const steps = [
@@ -49,12 +45,11 @@ export async function HowItWorksSection({ locale, direction }: HowItWorksSection
           <div className="mx-auto mt-16 max-w-7xl">
             <div className="grid grid-cols-1 gap-y-20 lg:grid-cols-3 lg:gap-x-12">
               {steps.map((step, index) => (
-                <div key={step.id} className="flex flex-col items-center lg:items-start">
+                <div key={`${step?.id}_${index}`} className="flex flex-col items-center lg:items-start">
                   {/* Step number with glowing effect */}
                   <div className="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-600 shadow-indigo-500/50 shadow-lg">
                     <span className="text-xl font-bold text-white">{step.id}</span>
                   </div>
-                  
                   
                   {/* Image */}
                   <div className="mt-6 rounded-2xl bg-gray-50 border border-gray-100 shadow-inner overflow-hidden w-full max-w-md">

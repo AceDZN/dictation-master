@@ -4,7 +4,6 @@ import { getLocale } from 'next-intl/server'
 import { Metadata } from 'next'
 import { DictationGame } from '@/lib/types'
 import { WriterGameClient } from '@/components/dictation/WriterGameClient'
-import { incrementPlayCount } from '../helpers'
 
 interface WriterGamePageProps {
   params: Promise<{ id: string }>

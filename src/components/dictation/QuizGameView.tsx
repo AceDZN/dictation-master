@@ -6,7 +6,7 @@ import Realistic from 'react-canvas-confetti/dist/presets/realistic'
 import { useAnimate } from 'motion/react'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 import { useTranslations } from 'next-intl'
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
+
 import { Button } from '@/components/ui/button'
 import { GameOverView } from './GameOverView'
 import { GameHeader, GameHeaderRef } from './GameHeader'

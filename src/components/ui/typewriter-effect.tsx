@@ -10,7 +10,7 @@ interface TypewriterEffectProps {
 export function TypewriterEffect({ text, delay = 60 }: TypewriterEffectProps) {
   const [displayText, setDisplayText] = useState('')
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [isDone, setIsDone] = useState(false)
+  //const [isDone, setIsDone] = useState(false)
 
   useEffect(() => {
     if (currentIndex < text.length) {
@@ -20,9 +20,9 @@ export function TypewriterEffect({ text, delay = 60 }: TypewriterEffectProps) {
       }, delay)
       
       return () => clearTimeout(timeout)
-    } else {
+    } /*else {
       setIsDone(true)
-    }
+    }*/
   }, [currentIndex, delay, text])
 
   return (

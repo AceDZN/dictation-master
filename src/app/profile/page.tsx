@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { PencilIcon, RocketLaunchIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline'
 import { getTranslations } from 'next-intl/server'
-import { BackgroundGradient } from '@/components/ui/background-gradient'
 
 export default async function ProfilePage() {
   const session = await auth()

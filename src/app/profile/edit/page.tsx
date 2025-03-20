@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import ProfileForm from "../ProfileForm"
 import { getTranslations } from 'next-intl/server'
-import { BackgroundGradient } from '@/components/ui/background-gradient'
+
 
 interface ProfileEditPageProps {
   searchParams: Promise<Record<string, string | string[]>>

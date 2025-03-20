@@ -8,11 +8,8 @@ import {
   BookOpenIcon
 } from '@heroicons/react/24/outline'
 
-interface FeaturesSectionProps {
-  locale: string
-}
 
-export async function FeaturesSection({ locale }: FeaturesSectionProps) {
+export async function FeaturesSection() {
   const t = await getTranslations('Features')
 
   const features = [
