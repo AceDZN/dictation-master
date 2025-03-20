@@ -19,26 +19,12 @@ export function GameContainer({ game }: GameContainerProps) {
   const [hideExampleSentences, setHideExampleSentences] = useState(true)
   const t = useTranslations('Dictation.game')
 
-  const incrementPlayCount = async () => {
-    try {
-      const response = await fetch(`/api/dictation/play/${game.id}`, {
-        method: 'POST',
-      })
-      if (!response.ok) {
-        console.error('Failed to increment play count')
-      }
-    } catch (error) {
-      console.error('Error incrementing play count:', error)
-    }
-  }
 
   const handleWriterGameStart = () => {
-    incrementPlayCount()
     router.push(`/dictation/play/${game.id}/writer-game?hideExamples=${hideExampleSentences.toString()}`)
   }
 
   const handleQuizGameStart = () => {
-    incrementPlayCount()
     router.push(`/dictation/play/${game.id}/quiz-game?hideExamples=${hideExampleSentences.toString()}`)
   }
 
@@ -53,7 +39,7 @@ export function GameContainer({ game }: GameContainerProps) {
                 variant="ghost" 
                 size="icon" 
                 onClick={() => setHideExampleSentences(prev => !prev)}
-                aria-label={hideExampleSentences ? t('showExamples') : t('hideExamples')}
+                ariaLabel={hideExampleSentences ? t('showExamples') : t('hideExamples')}
               >
                 {hideExampleSentences ? (
                   <EyeIcon className="h-5 w-5" />

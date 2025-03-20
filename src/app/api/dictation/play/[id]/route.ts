@@ -71,7 +71,7 @@ export async function GET(
       ])
       
       //console.log('sourceResult', {sourceWords, gameData.sourceLanguage, sourceResult})
-      console.log('targetResult', {targetWords, targetLanguage:gameData.targetLanguage, targetResult})
+      //console.log('targetResult', {targetWords, targetLanguage:gameData.targetLanguage, targetResult})
       
       // Initialize empty URL objects in case of failures
       const sourceAudioUrls: Record<string, string> = {}

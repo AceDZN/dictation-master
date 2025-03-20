@@ -3,7 +3,61 @@
     "title": "Master Languages Through Interactive Dictation",
     "description": "Create personalized dictation games to enhance vocabulary learning across multiple languages. Perfect for educators and language learners.",
     "createGame": "Create Your First Game",
-    "learnMore": "Learn more"
+    "learnMore": "Learn more",
+    "hero": {
+      "card1": "Learn",
+      "card2": "Practice",
+      "card3": "Master",
+      "card4": "Enjoy"
+    },
+    "newVersionAvailable": "New Version Available"
+  },
+  "Features": {
+    "sectionTitle": "Powerful Features",
+    "sectionSubtitle": "Designed for Effective Language Learning",
+    "sectionDescription": "Our platform offers a comprehensive set of tools to make language learning engaging, personalized, and effective.",
+    "smartLearning": {
+      "title": "Smart Learning",
+      "description": "Our AI-powered system adapts to your learning style and progress, ensuring optimal retention and advancement."
+    },
+    "multilingualSupport": {
+      "title": "Multilingual Support",
+      "description": "Learn and practice in over 12 languages with native speaker pronunciations and cultural nuances."
+    },
+    "progressTracking": {
+      "title": "Progress Tracking",
+      "description": "Monitor your improvement with detailed statistics and analytics on your learning journey."
+    },
+    "audioRecognition": {
+      "title": "Audio Recognition",
+      "description": "Practice speaking and listening with our advanced speech recognition technology."
+    },
+    "multiplayerMode": {
+      "title": "Multiplayer Mode",
+      "description": "Compete with friends or join language learning communities to enhance motivation."
+    },
+    "vocabularyBuilding": {
+      "title": "Vocabulary Building",
+      "description": "Expand your vocabulary with context-based learning and spaced repetition techniques."
+    }
+  },
+  "HowItWorks": {
+    "sectionTitle": "Easy to Get Started",
+    "sectionSubtitle": "Three Simple Steps to Language Mastery",
+    "sectionDescription": "Our platform makes it easy to create, practice, and master language skills through interactive dictation games.",
+    "imagePlaceholder": "Image coming soon",
+    "step1": {
+      "title": "Create Your Dictation Game",
+      "description": "Set up a personalized dictation game by selecting languages and adding word pairs with example sentences."
+    },
+    "step2": {
+      "title": "Add Words and Phrases",
+      "description": "Build your vocabulary list manually or use our AI-powered tools to generate content from texts or images."
+    },
+    "step3": {
+      "title": "Play and Practice",
+      "description": "Start playing in writing or quiz mode to practice and reinforce your language skills."
+    }
   },
   "LatestGames": {
     "title": "Latest Dictation Games",
@@ -25,9 +79,14 @@
     "saving": "Saving...",
     "updateSuccess": "Profile updated successfully!",
     "updateError": "Failed to update profile",
-    "imageSizeError": "Image size should be less than 5MB"
+    "imageSizeError": "Image size should be less than 5MB",
+    "recommendedImageSize": "Recommended image size: 320x320px",
+    "personalInfo": "Personal Information",
+    "email": "Email",
+    "gamesCreated": "Games Created"
   },
   "Language": {
+    "language": "Language",
     "select": "Select Language",
     "en": "English",
     "he": "Hebrew",
@@ -50,7 +109,8 @@
     "signIn": "Sign in",
     "signOut": "Sign out",
     "profile": "Profile",
-    "appName": "Dictation Masters"
+    "appName": "Dictation Masters",
+    "logoLabel": "Dictation Masters Logo"
   },
   "Dictation": {
     "create": {

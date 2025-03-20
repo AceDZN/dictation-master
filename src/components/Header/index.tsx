@@ -104,7 +104,7 @@ export function Header() {
         <Link href="/" className="flex items-center">
           <Image
             src="/logo.svg"
-            alt={t('appName')}
+            alt={t('logoLabel')}
             width={32}
             height={32}
             className="h-8 w-auto"

@@ -64,7 +64,7 @@ async function getOrCreateTTS(word: string): Promise<string> {
           word
         }
       })
-      console.log('file saved')
+      //console.log('file saved')
       
       // Get signed URL with extended expiration time
       const [url] = await file.getSignedUrl({

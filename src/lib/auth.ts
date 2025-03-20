@@ -112,7 +112,7 @@ export const {
 
       // Handle updates to the session
       if (trigger === "update" && session?.user) {
-        console.log('Updating token with:', session.user)
+        //console.log('Updating token with:', session.user)
         token.name = session.user.name
         token.picture = session.user.image
       }

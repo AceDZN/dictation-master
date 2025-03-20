@@ -26,7 +26,7 @@ export function AdBlockDetector() {
 				testAd.remove()
 			} catch (error) {
 				setIsBlocked(true)
-                console.log('error occured in adblock detector',error)
+                console.warn('error occured in adblock detector',error)
 			}
 		}
 

@@ -22,7 +22,7 @@ export function LanguageSelector() {
 
   return (
     <Select onValueChange={handleLanguageChange}>
-      <SelectTrigger className="w-12 text-center p-0">
+      <SelectTrigger className="w-12 text-center p-0" aria-label={t('language')} placeholder={t('language')} text={t('language')}>
         <Globe className="h-4 w-full" />
         
       </SelectTrigger>
