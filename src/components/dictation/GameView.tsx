@@ -44,6 +44,9 @@ export function GameView({
   hideExampleSentences = false,
   onToggleExampleSentences
 }: GameViewProps) {
+  if (!game.id) {
+    throw new Error('Game ID is required')
+  }
   const t = useTranslations('Dictation.game')
   // Randomize word pairs on initial load
   const randomizedWordPairs = useMemo(() => {
@@ -310,6 +313,7 @@ export function GameView({
   if (gameState.isGameOver) {
     return (
       <GameOverView 
+        gameId={game.id}
         stars={gameState.stars}
         hearts={gameState.hearts}
         totalTime={gameState.totalTime}

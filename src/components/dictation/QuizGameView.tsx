@@ -48,6 +48,9 @@ export function QuizGameView({
   onToggleExampleSentences
 }: QuizGameViewProps) {
   const t = useTranslations('Dictation.game')
+  if (!game.id) {
+    throw new Error('Game ID is required')
+  }
   
   // Randomize word pairs on initial load
   const randomizedWordPairs = useMemo(() => {
@@ -423,6 +426,7 @@ export function QuizGameView({
   if (gameState.isGameOver) {
     return (
       <GameOverView
+        gameId={game.id}
         stars={gameState.stars}
         hearts={gameState.hearts}
         totalTime={gameState.totalTime}
@@ -439,7 +443,28 @@ export function QuizGameView({
   const progress = Math.round((gameState.currentWordIndex / game.wordPairs.length) * 100)
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[70vh] w-full max-w-2xl mx-auto">
+    <div className="max-w-3xl mx-auto p-6 min-h-[70vh]">
+      <Realistic onInit={handleConfettiInit} />
+      <h1 className="text-md mb-12 text-center text-gray-300 relative">
+        {game.title}
+
+        {/* Example Sentences Toggle */}
+        {onToggleExampleSentences && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onToggleExampleSentences}
+            className="absolute right-0 top-1/2 -translate-y-1/2"
+            title={hideExampleSentences ? t('showExamples') : t('hideExamples')}
+          >
+            {hideExampleSentences ? (
+              <EyeSlashIcon className="h-5 w-5" />
+            ) : (
+              <EyeIcon className="h-5 w-5" />
+            )}
+          </Button>
+        )}
+      </h1>
       <GameHeader
         ref={gameHeaderRef}
         hearts={gameState.hearts}
@@ -448,73 +473,46 @@ export function QuizGameView({
         progress={progress}
         formatTime={formatTime}
       />
-      
-      <div className="mb-8 text-center">
-        <div className="text-6xl font-bold mb-12 text-indigo-600">
-          {currentWord.first}
+      <div className="max-w-3xl mx-auto p-6">
+        <div className="flex flex-col items-center justify-center w-full mx-auto">
+          
+          <div className="mb-8 text-center">
+            <div className="text-6xl font-bold mb-12 text-indigo-600">
+              {currentWord.first}
+            </div>
+          </div>
+          
+          <div className="w-full space-y-4 mb-8 flex flex-col items-center justify-center">
+            {quizOptions.map((option, index) => (
+              <Button
+                key={index}
+                className={`w-full text-center justify-center text-2xl bold py-6 ${
+                  // If an option is selected, show it as green if correct, red if incorrect
+                  gameState.selectedOption === index
+                    ? option.isCorrect 
+                      ? 'bg-green-100 hover:bg-green-200 text-green-800 border-green-500'
+                      : 'bg-red-100 hover:bg-red-200 text-red-800 border-red-500'
+                    // If showing correct answer (after second mistake), highlight all options accordingly
+                    : showCorrectAnswer
+                      ? option.isCorrect
+                        ? 'bg-green-100 hover:bg-green-200 text-green-800 border-green-500'
+                        : 'bg-red-100 hover:bg-red-200 text-red-800 border-red-500'
+                      // Default styling for unselected options
+                      : 'bg-white hover:bg-gray-50 text-gray-800 border-gray-300'
+                } border-2`}
+                variant="outline"
+                disabled={gameState.selectedOption !== null || showCorrectAnswer}
+                onClick={() => handleOptionSelect(index)}
+              >
+                {option.value}
+              </Button>
+            ))}
+          </div>
+          <div className={`example-sentence text-xl text-gray-600 mt-20 transition-opacity duration-300 ${hideExampleSentences ? 'opacity-0' : 'opacity-100'}`}>
+            {getCurrentWord().sentence}
+          </div>
         </div>
-        
-        
-        {currentWord.sentence && !hideExampleSentences && (
-          <div className="mt-2 text-gray-600 italic text-sm p-2 bg-gray-50 rounded-md">
-            {currentWord.sentence}
-          </div>
-        )}
-        
-        {currentWord.sentence && (
-          <div className="mt-2">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={onToggleExampleSentences}
-                  >
-                    {hideExampleSentences ? (
-                      <><EyeIcon className="h-4 w-4 mr-2" /> {t('showExamples')}</>
-                    ) : (
-                      <><EyeSlashIcon className="h-4 w-4 mr-2" /> {t('hideExamples')}</>
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {hideExampleSentences ? t('showExamples') : t('hideExamples')}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        )}
       </div>
-      
-      <div className="w-full space-y-4 mb-8 flex flex-col items-center justify-center">
-        {quizOptions.map((option, index) => (
-          <Button
-            key={index}
-            className={`w-full text-left justify-start text-2xl bold py-6 ${
-              // If an option is selected, show it as green if correct, red if incorrect
-              gameState.selectedOption === index
-                ? option.isCorrect 
-                  ? 'bg-green-100 hover:bg-green-200 text-green-800 border-green-500'
-                  : 'bg-red-100 hover:bg-red-200 text-red-800 border-red-500'
-                // If showing correct answer (after second mistake), highlight all options accordingly
-                : showCorrectAnswer
-                  ? option.isCorrect
-                    ? 'bg-green-100 hover:bg-green-200 text-green-800 border-green-500'
-                    : 'bg-red-100 hover:bg-red-200 text-red-800 border-red-500'
-                  // Default styling for unselected options
-                  : 'bg-white hover:bg-gray-50 text-gray-800 border-gray-300'
-            } border-2`}
-            variant="outline"
-            disabled={gameState.selectedOption !== null || showCorrectAnswer}
-            onClick={() => handleOptionSelect(index)}
-          >
-            {option.value}
-          </Button>
-        ))}
-      </div>
-      
-      <Realistic onInit={handleConfettiInit} />
     </div>
   )
 } 

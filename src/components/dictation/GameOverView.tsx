@@ -1,9 +1,12 @@
 'use client'
 
+import { incrementPlayCount } from '@/app/dictation/play/[id]/helpers'
 import { ClockIcon } from '@heroicons/react/24/outline'
 import { useTranslations } from 'next-intl'
+import { useEffect } from 'react'
 
 interface GameOverViewProps {
+  gameId: string
   stars: number
   hearts?: number
   totalTime: number
@@ -19,6 +22,7 @@ interface GameOverViewProps {
  * Shows star rating, hearts remaining, time spent, and score
  */
 export function GameOverView({
+  gameId,
   stars,
   hearts = 0,
   totalTime,
@@ -35,6 +39,10 @@ export function GameOverView({
     const remainingSeconds = seconds % 60
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
   }
+  useEffect(() => {
+    if (!gameId) return
+    incrementPlayCount(gameId)
+  }, [])
 
   return (
     <div className="max-w-md mx-auto text-center p-8 bg-white rounded-xl shadow-2xl">

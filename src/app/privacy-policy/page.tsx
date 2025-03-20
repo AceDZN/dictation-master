@@ -29,11 +29,11 @@ export default function PrivacyPolicy() {
 
 				<section>
 					<h2 className="text-2xl font-semibold mb-4">Advertising</h2>
-					<p className="text-gray-700 dark:text-gray-300">
+					{/*<p className="text-gray-700 dark:text-gray-300">
 						{`We use Google AdSense on our website. Google AdSense may use cookies
 						and data to serve personalized ads. This is the only third-party service
 						that may collect any information on our website.`}
-					</p>
+					</p>*/}
 					<p className="text-gray-700 dark:text-gray-300 mt-2">
 						{`You can learn more about how Google uses data when you use our site by
 						visiting `}<a

@@ -34,7 +34,7 @@ export async function extractWordPairsFromImage(
   const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '')
   
   const imagePrompt = `Extract word pairs from image. For each: 'first' in ${firstLanguage}, 'second' in ${secondLanguage}, ${secondLanguage} 'sentence' using word, 'imagePrompt' (always in English) for visualization. Use exact words if present. Only translate if no translation found. Include multiple ${firstLanguage} words if given for one ${secondLanguage} word. make sure to use the words exactly as they appear in the image. Return JSON array. double check that you have all the words, no matter how much words are in the image. If you are not sure, Check the image again. if there are words only in one of the specified languages, make sure to use and TRANSLATE the words to the other language. Also, add a relevant title and interesting description, both in ${firstLanguage}, related to the topic of the words, cool, and SEO friendly.`
-  console.log('extractWordPairsFromImage',{ firstLanguage, secondLanguage, imagePrompt })
+  //console.log('extractWordPairsFromImage',{ firstLanguage, secondLanguage, imagePrompt })
   const response = await openai.chat.completions.create({
     model: 'gpt-4o-2024-08-06',
     response_format: zodResponseFormat(WordPairsList, 'word_pairs'),

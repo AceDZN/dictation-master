@@ -4,6 +4,7 @@ import { getLocale } from 'next-intl/server'
 import { Metadata } from 'next'
 import { DictationGame } from '@/lib/types'
 import { WriterGameClient } from '@/components/dictation/WriterGameClient'
+import { incrementPlayCount } from '../helpers'
 
 interface WriterGamePageProps {
   params: Promise<{ id: string }>
@@ -41,17 +42,26 @@ export default async function WriterGamePage({ params }: WriterGamePageProps) {
   
   try {
     const game = await getGame(dictationId)
-
     return (
-      <div className="container mx-auto px-4 py-8">
-        <WriterGameClient game={game} />
+      <div className="container mx-auto relative z-10">
+        <div className="mx-auto max-w-6xl relative">
+          <div className="bg-white rounded-2xl shadow-xl p-8 mb-12 border border-gray-100 relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+            <WriterGameClient game={game} />
+
+          </div>
+        </div>
       </div>
     )
   } catch (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
-          {error instanceof Error ? error.message : 'Failed to load game'}
+      <div className="container mx-auto relative z-10">
+        <div className="mx-auto max-w-6xl relative">
+          <div className="bg-white rounded-2xl shadow-xl p-8 mb-12 border border-gray-100 relative overflow-hidden">
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
+              {error instanceof Error ? error.message : 'Failed to load game'}
+            </div>
+          </div>
         </div>
       </div>
     )

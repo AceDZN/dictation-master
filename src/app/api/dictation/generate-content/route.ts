@@ -35,7 +35,7 @@ const RequestSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    console.log('body', body)
+    //console.log('body', body)
     const { sourceLanguage='Hebrew', targetLanguage='English', wordPairs=[], title='NO TITLE', description='NO DESCRIPTION' } = RequestSchema.parse(body)
 
     const prompt = `Given these word pairs between ${sourceLanguage} and ${targetLanguage}, please:
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     })
 
     const content = response.choices[0].message.content
-    console.log('content', content)
+    //console.log('content', content)
     if (!content) {
       throw new Error('No content in the response')
     }

@@ -21,7 +21,7 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
-  swcMinify: true,
+  //swcMinify: true,
   output: 'standalone',
   experimental: {
     optimizeCss: true,
