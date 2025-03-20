@@ -1,18 +1,26 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, ReactNode } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { DictationGame } from '@/lib/types'
-import { GameView } from '@/components/dictation/GameView'
 import { Button } from '@/components/ui/button'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 import { useTranslations } from 'next-intl'
 
-interface WriterGameClientProps {
+interface GameViewProps {
   game: DictationGame
+  onGameEnd: () => void
+  hideExampleSentences: boolean
+  onToggleExampleSentences: () => void
 }
 
-export function WriterGameClient({ game }: WriterGameClientProps) {
+interface GameClientProps {
+  game: DictationGame
+  view: React.ComponentType<GameViewProps>
+  onGameEnd?: () => void
+}
+
+export function GameClient({ game, view: View, onGameEnd }: GameClientProps) {
   const searchParams = useSearchParams()
   const hideExamplesParam = searchParams.get('hideExamples')
   const [hideExampleSentences, setHideExampleSentences] = useState(
@@ -33,11 +41,19 @@ export function WriterGameClient({ game }: WriterGameClientProps) {
   }, [showBackButton])
 
   const handleGameEnd = () => {
-    router.push(`/dictation/play/${game.id}`)
+    if (onGameEnd) {
+      onGameEnd()
+    } else {
+      router.push(`/dictation/play/${game.id}`)
+    }
   }
 
   const handleBackClick = () => {
     router.back()
+  }
+
+  const handleToggleExampleSentences = () => {
+    setHideExampleSentences(prev => !prev)
   }
 
   return (
@@ -55,11 +71,11 @@ export function WriterGameClient({ game }: WriterGameClientProps) {
           </Button>
         </div>
       )}
-      <GameView 
-        game={game} 
-        onGameEnd={handleGameEnd} 
+      <View
+        game={game}
+        onGameEnd={handleGameEnd}
         hideExampleSentences={hideExampleSentences}
-        onToggleExampleSentences={() => setHideExampleSentences(prev => !prev)}
+        onToggleExampleSentences={handleToggleExampleSentences}
       />
     </div>
   )

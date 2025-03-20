@@ -2,7 +2,8 @@ import { Metadata } from 'next'
 import { getLocale } from 'next-intl/server'
 import { getGame } from '@/lib/game'
 import { generateMetadata as generateSiteMetadata } from '@/lib/metadata'
-import { QuizGameClient } from '@/components/dictation/QuizGameClient'
+import { GameClient } from '@/components/dictation/GameClient'
+import { QuizGameView } from '@/components/dictation/QuizGameView'
 import { DictationGame } from '@/lib/types'
 
 interface QuizGamePageProps {
@@ -48,7 +49,10 @@ export default async function QuizGamePage({ params }: QuizGamePageProps) {
         <div className="mx-auto max-w-6xl relative">
           <div className="bg-white rounded-2xl shadow-xl p-8 mb-12 border border-gray-100 relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
-            <QuizGameClient game={game} />
+            <GameClient 
+              game={game} 
+              view={QuizGameView} 
+            />
           </div>
         </div>
       </div>

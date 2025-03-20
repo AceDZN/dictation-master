@@ -38,7 +38,7 @@ interface GameState {
   score: number
 }
 
-export function GameView({ 
+export function WriterGameView({ 
   game, 
   onGameEnd,
   hideExampleSentences = false,
