@@ -12,8 +12,8 @@ interface WriterGamePageProps {
 
 const getPlayDescription = async (locale: string, game: DictationGame) => {
   const locales = {
-    en: `Practice your ${game.targetLanguage} skills with this archery exercise: ${game.description}`,
-    he: `תרגל את כישורי ה-${game.targetLanguage} שלך עם החץ וקשת: ${game.description}`
+    en: `Practice your ${game.targetLanguage} skills with this dictation exercise: ${game.description}`,
+    he: `תרגל את כישורי ה-${game.targetLanguage} שלך עם תרגיל ההכתבה הזה: ${game.description}`
   }
   return locales[locale as keyof typeof locales] as string
 }
