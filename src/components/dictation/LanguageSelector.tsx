@@ -54,7 +54,7 @@ export function LanguageSelector({
         onValueChange={onChange}
         disabled={disabled}
       >
-        <SelectTrigger id={id} ariaLabel={label} placeholder={label} text={label}>
+        <SelectTrigger id={id} label={label} placeholder={label} text={label}>
           <SelectValue>{t(`languages.${value}`)}</SelectValue>
         </SelectTrigger>
         <SelectContent>

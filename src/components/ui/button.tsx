@@ -38,7 +38,7 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean
-  ariaLabel?: string
+  label?: string
   placeholder?: string
   text?: string
 }
@@ -48,7 +48,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? Slot : "button"
     return (
       <Comp
-        aria-label={props.ariaLabel || props.placeholder || props.text}
+        aria-label={props.label || props.placeholder || props.text}
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...props}
