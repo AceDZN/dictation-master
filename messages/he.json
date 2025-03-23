@@ -159,8 +159,10 @@
       "startGame": "התחל משחק",
       "startWriterGame": "מצב כתיבה",
       "startQuizGame": "מצב חידון",
+      "startArcheryGame": "חץ למטרה",
       "writerGameDescription": "הקלד את התרגומים לכל מילה",
       "quizGameDescription": "בחר את התרגום הנכון מבין האפשרויות",
+      "archeryGameDescription": "פגע במטרה הנכונה",
       "translate": "תרגם",
       "gameOver": "המשחק נגמר!",
       "playAgain": "שחק שוב",
@@ -175,7 +177,9 @@
       "back": "חזרה",
       "playAudio": "נגן שמע",
       "retryAudio": "נסה שוב",
-      "loading": "טוען..."
+      "loading": "טוען...",
+      "instructions": "הוראות",
+      "clickDragInstructions": "לחצו וגררו את המילה למקום הנכון"
     },
     "card": {
       "edit": "ערוך",

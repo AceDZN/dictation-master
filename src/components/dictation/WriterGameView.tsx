@@ -68,6 +68,7 @@ export function WriterGameView({
     isStarted: false,
     score: 0
   })
+  const gameContainerRef = useRef<HTMLDivElement>(null)
   const [input, setInput] = useState('')
   const [inputStatus, setInputStatus] = useState<'default' | 'correct' | 'incorrect'>('default')
   const [hasInputChanged, setHasInputChanged] = useState(false)
@@ -362,7 +363,7 @@ export function WriterGameView({
       />
 
       <div className="text-center mb-12 w-full min-h-[50vh] flex flex-col justify-center items-center">
-        <div className="flex flex-col justify-center items-center h-auto">
+        <div className="flex flex-col justify-center items-center h-auto" ref={gameContainerRef}>
           <div className="text-6xl font-bold mb-12 text-indigo-600">
             {getCurrentWord().first}
           </div>

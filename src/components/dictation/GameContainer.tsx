@@ -28,6 +28,10 @@ export function GameContainer({ game }: GameContainerProps) {
     router.push(`/dictation/play/${game.id}/quiz-game?hideExamples=${hideExampleSentences.toString()}`)
   }
 
+  const handleArcheryGameStart = () => {
+    router.push(`/dictation/play/${game.id}/archery-game?hideExamples=${hideExampleSentences.toString()}`)
+  }
+
   return (
     <div className="max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold mb-8 text-center">{game.title}</h1>
@@ -94,6 +98,23 @@ export function GameContainer({ game }: GameContainerProps) {
             </TooltipTrigger>
             <TooltipContent>
               {t('quizGameDescription')}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                size="lg"
+                onClick={handleArcheryGameStart}
+                className="px-8 flex items-center"
+              >
+                <PencilIcon className="w-5 h-5 mr-2" />
+                {t('startArcheryGame')}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {t('archeryGameDescription')}
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
