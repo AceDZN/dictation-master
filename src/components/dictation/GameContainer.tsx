@@ -6,9 +6,9 @@ import { DictationGame } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { WordPairDisplay } from '@/components/dictation/WordPairDisplay'
 import { useTranslations } from 'next-intl'
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
+import { BoltIcon, EyeIcon, EyeSlashIcon,PencilIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline'
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
-import { PencilIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline'
+
 
 interface GameContainerProps {
   game: DictationGame
@@ -28,6 +28,10 @@ export function GameContainer({ game }: GameContainerProps) {
     router.push(`/dictation/play/${game.id}/quiz-game?hideExamples=${hideExampleSentences.toString()}`)
   }
 
+  const handleArcheryGameStart = () => {
+    router.push(`/dictation/play/${game.id}/archery-game?hideExamples=${hideExampleSentences.toString()}`)
+  }
+
   return (
     <div className="max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold mb-8 text-center">{game.title}</h1>
@@ -39,7 +43,7 @@ export function GameContainer({ game }: GameContainerProps) {
                 variant="ghost" 
                 size="icon" 
                 onClick={() => setHideExampleSentences(prev => !prev)}
-                ariaLabel={hideExampleSentences ? t('showExamples') : t('hideExamples')}
+                label={hideExampleSentences ? t('showExamples') : t('hideExamples')}
               >
                 {hideExampleSentences ? (
                   <EyeIcon className="h-5 w-5" />
@@ -60,7 +64,7 @@ export function GameContainer({ game }: GameContainerProps) {
         sourceLanguage={game.sourceLanguage}
         targetLanguage={game.targetLanguage}
       />
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 max-w-md mx-auto">
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-full mx-auto">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -86,7 +90,7 @@ export function GameContainer({ game }: GameContainerProps) {
                 size="lg"
                 onClick={handleQuizGameStart}
                 className="px-8 flex items-center"
-                variant="secondary"
+                
               >
                 <QuestionMarkCircleIcon className="w-5 h-5 mr-2" />
                 {t('startQuizGame')}
@@ -94,6 +98,24 @@ export function GameContainer({ game }: GameContainerProps) {
             </TooltipTrigger>
             <TooltipContent>
               {t('quizGameDescription')}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                size="lg"
+                onClick={handleArcheryGameStart}
+                className="px-8 flex items-center"
+                
+              >
+                <BoltIcon className="w-5 h-5 mr-2" />
+                {t('startArcheryGame')}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {t('archeryGameDescription')}
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

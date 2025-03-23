@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translation Archery</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #87CEEB; /* Light sky blue as fallback */
+        }
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+        }
+        #ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 24px;
+            text-shadow: 1px 1px 2px black;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="ui">
+            <div id="lives"></div>
+        </div>
+        <canvas id="game-canvas"></canvas>
+    </div>
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Game Configuration
+        const gameConfig = {
+            userId: "123",
+            title: "Translation Archery",
+            sourceLanguage: "English",
+            targetLanguage: "Spanish",
+            wordPairs: [
+                { first: "House", second: "Casa" },
+                { first: "Dog", second: "Perro" },
+                { first: "Book", second: "Libro" },
+                { first: "Car", second: "Coche" },
+                { first: "Apple", second: "Manzana" }
+            ],
+            quizParameters: {
+                globalTimeLimit: 300,
+                globalLivesLimit: 3,
+                activityTimeLimit: 60,
+                quizModeEnabled: true
+            }
+        };
+
+        // Scene Setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 1.6, 0); // Player eye height
+
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('game-canvas'), antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0x404040, 1);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 10, 7.5);
+        scene.add(directionalLight);
+
+        // Ground
+        const groundGeometry = new THREE.PlaneGeometry(100, 100);
+        const groundMaterial = new THREE.MeshLambertMaterial({ color: 0x228B22 }); // Forest green
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        scene.add(ground);
+
+        // Sky
+        const skyGeometry = new THREE.SphereGeometry(50, 32, 32);
+        const skyMaterial = new THREE.MeshBasicMaterial({ color: 0x87CEEB, side: THREE.BackSide });
+        const sky = new THREE.Mesh(skyGeometry, skyMaterial);
+        scene.add(sky);
+
+        // Target Texture
+        function createTargetTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, 256, 256);
+            const centerX = 128;
+            const centerY = 128;
+            const radii = [100, 75, 50, 25];
+            const colors = ['red', 'blue', 'yellow', 'black'];
+            radii.forEach((radius, index) => {
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                ctx.fillStyle = colors[index];
+                ctx.fill();
+            });
+            return new THREE.CanvasTexture(canvas);
+        }
+        const targetTexture = createTargetTexture();
+        const targetGeometry = new THREE.CylinderGeometry(1, 1, 0.1, 32);
+        const targetMaterial = new THREE.MeshLambertMaterial({ map: targetTexture });
+
+        // Word Texture for Banners
+        function createWordTexture(word) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, 256, 128);
+            ctx.fillStyle = 'black';
+            ctx.font = 'bold 48px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(word, 128, 64);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        // Targets and Banners
+        const targetPositions = [-6, -2, 2, 6];
+        const targetsData = targetPositions.map((x, i) => {
+            const target = new THREE.Mesh(targetGeometry, targetMaterial);
+            target.userData.index = i;
+            target.position.set(x, 1, -10);
+            target.rotation.x = Math.PI / 2;
+            scene.add(target);
+            const bannerGeometry = new THREE.PlaneGeometry(2, 1);
+            const bannerMaterial = new THREE.MeshBasicMaterial({ map: createWordTexture(''), transparent: true });
+            const banner = new THREE.Mesh(bannerGeometry, bannerMaterial);
+            banner.position.set(x, 2.5, -10);
+            banner.rotation.y = Math.PI;
+            scene.add(banner);
+            return { target, banner, word: '' };
+        });
+
+        // Bow
+        const bowGeometry = new THREE.CylinderGeometry(0.05, 0.05, 1, 32);
+        const bowMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
+        const bow = new THREE.Mesh(bowGeometry, bowMaterial);
+        bow.position.set(0.5, -0.5, -0.5);
+        bow.rotation.z = Math.PI / 2;
+        camera.add(bow);
+        scene.add(camera);
+
+        // Arrow
+        const arrowShaftGeometry = new THREE.CylinderGeometry(0.02, 0.02, 1, 8);
+        const arrowShaftMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
+        const arrowShaft = new THREE.Mesh(arrowShaftGeometry, arrowShaftMaterial);
+        const arrowTipGeometry = new THREE.ConeGeometry(0.05, 0.2, 8);
+        const arrowTipMaterial = new THREE.MeshLambertMaterial({ color: 0x808080 });
+        const arrowTip = new THREE.Mesh(arrowTipGeometry, arrowTipMaterial);
+        arrowTip.position.set(0, 0.5, 0);
+        const arrow = new THREE.Group();
+        arrow.add(arrowShaft);
+        arrow.add(arrowTip);
+
+        // Trajectory Line
+        const trajectoryMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 });
+        const trajectoryPoints = [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -10)];
+        const trajectoryGeometry = new THREE.BufferGeometry().setFromPoints(trajectoryPoints);
+        const trajectoryLine = new THREE.Line(trajectoryGeometry, trajectoryMaterial);
+        scene.add(trajectoryLine);
+        trajectoryLine.visible = false;
+
+        // Source Word Display
+        const sourceWordCanvas = document.createElement('canvas');
+        sourceWordCanvas.width = 512;
+        sourceWordCanvas.height = 128;
+        const sourceWordCtx = sourceWordCanvas.getContext('2d');
+        sourceWordCtx.fillStyle = 'white';
+        sourceWordCtx.fillRect(0, 0, 512, 128);
+        sourceWordCtx.fillStyle = 'black';
+        sourceWordCtx.font = 'bold 64px Arial';
+        sourceWordCtx.textAlign = 'center';
+        sourceWordCtx.textBaseline = 'middle';
+        function updateSourceWord(word) {
+            sourceWordCtx.clearRect(0, 0, 512, 128);
+            sourceWordCtx.fillStyle = 'white';
+            sourceWordCtx.fillRect(0, 0, 512, 128);
+            sourceWordCtx.fillStyle = 'black';
+            sourceWordCtx.fillText(word, 256, 64);
+            sourceWordTexture.needsUpdate = true;
+        }
+        const sourceWordTexture = new THREE.CanvasTexture(sourceWordCanvas);
+        const sourceWordMaterial = new THREE.MeshBasicMaterial({ map: sourceWordTexture, transparent: true });
+        const sourceWordGeometry = new THREE.PlaneGeometry(2, 0.5);
+        const sourceWordPlane = new THREE.Mesh(sourceWordGeometry, sourceWordMaterial);
+        sourceWordPlane.position.set(0, 0.5, -1);
+        camera.add(sourceWordPlane);
+
+        // Game State
+        let isAiming = false;
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+        const sensitivity = 0.005;
+        let lives = gameConfig.quizParameters.globalLivesLimit;
+        let currentDistance = 10;
+        let correctWord = '';
+
+        document.getElementById('lives').textContent = `Lives: ${lives}`;
+
+        // Raycaster
+        const raycaster = new THREE.Raycaster();
+
+        // Event Handlers
+        function onMouseDown(event) {
+            isAiming = true;
+            lastMouseX = event.clientX;
+            lastMouseY = event.clientY;
+        }
+
+        function onMouseMove(event) {
+            if (isAiming) {
+                const deltaX = event.clientX - lastMouseX;
+                const deltaY = event.clientY - lastMouseY;
+                lastMouseX = event.clientX;
+                lastMouseY = event.clientY;
+                bow.rotation.y -= deltaX * sensitivity;
+                bow.rotation.x -= deltaY * sensitivity;
+                bow.rotation.x = Math.max(-Math.PI / 4, Math.min(Math.PI / 4, bow.rotation.x));
+                bow.rotation.y = Math.max(-Math.PI / 4, Math.min(Math.PI / 4, bow.rotation.y));
+            }
+        }
+
+        function onMouseUp(event) {
+            if (isAiming) {
+                isAiming = false;
+                shootArrow();
+            }
+        }
+
+        document.addEventListener('mousedown', onMouseDown);
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+
+        // Touch Events for Mobile
+        function onTouchStart(event) {
+            if (event.touches.length === 1) {
+                isAiming = true;
+                lastMouseX = event.touches[0].clientX;
+                lastMouseY = event.touches[0].clientY;
+            }
+        }
+
+        function onTouchMove(event) {
+            if (isAiming && event.touches.length === 1) {
+                const deltaX = event.touches[0].clientX - lastMouseX;
+                const deltaY = event.touches[0].clientY - lastMouseY;
+                lastMouseX = event.touches[0].clientX;
+                lastMouseY = event.touches[0].clientY;
+                bow.rotation.y -= deltaX * sensitivity;
+                bow.rotation.x -= deltaY * sensitivity;
+                bow.rotation.x = Math.max(-Math.PI / 4, Math.min(Math.PI / 4, bow.rotation.x));
+                bow.rotation.y = Math.max(-Math.PI / 4, Math.min(Math.PI / 4, bow.rotation.y));
+            }
+        }
+
+        function onTouchEnd(event) {
+            if (isAiming) {
+                isAiming = false;
+                shootArrow();
+            }
+        }
+
+        document.addEventListener('touchstart', onTouchStart);
+        document.addEventListener('touchmove', onTouchMove);
+        document.addEventListener('touchend', onTouchEnd);
+
+        function updateTrajectory() {
+            if (isAiming) {
+                const start = new THREE.Vector3();
+                bow.getWorldPosition(start);
+                const direction = new THREE.Vector3();
+                bow.getWorldDirection(direction);
+                direction.negate();
+                const end = start.clone().add(direction.multiplyScalar(10));
+                trajectoryLine.geometry.setFromPoints([start, end]);
+                trajectoryLine.visible = true;
+            } else {
+                trajectoryLine.visible = false;
+            }
+        }
+
+        function shootArrow() {
+            const arrowClone = arrow.clone();
+            scene.add(arrowClone);
+            const startPosition = new THREE.Vector3();
+            bow.getWorldPosition(startPosition);
+            arrowClone.position.copy(startPosition);
+            const direction = new THREE.Vector3();
+            bow.getWorldDirection(direction);
+            direction.negate();
+            arrowClone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
+            const speed = 0.2;
+            const distance = currentDistance + 5; // Ensure it reaches targets
+            let currentDistanceTraveled = 0;
+
+            function animateArrow() {
+                if (currentDistanceTraveled < distance) {
+                    arrowClone.position.add(direction.clone().multiplyScalar(speed));
+                    currentDistanceTraveled += speed;
+                    requestAnimationFrame(animateArrow);
+                } else {
+                    scene.remove(arrowClone);
+                    raycaster.set(startPosition, direction);
+                    const intersects = raycaster.intersectObjects(targetsData.map(data => data.target));
+                    if (intersects.length > 0) {
+                        const hitTarget = intersects[0].object;
+                        const index = hitTarget.userData.index;
+                        const hitWord = targetsData[index].word;
+                        if (hitWord === correctWord) {
+                            hitTarget.material.color.set(0x00ff00);
+                            setTimeout(() => {
+                                hitTarget.material.color.set(0xffffff);
+                                currentDistance += 5;
+                                setupRound();
+                            }, 1000);
+                        } else {
+                            hitTarget.material.color.set(0xff0000);
+                            setTimeout(() => {
+                                hitTarget.material.color.set(0xffffff);
+                            }, 1000);
+                            const correctTarget = targetsData.find(data => data.word === correctWord).target;
+                            correctTarget.material.color.set(0xffff00);
+                            setTimeout(() => {
+                                correctTarget.material.color.set(0xffffff);
+                            }, 1000);
+                            lives--;
+                            document.getElementById('lives').textContent = `Lives: ${lives}`;
+                            if (lives <= 0) {
+                                alert('Game Over');
+                                lives = gameConfig.quizParameters.globalLivesLimit;
+                                currentDistance = 10;
+                                document.getElementById('lives').textContent = `Lives: ${lives}`;
+                                setupRound();
+                            }
+                        }
+                    } else {
+                        lives--;
+                        document.getElementById('lives').textContent = `Lives: ${lives}`;
+                        if (lives <= 0) {
+                            alert('Game Over');
+                            lives = gameConfig.quizParameters.globalLivesLimit;
+                            currentDistance = 10;
+                            document.getElementById('lives').textContent = `Lives: ${lives}`;
+                            setupRound();
+                        }
+                    }
+                }
+            }
+            animateArrow();
+        }
+
+        function setupRound() {
+            const index = Math.floor(Math.random() * gameConfig.wordPairs.length);
+            const wordPair = gameConfig.wordPairs[index];
+            const sourceWord = wordPair.first;
+            correctWord = wordPair.second;
+            const otherPairs = gameConfig.wordPairs.filter((_, i) => i !== index);
+            const distractors = [];
+            while (distractors.length < 3) {
+                const randomPair = otherPairs[Math.floor(Math.random() * otherPairs.length)];
+                if (!distractors.includes(randomPair.second) && randomPair.second !== correctWord) {
+                    distractors.push(randomPair.second);
+                }
+            }
+            const translations = [correctWord, ...distractors].sort(() => Math.random() - 0.5);
+            targetsData.forEach((data, i) => {
+                data.word = translations[i];
+                data.banner.material.map = createWordTexture(translations[i]);
+                data.banner.material.map.needsUpdate = true;
+                data.target.position.z = -currentDistance;
+                data.banner.position.z = -currentDistance;
+            });
+            updateSourceWord(sourceWord);
+        }
+
+        // Window Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            updateTrajectory();
+            renderer.render(scene, camera);
+        }
+
+        // Start Game
+        setupRound();
+        animate();
+    </script>
+</body>
+</html>

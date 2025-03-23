@@ -159,8 +159,10 @@
       "startGame": "Start Game",
       "startWriterGame": "Writing Mode",
       "startQuizGame": "Quiz Mode",
+      "startArcheryGame": "Archery Mode",
       "writerGameDescription": "Type the translations for each word",
       "quizGameDescription": "Choose the correct translation from options",
+      "archeryGameDescription": "Shoot the correct word",
       "translate": "Translate",
       "gameOver": "Game Over!",
       "playAgain": "Play Again",
@@ -175,7 +177,10 @@
       "back": "Back",
       "playAudio": "Play Audio",
       "retryAudio": "Retry Audio",
-      "loading": "Loading..."
+      "loading": "Loading...",
+      "instructions": "Instructions",
+      "clickDragInstructions": "Click and drag the word to the correct position"
+
     },
     "card": {
       "edit": "Edit",
