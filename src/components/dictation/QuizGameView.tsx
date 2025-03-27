@@ -114,9 +114,13 @@ export function QuizGameView({
     const currentWord = getCurrentWord()
     const correctOption = { value: currentWord.second, isCorrect: true }
     
-    // Generate 2 wrong options from other word pairs
+    // Generate wrong options from other word pairs, excluding any with the same translation
     const availableOptions = randomizedWordPairs
-      .filter((_, index) => index !== gameState.currentWordIndex)
+      .filter((pair, index) => 
+        // Exclude current word index and any pairs with the same translation
+        index !== gameState.currentWordIndex && 
+        pair.second !== currentWord.second
+      )
       .map(pair => pair.second)
     
     // Shuffle and take first 2
