@@ -385,7 +385,9 @@ export function ArcheryGameView({
 
   return (
     <div className="max-w-5xl mx-auto">
-      <Realistic onInit={handleConfettiInit} />
+      <Realistic onInit={handleConfettiInit} globalOptions={{useWorker: true}} decorateOptions={() => ({
+        particleCount: 25
+      })} />
       
       <h1 className="text-md mb-8 text-center text-gray-300 relative">
         {game.title}

@@ -329,7 +329,10 @@ export function WriterGameView({
   return (
     <div className="max-w-3xl mx-auto p-6">
 
-      <Realistic onInit={handleConfettiInit} />
+      
+      <Realistic onInit={handleConfettiInit} globalOptions={{useWorker: true}} decorateOptions={() => ({
+        particleCount: 25
+      })} />
       <h1 className="text-md mb-12 text-center text-gray-300 relative">
         {game.title}
 
