@@ -331,7 +331,8 @@ export function WriterGameView({
 
       
       <Realistic onInit={handleConfettiInit} globalOptions={{useWorker: true}} decorateOptions={() => ({
-        particleCount: 25
+        particleCount: 10,
+        spread: 70,
       })} />
       <h1 className="text-md mb-12 text-center text-gray-300 relative">
         {game.title}
