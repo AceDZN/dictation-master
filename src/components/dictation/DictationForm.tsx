@@ -418,6 +418,22 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
             >
               {t('cancel')}
             </Button>
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="transition duration-200 ease-in-out hover:bg-gray-100"
+              disabled={isLoadingState || isFormComplete}
+              onClick={handleGenerateContent}
+            >
+              {isProcessingFile ? (
+                <div className="flex items-center gap-2">
+                  <Spinner size="sm" />
+                  <span>{t('generating')}</span>
+                </div>
+              ) : (
+                t('populateData')
+              )}
+            </Button>
             {!formData.isPublic && (
               <Button 
                 type="button" 
