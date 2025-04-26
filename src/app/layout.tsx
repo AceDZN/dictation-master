@@ -55,8 +55,8 @@ export default async function RootLayout({
                   
                                   
                     {/* Decorative blurred circles */}
-                    <div className="absolute top-40 left-0 w-72 h-72 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" />
-                    <div className="absolute bottom-20 right-0 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" style={{ animationDelay: '1s' }} />
+                    <div className="absolute top-40 z-0  user-select-none pointer-events-none left-0 w-72 h-72 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" />
+                    <div className="absolute bottom-20 z-0  user-select-none pointer-events-none right-0 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" style={{ animationDelay: '1s' }} />
                     
                     {/* Dot pattern decoration */}
                     

@@ -12,6 +12,7 @@ interface GameViewProps {
   onGameEnd: () => void
   hideExampleSentences: boolean
   onToggleExampleSentences: () => void
+  shuffleWords: boolean
 }
 
 interface GameClientProps {
@@ -23,8 +24,12 @@ interface GameClientProps {
 export function GameClient({ game, view: View, onGameEnd }: GameClientProps) {
   const searchParams = useSearchParams()
   const hideExamplesParam = searchParams.get('hideExamples')
+  const shuffleParam = searchParams.get('shuffle')
   const [hideExampleSentences, setHideExampleSentences] = useState(
     hideExamplesParam === 'true' || hideExamplesParam === null
+  )
+  const [shuffleWords, setShuffleWords] = useState(
+    shuffleParam === 'true' || shuffleParam === null
   )
   const [showBackButton, setShowBackButton] = useState(true)
   const router = useRouter()
@@ -76,6 +81,7 @@ export function GameClient({ game, view: View, onGameEnd }: GameClientProps) {
         onGameEnd={handleGameEnd}
         hideExampleSentences={hideExampleSentences}
         onToggleExampleSentences={handleToggleExampleSentences}
+        shuffleWords={shuffleWords}
       />
     </div>
   )

@@ -18,6 +18,7 @@ interface QuizGameViewProps {
   onGameEnd: () => void
   hideExampleSentences?: boolean
   onToggleExampleSentences?: () => void
+  shuffleWords?: boolean
 }
 
 interface GameState {
@@ -45,17 +46,20 @@ export function QuizGameView({
   game, 
   onGameEnd,
   hideExampleSentences = false,
-  onToggleExampleSentences
+  onToggleExampleSentences,
+  shuffleWords = true
 }: QuizGameViewProps) {
   const t = useTranslations('Dictation.game')
   if (!game.id) {
     throw new Error('Game ID is required')
   }
   
-  // Randomize word pairs on initial load
+  // Randomize word pairs on initial load if shuffleWords is true
   const randomizedWordPairs = useMemo(() => {
-    return [...game.wordPairs].sort(() => Math.random() - 0.5)
-  }, [game.wordPairs])
+    return shuffleWords
+      ? [...game.wordPairs].sort(() => Math.random() - 0.5)
+      : [...game.wordPairs]
+  }, [game.wordPairs, shuffleWords])
 
   const [gameState, setGameState] = useState<GameState>({
     currentWordIndex: 0,

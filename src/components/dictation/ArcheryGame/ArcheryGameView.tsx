@@ -22,6 +22,7 @@ interface GameViewProps {
   onGameEnd: () => void
   hideExampleSentences?: boolean
   onToggleExampleSentences?: () => void
+  shuffleWords?: boolean
 }
 
 interface GameState {
@@ -51,7 +52,8 @@ export function ArcheryGameView({
   game, 
   onGameEnd,
   hideExampleSentences = false,
-  onToggleExampleSentences
+  onToggleExampleSentences,
+  shuffleWords = true
 }: GameViewProps) {
   if (!game.id) {
     throw new Error('Game ID is required')
@@ -59,10 +61,12 @@ export function ArcheryGameView({
   useGLTF.preload('/3d-models/bow.glb')
   const t = useTranslations('Dictation.game')
   
-  // Randomize word pairs on initial load
+  // Randomize word pairs on initial load if shuffleWords is true
   const randomizedWordPairs = useMemo(() => {
-    return [...game.wordPairs].sort(() => Math.random() - 0.5)
-  }, [game.wordPairs])
+    return shuffleWords
+      ? [...game.wordPairs].sort(() => Math.random() - 0.5)
+      : [...game.wordPairs]
+  }, [game.wordPairs, shuffleWords])
 
   const [gameState, setGameState] = useState<GameState>({
     currentWordIndex: 0,

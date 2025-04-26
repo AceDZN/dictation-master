@@ -54,15 +54,15 @@ export async function POST(req: NextRequest) {
       model: 'gpt-4o-mini',
       response_format: zodResponseFormat(WordPairsList, 'word_pairs'),
       messages: [{ role: 'user', content: prompt }],
-      max_tokens: 3500,
+      max_tokens: 10000,
     })
 
     const content = response.choices[0].message.content
-    //console.log('content', content)
+    
     if (!content) {
       throw new Error('No content in the response')
     }
-
+    
     const parsedContent = JSON.parse(content)
     return NextResponse.json(parsedContent)
   } catch (error) {

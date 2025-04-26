@@ -6,7 +6,7 @@ import { DictationGame } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { WordPairDisplay } from '@/components/dictation/WordPairDisplay'
 import { useTranslations } from 'next-intl'
-import { BoltIcon, EyeIcon, EyeSlashIcon,PencilIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline'
+import { BoltIcon, EyeIcon, EyeSlashIcon, PencilIcon, QuestionMarkCircleIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
 
 
@@ -17,25 +17,42 @@ interface GameContainerProps {
 export function GameContainer({ game }: GameContainerProps) {
   const router = useRouter()
   const [hideExampleSentences, setHideExampleSentences] = useState(true)
+  const [shuffleWords, setShuffleWords] = useState(true)
   const t = useTranslations('Dictation.game')
 
 
   const handleWriterGameStart = () => {
-    router.push(`/dictation/play/${game.id}/writer-game?hideExamples=${hideExampleSentences.toString()}`)
+    router.push(`/dictation/play/${game.id}/writer-game?hideExamples=${hideExampleSentences.toString()}&shuffle=${shuffleWords.toString()}`)
   }
 
   const handleQuizGameStart = () => {
-    router.push(`/dictation/play/${game.id}/quiz-game?hideExamples=${hideExampleSentences.toString()}`)
+    router.push(`/dictation/play/${game.id}/quiz-game?hideExamples=${hideExampleSentences.toString()}&shuffle=${shuffleWords.toString()}`)
   }
 
   const handleArcheryGameStart = () => {
-    router.push(`/dictation/play/${game.id}/archery-game?hideExamples=${hideExampleSentences.toString()}`)
+    router.push(`/dictation/play/${game.id}/archery-game?hideExamples=${hideExampleSentences.toString()}&shuffle=${shuffleWords.toString()}`)
   }
 
   return (
     <div className="max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold mb-8 text-center">{game.title}</h1>
-      <div className="flex justify-end mb-2">
+      <div className="flex justify-end mb-2 space-x-2">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setShuffleWords(prev => !prev)}
+              >
+                <ArrowPathIcon className={`h-5 w-5 ${shuffleWords ? 'text-indigo-600' : 'text-gray-400'}`} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {shuffleWords ? t('disableShuffle') : t('enableShuffle')}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>

@@ -174,13 +174,14 @@
       "created": "Created",
       "showExamples": "Show example sentences",
       "hideExamples": "Hide example sentences",
+      "enableShuffle": "Enable word shuffling",
+      "disableShuffle": "Disable word shuffling",
       "back": "Back",
       "playAudio": "Play Audio",
       "retryAudio": "Retry Audio",
       "loading": "Loading...",
       "instructions": "Instructions",
       "clickDragInstructions": "Click and drag the word to the correct position"
-
     },
     "card": {
       "edit": "Edit",
