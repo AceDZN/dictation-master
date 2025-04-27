@@ -28,7 +28,7 @@ export function GameClient({ game, view: View, onGameEnd }: GameClientProps) {
   const [hideExampleSentences, setHideExampleSentences] = useState(
     hideExamplesParam === 'true' || hideExamplesParam === null
   )
-  const [shuffleWords, setShuffleWords] = useState(
+  const [shuffleWords] = useState(
     shuffleParam === 'true' || shuffleParam === null
   )
   const [showBackButton, setShowBackButton] = useState(true)
