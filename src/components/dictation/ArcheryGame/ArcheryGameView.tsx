@@ -45,8 +45,7 @@ interface GameState {
 
 
 
-const hitSound = new Audio('/sounds/arrow-hit.mp3')
-const missSound = new Audio('/sounds/arrow-miss.mp3')
+// Removed module-level Audio to avoid SSR errors
 
 export function ArcheryGameView({ 
   game, 
@@ -86,6 +85,16 @@ export function ArcheryGameView({
   })
   // Add debug mode state
   const [debugMode, setDebugMode] = useState(true)
+
+  // Audio refs (client-only)
+  const hitSoundRef = useRef<HTMLAudioElement | null>(null)
+  const missSoundRef = useRef<HTMLAudioElement | null>(null)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      hitSoundRef.current = new Audio('/sounds/arrow-hit.mp3')
+      missSoundRef.current = new Audio('/sounds/arrow-miss.mp3')
+    }
+  }, [])
 
   // Debug mode keyboard shortcut - press 'D' to toggle debug mode
   useEffect(() => {
@@ -235,12 +244,17 @@ export function ArcheryGameView({
   const handleCorrectAnswer = useCallback(() => {
     // Play arrow hit sound effect
     try {
-      hitSound.volume = 0.5
-      hitSound.addEventListener('ended', () => {
+      const audioEl = hitSoundRef.current
+      if (audioEl) {
+        audioEl.volume = 0.5
+        audioEl.onended = () => {
+          confettiController.current?.shoot()
+        }
+        audioEl.currentTime = 0
+        audioEl.play().catch(error => console.error('Sound play error:', error))
+      } else {
         confettiController.current?.shoot()
-      })
-      hitSound.play().catch(error => console.error('Sound play error:', error))
-
+      }
     } catch (error) {
       console.error('Sound loading error:', error)
     }
@@ -279,7 +293,7 @@ export function ArcheryGameView({
       word_first: currentWord.first,
       word_second: currentWord.second
     })
-  }, [getCurrentWord, moveToNextWord, game, gameState.currentWordIndex, confettiController, hitSound])
+  }, [getCurrentWord, moveToNextWord, game, gameState.currentWordIndex, confettiController])
 
   const handleIncorrectAnswer = useCallback(() => {
     const newHearts = gameState.hearts - 1
@@ -287,8 +301,12 @@ export function ArcheryGameView({
     
     // Play miss sound effect
     try {
-      missSound.volume = 0.5
-      missSound.play().catch(error => console.error('Sound play error:', error))
+      const audioEl = missSoundRef.current
+      if (audioEl) {
+        audioEl.volume = 0.5
+        audioEl.currentTime = 0
+        audioEl.play().catch(error => console.error('Sound play error:', error))
+      }
     } catch (error) {
       console.error('Sound loading error:', error)
     }
@@ -325,7 +343,7 @@ export function ArcheryGameView({
       hearts_remaining: newHearts,
       time_left: gameState.timeLeft
     })
-  }, [endGame, game, gameState, getCurrentWord, missSound])
+  }, [endGame, game, gameState, getCurrentWord])
 
   // Handle target hit
   const handleTargetHit = useCallback((target: Target) => {
@@ -426,13 +444,12 @@ export function ArcheryGameView({
       />
 
       <div className="relative text-center mb-8 w-full h-[60vh] flex flex-col justify-center items-center bg-cyan-300 rounded-lg overflow-hidden" ref={gameContainerRef}>
-        <Canvas>
+                 <Canvas shadows>
           <ArcheryScene 
             targets={targets}
             isBowDrawn={gameState.isBowDrawn}
             setIsBowDrawn={setIsBowDrawn}
             onTargetHit={handleTargetHit}
-            debugMode={debugMode}
           />
         </Canvas>
         <div className="text-4xl font-bold mb-12 text-indigo-600 current-word py-2 px-6 bg-white/70 absolute top-0 left-1/2 z-20 -translate-x-1/2 rounded-b-lg w-auto max-w-full">

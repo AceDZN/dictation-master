@@ -2343,7 +2343,8 @@ If you encounter any issues:
     "signIn": "Sign in",
     "signOut": "Sign out",
     "profile": "Profile",
-    "appName": "Dictation Masters"
+    "appName": "Dictation Masters",
+    "logoLabel": "Dictation Masters Logo"
   },
   "Dictation": {
     "create": {
@@ -2474,7 +2475,8 @@ If you encounter any issues:
     "signIn": "התחבר",
     "signOut": "התנתק",
     "profile": "פרופיל",
-    "appName": "מאסטר הכתבות"
+    "appName": "מאסטר הכתבות",
+    "logoLabel": "Dictation Masters Logo"
   },
   "Dictation": {
     "create": {
