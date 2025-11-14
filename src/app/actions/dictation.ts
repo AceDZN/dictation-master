@@ -18,6 +18,8 @@ const CreateDictationSchema = z.object({
     firstSentence: z.string().optional(),
     secondSentence: z.string().optional(),
     sentence: z.string().optional(),
+    firstAudioUrl: z.string().optional(),
+    secondAudioUrl: z.string().optional(),
   })),
   quizParameters: z.object({
     globalTimeLimit: z.number(),
