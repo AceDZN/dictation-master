@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { DictationGame, WordPair } from '@/lib/types'
+import { getSecondSentence } from '@/lib/language-direction'
 //import { useAnimate } from 'motion/react'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 import { useTranslations } from 'next-intl'
@@ -461,9 +462,9 @@ export function ArcheryGameView({
         </div>
       </div>
       
-      {!hideExampleSentences && getCurrentWord().sentence && (
+      {!hideExampleSentences && getSecondSentence(getCurrentWord()) && (
         <div className="text-center text-lg text-gray-600 mb-8 max-w-2xl mx-auto p-4 bg-gray-50 rounded-lg">
-          <p>{getCurrentWord().sentence}</p>
+          <p>{getSecondSentence(getCurrentWord())}</p>
         </div>
       )}
       

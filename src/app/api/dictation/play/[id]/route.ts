@@ -10,6 +10,8 @@ import { getTTSUrls } from '@/lib/server/tts'
 interface WordPair {
   first: string
   second: string
+  firstSentence?: string
+  secondSentence?: string
   sentence?: string
   firstAudioUrl?: string
   secondAudioUrl?: string
@@ -58,6 +60,20 @@ export async function GET(
     }
     
     
+    // Normalize sentence fields before generating audio
+    if (gameData.wordPairs && gameData.wordPairs.length > 0) {
+      gameData.wordPairs = gameData.wordPairs.map((pair: WordPair) => {
+        const normalizedFirstSentence = pair.firstSentence || ''
+        const normalizedSecondSentence = pair.secondSentence || pair.sentence || ''
+        return {
+          ...pair,
+          firstSentence: normalizedFirstSentence,
+          secondSentence: normalizedSecondSentence,
+          sentence: normalizedSecondSentence
+        }
+      })
+    }
+
     // Refresh the TTS URLs for all word pairs in the game
     if (gameData.wordPairs && gameData.wordPairs.length > 0) {
       // Extract all unique words from the word pairs

@@ -18,12 +18,24 @@ const WordPairsList = z.object({
     z.object({
       first: z.string(),
       second: z.string(),
-      sentence: z.string(),
+      firstSentence: z.string(),
+      secondSentence: z.string(),
+      sentence: z.string().optional(),
       imagePrompt: z.string(),
     }),
   ),
 })
 export type WordPairsList = z.infer<typeof WordPairsList>
+
+const normalizeWordPairsList = (data: WordPairsList): WordPairsList => {
+  return {
+    ...data,
+    wordPairs: data.wordPairs.map(pair => ({
+      ...pair,
+      sentence: pair.secondSentence || pair.sentence || ''
+    }))
+  }
+}
 
 export async function extractWordPairsFromImage(
   base64Image: string,
@@ -33,7 +45,13 @@ export async function extractWordPairsFromImage(
   // Remove the data URL prefix if present
   const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '')
   
-  const imagePrompt = `Extract word pairs from image. For each: 'first' in ${firstLanguage}, 'second' in ${secondLanguage}, ${secondLanguage} 'sentence' using word, 'imagePrompt' (always in English) for visualization. Use exact words if present. Only translate if no translation found. Include multiple ${firstLanguage} words if given for one ${secondLanguage} word. make sure to use the words exactly as they appear in the image. Return JSON array. double check that you have all the words, no matter how much words are in the image. If you are not sure, Check the image again. if there are words only in one of the specified languages, make sure to use and TRANSLATE the words to the other language. Also, add a relevant title and interesting description, both in ${firstLanguage}, related to the topic of the words, cool, and SEO friendly.`
+  const imagePrompt = `Extract word pairs from the image. For each pair include:
+- "first": the ${firstLanguage} word exactly as it appears
+- "second": the ${secondLanguage} translation
+- "firstSentence": a natural ${firstLanguage} sentence that uses the ${firstLanguage} word
+- "secondSentence": a natural ${secondLanguage} sentence that uses the ${secondLanguage} word
+- "imagePrompt": an English prompt that helps visualize the concept.
+Use exact words if present. Translate only if a translation is missing. Include multiple ${firstLanguage} words if they map to one ${secondLanguage} word when necessary. Double-check that all relevant words are captured. If a word exists only in one language, include it and translate it to the other language. Also add a relevant title and engaging description in ${firstLanguage}, keeping them SEO-friendly. Return strict JSON.` 
   //console.log('extractWordPairsFromImage',{ firstLanguage, secondLanguage, imagePrompt })
   const response = await openai.chat.completions.create({
     model: 'gpt-4o-2024-08-06',
@@ -65,7 +83,7 @@ export async function extractWordPairsFromImage(
 
   try {
     const result = JSON.parse(content)
-    return result
+    return normalizeWordPairsList(result)
   } catch (error) {
     console.error('Error parsing OpenAI response:', error)
     throw new Error('Failed to parse word pairs from the image')
@@ -83,7 +101,16 @@ export async function extractWordPairsFromText(
     messages: [
       {
         role: 'user',
-        content: `Extract word pairs from the following text. For each pair: 'first' in ${firstLanguage}, 'second' in ${secondLanguage}, ${secondLanguage} 'sentence' using the word, 'imagePrompt' (always in English) for visualization. Use exact words if present. Only translate if no translation is given. Include multiple ${firstLanguage} words if given for one ${secondLanguage} word. Make sure to use the words exactly as they appear in the text. Also,  add a relevant title and interesting description, both in ${firstLanguage}, related to the topic of the text words, cool, and SEO friendly. \n\nText:\n${text}`,
+        content: `Extract word pairs from the following text. For each pair provide:
+- "first": ${firstLanguage} word exactly as in the text
+- "second": ${secondLanguage} translation
+- "firstSentence": ${firstLanguage} sentence using the ${firstLanguage} word
+- "secondSentence": ${secondLanguage} sentence using the ${secondLanguage} word
+- "imagePrompt": English visual prompt.
+Use exact wording where possible, translating only when missing. Include multiple ${firstLanguage} words if needed for one ${secondLanguage} term. Keep a relevant, catchy, SEO-friendly title and description in ${firstLanguage}.
+
+Text:
+${text}`,
       },
     ],
     max_tokens: 3500,
@@ -96,7 +123,7 @@ export async function extractWordPairsFromText(
 
   try {
     const result = JSON.parse(content)
-    return result
+    return normalizeWordPairsList(result)
   } catch (error) {
     console.error('Error parsing OpenAI response:', error)
     throw new Error('Failed to parse word pairs from the text')

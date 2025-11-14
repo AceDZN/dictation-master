@@ -3,6 +3,11 @@ import { Timestamp } from 'firebase-admin/firestore'
 export interface WordPair {
   first: string
   second: string
+  firstSentence?: string
+  secondSentence?: string
+  /**
+   * @deprecated use firstSentence/secondSentence instead
+   */
   sentence?: string
   firstAudioUrl?: string
   secondAudioUrl?: string
@@ -58,9 +63,11 @@ export interface FirebaseGame {
   wordPairs: Array<{
     first: string
     second: string
+    firstSentence?: string
+    secondSentence?: string
     sentence?: string
   }>
   createdAt: Timestamp
   isPublic: boolean
   userId: string
-} 
+}

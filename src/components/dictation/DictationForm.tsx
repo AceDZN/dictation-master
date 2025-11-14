@@ -46,7 +46,7 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
       description: initialData?.description,
       sourceLanguage: initialData?.sourceLanguage || DEFAULT_LANGUAGES.source,
       targetLanguage: initialData?.targetLanguage || DEFAULT_LANGUAGES.target,
-      wordPairs: initialData?.wordPairs || [{ first: '', second: '', sentence: '' }],
+      wordPairs: initialData?.wordPairs || [{ first: '', second: '', firstSentence: '', secondSentence: '', sentence: '' }],
       quizParameters: initialData?.quizParameters || {
         globalTimeLimit: 0,
         globalLivesLimit: 3,
@@ -271,11 +271,19 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
 
   const handleLanguageSwap = useCallback(() => {
     setFormData(prev => {
-      const newWordPairs = prev.wordPairs.map(pair => ({
-        first: pair.second,
-        second: pair.first,
-        sentence: pair.sentence
-      }))
+      const newWordPairs = prev.wordPairs.map(pair => {
+        const firstSentence = pair.firstSentence || ''
+        const secondSentence = pair.secondSentence || pair.sentence || ''
+        return {
+          first: pair.second,
+          second: pair.first,
+          firstSentence: secondSentence,
+          secondSentence: firstSentence,
+          sentence: firstSentence,
+          firstAudioUrl: pair.secondAudioUrl,
+          secondAudioUrl: pair.firstAudioUrl,
+        }
+      })
       
       return {
         ...prev,

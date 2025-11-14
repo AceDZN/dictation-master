@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { DictationGame, WordPair } from '@/lib/types'
+import { getSecondSentence } from '@/lib/language-direction'
 import Realistic from 'react-canvas-confetti/dist/presets/realistic'
 import { useAnimate } from 'motion/react'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
@@ -520,7 +521,7 @@ export function QuizGameView({
             ))}
           </div>
           <div className={`example-sentence text-xl text-gray-600 mt-20 transition-opacity duration-300 ${hideExampleSentences ? 'opacity-0' : 'opacity-100'}`}>
-            {getCurrentWord().sentence}
+            {getSecondSentence(getCurrentWord())}
           </div>
         </div>
       </div>

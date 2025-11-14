@@ -79,11 +79,18 @@ export async function PUT(
       ])
 
       // Add audio URLs to word pairs
-      body.wordPairs = body.wordPairs.map((pair: { first: string; second: string }) => ({
-        ...pair,
-        firstAudioUrl: sourceAudioUrls[pair.first],
-        secondAudioUrl: targetAudioUrls[pair.second]
-      }))
+      body.wordPairs = body.wordPairs.map((pair: { first: string; second: string; firstSentence?: string; secondSentence?: string; sentence?: string }) => {
+        const normalizedFirstSentence = pair.firstSentence || ''
+        const normalizedSecondSentence = pair.secondSentence || pair.sentence || ''
+        return {
+          ...pair,
+          firstSentence: normalizedFirstSentence,
+          secondSentence: normalizedSecondSentence,
+          sentence: normalizedSecondSentence,
+          firstAudioUrl: sourceAudioUrls[pair.first],
+          secondAudioUrl: targetAudioUrls[pair.second]
+        }
+      })
     }
 
     const updatedData: Partial<DictationGame> = {

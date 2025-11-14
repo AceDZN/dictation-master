@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { DictationGame, WordPair } from '@/lib/types'
+import { getSecondSentence } from '@/lib/language-direction'
 import { Input } from '@/components/ui/input'
 import Realistic from 'react-canvas-confetti/dist/presets/realistic'
 import { useAnimate } from 'motion/react'
@@ -414,7 +415,7 @@ export function WriterGameView({
             </div>
           </div>
           <div className={`example-sentence text-xl text-gray-600 mt-20 transition-opacity duration-300 ${hideExampleSentences ? 'opacity-0' : 'opacity-100'}`}>
-            {getCurrentWord().sentence}
+            {getSecondSentence(getCurrentWord())}
           </div>
         </div>
       </div>

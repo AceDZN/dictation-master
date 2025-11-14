@@ -34,7 +34,7 @@ export function WordPairList({
   const tLang = useTranslations('Language')
 
   const handleAddPair = () => {
-    onChange([...wordPairs, { first: '', second: '', sentence: '' }])
+    onChange([...wordPairs, { first: '', second: '', firstSentence: '', secondSentence: '', sentence: '' }])
   }
 
   const handleRemovePair = (index: number) => {
@@ -43,7 +43,11 @@ export function WordPairList({
 
   const handlePairChange = (index: number, field: keyof WordPair, value: string) => {
     const newPairs = [...wordPairs]
-    newPairs[index] = { ...newPairs[index], [field]: value }
+    const updatedPair: WordPair = { ...newPairs[index], [field]: value }
+    if (field === 'secondSentence') {
+      updatedPair.sentence = value
+    }
+    newPairs[index] = updatedPair
     onChange(newPairs)
   }
 
@@ -61,15 +65,16 @@ export function WordPairList({
       )}
       
       <div className="border rounded-lg overflow-hidden">
-        <div className="grid grid-cols-[1fr,1fr,2fr,auto] gap-4 p-4 bg-gray-50 font-semibold">
+        <div className="grid grid-cols-[1fr,1fr,1.5fr,1.5fr,auto] gap-4 p-4 bg-gray-50 font-semibold">
           <div>{tLang(`languages.${sourceLanguage}`)}</div>
           <div>{tLang(`languages.${targetLanguage}`)}</div>
-          <div>{t('exampleSentence')}</div>
+          <div>{t('sourceSentence', { language: tLang(`languages.${sourceLanguage}`) })}</div>
+          <div>{t('targetSentence', { language: tLang(`languages.${targetLanguage}`) })}</div>
           <div className="w-8"></div>
         </div>
         <div className="divide-y">
           {wordPairs.map((pair, index) => (
-            <div key={index} className="grid grid-cols-[1fr,1fr,2fr,auto] gap-4 p-4">
+            <div key={index} className="grid grid-cols-[1fr,1fr,1.5fr,1.5fr,auto] gap-4 p-4">
               <Input
                 value={pair.first}
                 onChange={(e) => handlePairChange(index, 'first', e.target.value)}
@@ -83,9 +88,15 @@ export function WordPairList({
                 disabled={disabled}
               />
               <Input
-                value={pair.sentence || ''}
-                onChange={(e) => handlePairChange(index, 'sentence', e.target.value)}
-                placeholder={t('exampleSentence')}
+                value={pair.firstSentence || ''}
+                onChange={(e) => handlePairChange(index, 'firstSentence', e.target.value)}
+                placeholder={t('sourceSentence', { language: tLang(`languages.${sourceLanguage}`) })}
+                disabled={disabled}
+              />
+              <Input
+                value={pair.secondSentence || pair.sentence || ''}
+                onChange={(e) => handlePairChange(index, 'secondSentence', e.target.value)}
+                placeholder={t('targetSentence', { language: tLang(`languages.${targetLanguage}`) })}
                 disabled={disabled}
               />
               <Button

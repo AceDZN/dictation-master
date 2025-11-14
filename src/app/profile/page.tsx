@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { PencilIcon, RocketLaunchIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline'
+import { PencilIcon, RocketLaunchIcon, DocumentDuplicateIcon, PlusIcon } from '@heroicons/react/24/outline'
 import { getTranslations } from 'next-intl/server'
 
 export default async function ProfilePage() {
@@ -30,12 +30,20 @@ export default async function ProfilePage() {
               <h1 className="text-3xl font-bold text-gray-900">
                 {session.user.name}
               </h1>
-              <Link href="/profile/edit">
-                <Button variant="outline" size="sm" className="gap-2 rounded-lg border-gray-200 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600 transition-all">
-                  <PencilIcon className="h-4 w-4" />
-                  {t('editProfile')}
-                </Button>
-              </Link>
+              <div className="flex flex-col w-full gap-3 sm:w-auto sm:flex-row">
+                <Link href="/dictation/create">
+                  <Button size="sm" className="w-full gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 hover:shadow-lg transition-all sm:w-auto">
+                    <PlusIcon className="h-4 w-4" />
+                    {t('createGame')}
+                  </Button>
+                </Link>
+                <Link href="/profile/edit">
+                  <Button variant="outline" size="sm" className="w-full gap-2 rounded-lg border-gray-200 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600 transition-all sm:w-auto">
+                    <PencilIcon className="h-4 w-4" />
+                    {t('editProfile')}
+                  </Button>
+                </Link>
+              </div>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-8">

@@ -1,5 +1,6 @@
 // src/components/dictation/WordPairDisplay.tsx
 import { WordPair } from "@/lib/types"
+import { getFirstSentence, getSecondSentence } from '@/lib/language-direction'
 
 interface WordPairDisplayProps {
   wordPairs: WordPair[]
@@ -23,13 +24,22 @@ export function WordPairDisplay({
       <div className="divide-y">
         {wordPairs.map((pair, index) => (
           <div key={index} className="grid grid-cols-2 gap-4 p-4">
-            <div>{pair.first}</div>
-            <div>{pair.second}</div>
-            {!hideSentences && pair.sentence && (
-              <div className="col-span-2 text-sm text-gray-600 mt-2">
-                {pair.sentence}
-              </div>
-            )}
+            <div>
+              <p className="font-medium text-gray-900">{pair.first}</p>
+              {!hideSentences && getFirstSentence(pair) && (
+                <p className="text-sm text-gray-600 mt-2">
+                  {getFirstSentence(pair)}
+                </p>
+              )}
+            </div>
+            <div>
+              <p className="font-medium text-gray-900">{pair.second}</p>
+              {!hideSentences && getSecondSentence(pair) && (
+                <p className="text-sm text-gray-600 mt-2">
+                  {getSecondSentence(pair)}
+                </p>
+              )}
+            </div>
           </div>
         ))}
       </div>

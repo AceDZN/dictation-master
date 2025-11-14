@@ -66,6 +66,7 @@
   "Profile": {
     "title": "פרופיל",
     "editProfile": "ערוך פרופיל",
+    "createGame": "צור משחק חדש",
     "publishedGames": "משחקים שפורסמו",
     "draftGames": "טיוטות משחקים",
     "noPublishedGames": "עדיין לא פרסמת משחקים.",
@@ -137,6 +138,8 @@
       "sourceWord": "מילה ב-{language}",
       "targetWord": "מילה ב-{language}",
       "exampleSentence": "משפט לדוגמה (אופציונלי)",
+      "sourceSentence": "משפט לדוגמה ב-{language} (אופציונלי)",
+      "targetSentence": "משפט לדוגמה ב-{language} (אופציונלי)",
       "advancedOptions": "אפשרויות מתקדמות",
       "advancedMode": "מצב מתקדם",
       "quizMode": "מצב חידון",
@@ -181,7 +184,8 @@
       "retryAudio": "נסה שוב",
       "loading": "טוען...",
       "instructions": "הוראות",
-      "clickDragInstructions": "לחצו וגררו את המילה למקום הנכון"
+      "clickDragInstructions": "לחצו וגררו את המילה למקום הנכון",
+      "languageDirectionLabel": "בחר כיוון תרגול"
     },
     "card": {
       "edit": "ערוך",

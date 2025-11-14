@@ -66,6 +66,7 @@
   "Profile": {
     "title": "Profile",
     "editProfile": "Edit Profile",
+    "createGame": "Create New Game",
     "publishedGames": "Published Games",
     "draftGames": "Draft Games",
     "noPublishedGames": "You haven't published any games yet.",
@@ -137,6 +138,8 @@
       "sourceWord": "{language} word",
       "targetWord": "{language} word",
       "exampleSentence": "Example sentence (optional)",
+      "sourceSentence": "{language} example sentence (optional)",
+      "targetSentence": "{language} example sentence (optional)",
       "advancedOptions": "Advanced Options",
       "advancedMode": "Advanced Mode",
       "quizMode": "Quiz Mode",
@@ -181,7 +184,8 @@
       "retryAudio": "Retry Audio",
       "loading": "Loading...",
       "instructions": "Instructions",
-      "clickDragInstructions": "Click and drag the word to the correct position"
+      "clickDragInstructions": "Click and drag the word to the correct position",
+      "languageDirectionLabel": "Choose practice direction"
     },
     "card": {
       "edit": "Edit",

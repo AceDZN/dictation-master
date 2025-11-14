@@ -10,14 +10,16 @@ const openai = new OpenAI({
 const WordPairsList = z.object({
   title: z.string(),
   description: z.string().optional(),
-    wordPairs: z.array(
-        z.object({
-        first: z.string(),
-        second: z.string(),
-        sentence: z.string(),
-        imagePrompt: z.string(),
-        }),
-    ),
+  wordPairs: z.array(
+    z.object({
+      first: z.string(),
+      second: z.string(),
+      firstSentence: z.string(),
+      secondSentence: z.string(),
+      sentence: z.string().optional(),
+      imagePrompt: z.string(),
+    }),
+  ),
 })
 
 const RequestSchema = z.object({
@@ -28,7 +30,9 @@ const RequestSchema = z.object({
   wordPairs: z.array(z.object({
     first: z.string(),
     second: z.string(),
-    sentence: z.string(),
+    firstSentence: z.string().optional(),
+    secondSentence: z.string().optional(),
+    sentence: z.string().optional(),
   })),
 })
 
@@ -39,16 +43,19 @@ export async function POST(req: NextRequest) {
     const { sourceLanguage='Hebrew', targetLanguage='English', wordPairs=[], title='NO TITLE', description='NO DESCRIPTION' } = RequestSchema.parse(body)
 
     const prompt = `Given these word pairs between ${sourceLanguage} and ${targetLanguage}, please:
-        1. If a word is missing its translation, provide it
-        2. For each pair, generate a natural, contextual example sentence in ${targetLanguage} using the ${targetLanguage} word
-        3. For each pair, generate an English image prompt that would help visualize the word's meaning
-        4. If required, generate a title and description for the content in ${sourceLanguage} - the title and description should be in natural language, SEO friendly, cool, and related to the topic of the words.
-        Word pairs:
-        ${wordPairs.map(pair => `${pair.first} - ${pair.second}`).join('\n')}
-        title: ${title}
-        description: ${description}
-        Return a JSON object with the complete word pairs, including translations, sentences, and image prompts.
-    `
+1. Complete any missing translations.
+2. Provide a natural, contextual example sentence in ${sourceLanguage} that uses the ${sourceLanguage} word ("firstSentence").
+3. Provide a natural, contextual example sentence in ${targetLanguage} that uses the ${targetLanguage} word ("secondSentence").
+4. Include an English "imagePrompt" for each pair that helps visualize the concept.
+5. If needed, generate a catchy, SEO-friendly title and description in ${sourceLanguage}.
+
+Existing word pairs:
+${wordPairs.map(pair => `${pair.first} - ${pair.second}`).join('\n')}
+
+Title: ${title}
+Description: ${description}
+
+Return strict JSON that matches the schema with firstSentence, secondSentence, sentence (same as secondSentence), and imagePrompt.`
 
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
@@ -64,7 +71,14 @@ export async function POST(req: NextRequest) {
     }
     
     const parsedContent = JSON.parse(content)
-    return NextResponse.json(parsedContent)
+    const normalizedContent = {
+      ...parsedContent,
+      wordPairs: parsedContent.wordPairs.map((pair: { secondSentence?: string; sentence?: string }) => ({
+        ...pair,
+        sentence: pair.secondSentence || pair.sentence || ''
+      }))
+    }
+    return NextResponse.json(normalizedContent)
   } catch (error) {
     console.error('Error generating content:', error)
     return NextResponse.json(

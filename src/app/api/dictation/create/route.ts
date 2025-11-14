@@ -13,6 +13,8 @@ const createDictationSchema = z.object({
   wordPairs: z.array(z.object({
     first: z.string(),
     second: z.string(),
+    firstSentence: z.string().optional(),
+    secondSentence: z.string().optional(),
     sentence: z.string().optional()
   })).min(1),
   quizParameters: z.object({
@@ -48,11 +50,18 @@ export async function POST(request: Request) {
     ])
 
     // Add audio URLs to word pairs
-    const wordPairsWithAudio = validatedData.wordPairs.map(pair => ({
-      ...pair,
-      firstAudioUrl: sourceAudioUrls[pair.first],
-      secondAudioUrl: targetAudioUrls[pair.second]
-    }))
+    const wordPairsWithAudio = validatedData.wordPairs.map(pair => {
+      const normalizedFirstSentence = pair.firstSentence || ''
+      const normalizedSecondSentence = pair.secondSentence || pair.sentence || ''
+      return {
+        ...pair,
+        firstSentence: normalizedFirstSentence,
+        secondSentence: normalizedSecondSentence,
+        sentence: normalizedSecondSentence,
+        firstAudioUrl: sourceAudioUrls[pair.first],
+        secondAudioUrl: targetAudioUrls[pair.second]
+      }
+    })
 
     // Initialize Firestore
     const db = getFirestore(initAdminApp())

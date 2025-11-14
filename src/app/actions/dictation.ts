@@ -15,6 +15,8 @@ const CreateDictationSchema = z.object({
   wordPairs: z.array(z.object({
     first: z.string(),
     second: z.string(),
+    firstSentence: z.string().optional(),
+    secondSentence: z.string().optional(),
     sentence: z.string().optional(),
   })),
   quizParameters: z.object({
@@ -64,6 +66,8 @@ export interface Game {
   wordPairs: Array<{
     first: string
     second: string
+    firstSentence?: string
+    secondSentence?: string
     sentence?: string
   }>
   createdAt: {

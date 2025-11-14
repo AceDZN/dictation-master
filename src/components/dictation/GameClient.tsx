@@ -1,11 +1,12 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { DictationGame } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 import { useTranslations } from 'next-intl'
+import { getDirectedGame, type LanguageDirection } from '@/lib/language-direction'
 
 interface GameViewProps {
   game: DictationGame
@@ -25,11 +26,17 @@ export function GameClient({ game, view: View, onGameEnd }: GameClientProps) {
   const searchParams = useSearchParams()
   const hideExamplesParam = searchParams.get('hideExamples')
   const shuffleParam = searchParams.get('shuffle')
+  const directionParam = searchParams.get('direction') as LanguageDirection | null
+  const languageDirection: LanguageDirection = directionParam === 'reverse' ? 'reverse' : 'forward'
   const [hideExampleSentences, setHideExampleSentences] = useState(
     hideExamplesParam === 'true' || hideExamplesParam === null
   )
   const [shuffleWords] = useState(
     shuffleParam === 'true' || shuffleParam === null
+  )
+  const directedGame = useMemo(
+    () => getDirectedGame(game, languageDirection),
+    [game, languageDirection]
   )
   const [showBackButton, setShowBackButton] = useState(true)
   const router = useRouter()
@@ -77,7 +84,7 @@ export function GameClient({ game, view: View, onGameEnd }: GameClientProps) {
         </div>
       )}
       <View
-        game={game}
+        game={directedGame}
         onGameEnd={handleGameEnd}
         hideExampleSentences={hideExampleSentences}
         onToggleExampleSentences={handleToggleExampleSentences}
