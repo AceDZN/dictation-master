@@ -155,26 +155,26 @@ export async function getGames(): Promise<Game[]> {
 
 export async function deleteGame(id: string): Promise<boolean> {
   try {
-    // Get the current user's session
     const session = await auth()
-    if (!session?.user) return false
+    if (!session?.user?.id) {
+      return false
+    }
 
-    // Initialize Firestore
-    initAdminApp()
-    const db = getFirestore()
+    const db = getFirestore(initAdminApp())
+    const userDocRef = db.collection('dictation_games').doc(session.user.id)
+    const gameDocRef = userDocRef.collection('games').doc(id)
 
-    // Get the game document
-    const gameDoc = await db.collection('dictation_games').doc(id).get()
-    if (!gameDoc.exists) return false
+    const gameDoc = await gameDocRef.get()
+    if (!gameDoc.exists) {
+      return false
+    }
 
     const gameData = gameDoc.data()
-    if (!gameData) return false
+    if (gameData?.userId && gameData.userId !== session.user.id) {
+      return false
+    }
 
-    // Check if the user owns the game
-    if (gameData.userId !== session.user.id) return false
-
-    // Delete the game
-    await db.collection('dictation_games').doc(id).delete()
+    await gameDocRef.delete()
     return true
   } catch (error) {
     console.error('Error deleting game:', error)

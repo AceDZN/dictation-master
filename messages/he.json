@@ -223,7 +223,13 @@
       "shareWhatsApp": "וואטסאפ",
       "shareError": "משהו השתבש. נסו שוב.",
       "shareDefaultDescription": "תרגלו את ההכתבה הזו ב-Dictation Masters",
-      "shareMessage": "בדקו את משחק ההכתבה: {title}"
+      "shareMessage": "בדקו את משחק ההכתבה: {title}",
+      "deleteConfirmTitle": "למחוק את ההכתבה?",
+      "deleteConfirmDescription": "הפעולה תמחק לצמיתות את {title} ולא ניתן לבטל.",
+      "deleteConfirmCancel": "בטל",
+      "deleteConfirmAction": "מחק לצמיתות",
+      "deleteSuccess": "ההכתבה נמחקה",
+      "deleteError": "לא ניתן למחוק את ההכתבה. נסו שוב."
     }
   }
 }

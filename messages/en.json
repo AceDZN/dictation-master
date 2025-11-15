@@ -223,7 +223,13 @@
       "shareWhatsApp": "WhatsApp",
       "shareError": "Something went wrong. Please try again.",
       "shareDefaultDescription": "Practice this dictation on Dictation Masters",
-      "shareMessage": "Check this dictation game: {title}"
+      "shareMessage": "Check this dictation game: {title}",
+      "deleteConfirmTitle": "Delete this dictation?",
+      "deleteConfirmDescription": "This will permanently remove \"{title}\". This action cannot be undone.",
+      "deleteConfirmCancel": "Cancel",
+      "deleteConfirmAction": "Delete",
+      "deleteSuccess": "Dictation deleted",
+      "deleteError": "Could not delete dictation. Please try again."
     }
   }
 }

@@ -113,7 +113,10 @@ export function useGameShare(config: GameShareConfig): UseGameShareResult {
   const handleShareClick = async () => {
     const shared = await handleNativeShare()
     if (!shared) {
-      setIsShareOpen(true)
+      // Small delay to ensure dropdown closes before dialog opens
+      setTimeout(() => {
+        setIsShareOpen(true)
+      }, 100)
     }
   }
 
