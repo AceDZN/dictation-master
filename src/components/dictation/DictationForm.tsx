@@ -206,6 +206,36 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
     )
   }, [formData.title, formData.sourceLanguage, formData.targetLanguage, formData.wordPairs])
 
+  const canPopulateData = useMemo(() => {
+    // Need at least basic word pairs to populate
+    if (!formData.sourceLanguage || !formData.targetLanguage || formData.wordPairs.length === 0) {
+      return false
+    }
+    
+    // Check if there are word pairs with at least first and second
+    const hasValidWordPairs = formData.wordPairs.some(pair => pair.first && pair.second)
+    if (!hasValidWordPairs) {
+      return false
+    }
+
+    // Check if AI can help populate missing data:
+    // 1. Missing or short title
+    const needsTitle = !formData.title || formData.title.length < 3
+    
+    // 2. Missing description
+    const needsDescription = !formData.description || formData.description.trim().length === 0
+    
+    // 3. Missing example sentences for any word pair
+    const needsSentences = formData.wordPairs.some(pair => 
+      pair.first && pair.second && (
+        !pair.firstSentence || pair.firstSentence.trim().length === 0 ||
+        !pair.secondSentence || pair.secondSentence.trim().length === 0
+      )
+    )
+
+    return needsTitle || needsDescription || needsSentences
+  }, [formData.title, formData.description, formData.sourceLanguage, formData.targetLanguage, formData.wordPairs])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
@@ -430,7 +460,7 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
               type="button" 
               variant="outline" 
               className="transition duration-200 ease-in-out hover:bg-gray-100"
-              disabled={isLoadingState || isFormComplete}
+              disabled={isLoadingState || !canPopulateData}
               onClick={handleGenerateContent}
             >
               {isProcessingFile ? (
@@ -481,7 +511,7 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
               type="button" 
               variant="outline" 
               className="transition duration-200 ease-in-out hover:bg-gray-100"
-              disabled={isLoadingState || isFormComplete}
+              disabled={isLoadingState || !canPopulateData}
               onClick={handleGenerateContent}
             >
               {isProcessingFile ? (
