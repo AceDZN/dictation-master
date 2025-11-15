@@ -6,7 +6,6 @@ import { getFirstSentence, getSecondSentence } from '@/lib/language-direction'
 import { Button } from '@/components/ui/button'
 import { useTranslations } from 'next-intl'
 import { EyeIcon, EyeSlashIcon, ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/outline'
-import { usePreferredVoice } from '@/hooks/use-preferred-voice'
 import { useTTSPlayer } from '@/hooks/use-tts-player'
 import { getLanguageBCP47Tag } from '@/lib/language-tags'
 
@@ -50,7 +49,6 @@ export function CardsGameView({
 	const [currentIndex, setCurrentIndex] = useState(0)
 	const [isFlipped, setIsFlipped] = useState(false)
 	const [isComplete, setIsComplete] = useState(false)
-	const { preferredVoiceId } = usePreferredVoice()
 
 	const handleFlip = useCallback(() => {
 		setIsFlipped(prev => !prev)
@@ -126,7 +124,6 @@ export function CardsGameView({
 	const speakFrontWord = useTTSPlayer({
 		text: frontSpeechText,
 		fallbackUrl: currentPair?.firstAudioUrl,
-		voiceId: preferredVoiceId,
 		lang: sourceLanguageTag,
 		disableSpeech: true,
 	})
@@ -134,7 +131,6 @@ export function CardsGameView({
 	const speakBackWord = useTTSPlayer({
 		text: backSpeechText,
 		fallbackUrl: currentPair?.secondAudioUrl,
-		voiceId: preferredVoiceId,
 		lang: targetLanguageTag,
 		disableSpeech: true,
 	})

@@ -20,8 +20,10 @@ export async function getTTSUrls(words: string[], language: string): Promise<Rec
   }
 
   // Create a map of word to URL
-  return data.results.reduce((acc: Record<string, string>, item: { word: string, url: string }) => {
-    acc[item.word] = item.url
+  return data.results.reduce((acc: Record<string, string>, item: { word: string, url: string | null }) => {
+    if (item.url) {
+      acc[item.word] = item.url
+    }
     return acc
   }, {})
 } 

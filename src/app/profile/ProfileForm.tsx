@@ -1,14 +1,12 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import type { ChangeEvent } from "react"
 import Image from "next/image"
 import { useFormStatus } from "react-dom"
 import { updateUserProfile } from "./actions"
 import { useSession } from "next-auth/react"
 import { useTranslations } from 'next-intl'
-import { primePreferredVoiceCache } from '@/hooks/use-preferred-voice'
-import { useTTSPlayer } from '@/hooks/use-tts-player'
 
 function SubmitButton() {
   const { pending } = useFormStatus()
@@ -39,16 +37,12 @@ interface ProfileFormProps {
   userId: string
   initialName: string
   initialImage: string
-  initialVoiceId: string | null
-  initialVoiceLabel: string | null
 }
 
 export default function ProfileForm({
   userId,
   initialName,
   initialImage,
-  initialVoiceId,
-  initialVoiceLabel
 }: ProfileFormProps) {
   const { update } = useSession()
   const t = useTranslations('Profile')
@@ -58,57 +52,12 @@ export default function ProfileForm({
   const [lastName, setLastName] = useState(initialName.split(' ')[1] || '')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([])
-  const [isVoiceLoading, setIsVoiceLoading] = useState(true)
-  const [isVoiceSupported, setIsVoiceSupported] = useState(true)
-  const [selectedVoiceId, setSelectedVoiceId] = useState(initialVoiceId ?? '')
-  const [selectedVoiceLabel, setSelectedVoiceLabel] = useState(initialVoiceLabel ?? '')
-
-  const previewVoice = useTTSPlayer({
-    text: t('voicePreviewSample'),
-    voiceId: selectedVoiceId || undefined,
-  })
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) {
-      setIsVoiceSupported(false)
-      setIsVoiceLoading(false)
-      return
-    }
-
-    let cancelled = false
-    const synth = window.speechSynthesis
-
-    const loadVoices = () => {
-      if (cancelled) return
-      const voices = synth.getVoices()
-      if (voices.length) {
-        setAvailableVoices(voices)
-        setIsVoiceLoading(false)
-      }
-    }
-
-    loadVoices()
-    synth.addEventListener('voiceschanged', loadVoices)
-
-    const fallbackTimeout = window.setTimeout(() => {
-      if (!cancelled) {
-        setIsVoiceLoading(false)
-      }
-    }, 1500)
-
-    return () => {
-      cancelled = true
-      window.clearTimeout(fallbackTimeout)
-      synth.removeEventListener('voiceschanged', loadVoices)
-    }
-  }, [])
 
   const handleImageClick = () => {
     fileInputRef.current?.click()
   }
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
       if (file.size > 5 * 1024 * 1024) { // 5MB limit
@@ -134,8 +83,6 @@ export default function ProfileForm({
       lastName,
       profileImage: file,
       currentImageUrl: initialImage,
-      preferredVoiceId: selectedVoiceId || null,
-      preferredVoiceLabel: selectedVoiceLabel || null,
     })
 
     if (result.success) {
@@ -156,48 +103,10 @@ export default function ProfileForm({
           setPreviewImage(result.user.image)
         }
       }
-      primePreferredVoiceCache(
-        selectedVoiceId
-          ? { id: selectedVoiceId, label: selectedVoiceLabel || null }
-          : null,
-      )
     } else {
       setError(result.error || t('updateError'))
     }
   }
-
-  const handleVoiceChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    const value = event.target.value
-    setSelectedVoiceId(value)
-    if (!value) {
-      setSelectedVoiceLabel('')
-      return
-    }
-    const voice = availableVoices.find(option => option.voiceURI === value)
-    setSelectedVoiceLabel(voice?.name ?? '')
-  }
-
-  useEffect(() => {
-    if (!selectedVoiceId || selectedVoiceLabel) {
-      return
-    }
-    const voice = availableVoices.find(option => option.voiceURI === selectedVoiceId)
-    if (voice) {
-      setSelectedVoiceLabel(voice.name)
-    }
-  }, [availableVoices, selectedVoiceId, selectedVoiceLabel])
-
-  const handleVoicePreview = () => {
-    if (!isVoiceSupported) {
-      return
-    }
-    previewVoice()
-  }
-
-  const sortedVoices = useMemo(
-    () => [...availableVoices].sort((a, b) => a.name.localeCompare(b.name)),
-    [availableVoices],
-  )
 
   return (
     <form action={handleSubmit} className="max-w-xl">
@@ -274,56 +183,6 @@ export default function ProfileForm({
               />
             </div>
           </div>
-        </div>
-
-        {/* Voice Preference */}
-        <div className="bg-gray-50 rounded-xl p-6 border border-gray-100 transition-all">
-          <div className="flex flex-col gap-2 mb-4">
-            <h3 className="text-sm font-medium text-gray-700">{t('voicePreference')}</h3>
-            <p className="text-sm text-gray-500">
-              {t('voicePreferenceDescription')}
-            </p>
-          </div>
-          {isVoiceSupported ? (
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="preferredVoice" className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('voicePreference')}
-                </label>
-                <select
-                  id="preferredVoice"
-                  value={selectedVoiceId}
-                  onChange={handleVoiceChange}
-                  disabled={isVoiceLoading}
-                  className="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm transition-colors bg-white"
-                >
-                  <option value="">{t('voiceDefaultOption')}</option>
-                  {sortedVoices.map(voice => (
-                    <option key={voice.voiceURI} value={voice.voiceURI}>
-                      {voice.name} ({voice.lang})
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex flex-wrap items-center gap-4">
-                <button
-                  type="button"
-                  onClick={handleVoicePreview}
-                  className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
-                  disabled={isVoiceLoading}
-                >
-                  {t('voicePreview')}
-                </button>
-                <p className="text-xs text-gray-500">
-                  {t('voiceSyncHint')}
-                </p>
-              </div>
-            </div>
-          ) : (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
-              {t('voiceNotSupported')}
-            </p>
-          )}
         </div>
 
         {/* Error and Success Messages */}

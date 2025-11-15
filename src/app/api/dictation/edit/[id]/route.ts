@@ -143,13 +143,15 @@ export async function PUT(
       body.wordPairs = body.wordPairs.map((pair: { first: string; second: string; firstSentence?: string; secondSentence?: string; sentence?: string }) => {
         const normalizedFirstSentence = pair.firstSentence || ''
         const normalizedSecondSentence = pair.secondSentence || pair.sentence || ''
+        const firstAudioUrl = sourceAudioUrls[pair.first]
+        const secondAudioUrl = targetAudioUrls[pair.second]
         return {
           ...pair,
           firstSentence: normalizedFirstSentence,
           secondSentence: normalizedSecondSentence,
           sentence: normalizedSecondSentence,
-          firstAudioUrl: sourceAudioUrls[pair.first],
-          secondAudioUrl: targetAudioUrls[pair.second]
+          ...(firstAudioUrl ? { firstAudioUrl } : {}),
+          ...(secondAudioUrl ? { secondAudioUrl } : {})
         }
       })
     }

@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button'
 import { GameOverView } from '../GameOverView'
 import { GameHeader, GameHeaderRef } from '../GameHeader'
 import { trackEvent } from '@/lib/posthog-utils'
-import { usePreferredVoice } from '@/hooks/use-preferred-voice'
 import { useTTSPlayer } from '@/hooks/use-tts-player'
 import { getLanguageBCP47Tag } from '@/lib/language-tags'
 import Realistic from 'react-canvas-confetti/dist/presets/realistic'
@@ -89,7 +88,6 @@ export function ArcheryGameView({
   })
   // Add debug mode state
   const [debugMode, setDebugMode] = useState(true)
-  const { preferredVoiceId } = usePreferredVoice()
 
   // Audio refs (client-only)
   const hitSoundRef = useRef<HTMLAudioElement | null>(null)
@@ -183,14 +181,12 @@ export function ArcheryGameView({
   const speakPromptWord = useTTSPlayer({
     text: currentWord?.first,
     fallbackUrl: currentWord?.firstAudioUrl,
-    voiceId: preferredVoiceId,
     lang: sourceLanguageTag,
     disableSpeech: true,
   })
   const speakCurrentWord = useTTSPlayer({
     text: currentWord?.second,
     fallbackUrl: currentWord?.secondAudioUrl,
-    voiceId: preferredVoiceId,
     minDurationMs: 1000,
     lang: targetLanguageTag,
     disableSpeech: true,

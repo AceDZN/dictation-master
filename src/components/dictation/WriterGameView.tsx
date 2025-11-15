@@ -15,7 +15,6 @@ import { Button } from '@/components/ui/button'
 import { GameOverView } from './GameOverView'
 import { GameHeader, GameHeaderRef } from './GameHeader'
 import { trackEvent } from '@/lib/posthog-utils'
-import { usePreferredVoice } from '@/hooks/use-preferred-voice'
 import { useTTSPlayer } from '@/hooks/use-tts-player'
 import { getLanguageBCP47Tag } from '@/lib/language-tags'
 
@@ -86,7 +85,6 @@ export function WriterGameView({
   const gameHeaderRef = useRef<GameHeaderRef>(null)
   // eslint-disable-next-line 
   const [scope, animate] = useAnimate()
-  const { preferredVoiceId } = usePreferredVoice()
 
   const endGame = useCallback((isWin: boolean = false) => {
     setGameState(prev => ({
@@ -146,14 +144,12 @@ export function WriterGameView({
   const speakPromptWord = useTTSPlayer({
     text: currentWord?.first,
     fallbackUrl: currentWord?.firstAudioUrl,
-    voiceId: preferredVoiceId,
     lang: sourceLanguageTag,
     disableSpeech: true,
   })
   const speakCurrentWord = useTTSPlayer({
     text: currentWord?.second,
     fallbackUrl: currentWord?.secondAudioUrl,
-    voiceId: preferredVoiceId,
     minDurationMs: 700,
     lang: targetLanguageTag,
     disableSpeech: true,

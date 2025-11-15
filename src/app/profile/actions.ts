@@ -6,7 +6,6 @@ import { initAdminApp } from "@/lib/firebase-admin"
 import { uploadProfileImage, deleteProfileImage } from "@/lib/storage"
 import { revalidatePath } from "next/cache"
 import { trackEvent } from '@/lib/posthog-utils'
-import { updateUserSettings } from '@/lib/user-settings'
 
 export async function updateUserProfile(
   userId: string,
@@ -15,8 +14,6 @@ export async function updateUserProfile(
     lastName?: string
     profileImage?: File
     currentImageUrl?: string
-    preferredVoiceId?: string | null
-    preferredVoiceLabel?: string | null
   }
 ) {
   try {
@@ -27,7 +24,6 @@ export async function updateUserProfile(
 
     const adminAuth = getAuth(initAdminApp())
     const updates: { displayName?: string; photoURL?: string } = {}
-    const voiceUpdates: { preferredVoiceId?: string | null; preferredVoiceLabel?: string | null } = {}
 
     const updatedFields: string[] = []
 
@@ -55,17 +51,6 @@ export async function updateUserProfile(
 
       updates.photoURL = uploadResult.url
       updatedFields.push('image')
-    }
-
-    if (data.preferredVoiceId !== undefined) {
-      voiceUpdates.preferredVoiceId = data.preferredVoiceId || null
-      voiceUpdates.preferredVoiceLabel = data.preferredVoiceLabel || null
-    }
-
-    const shouldUpdateVoice = Object.keys(voiceUpdates).length > 0
-    if (shouldUpdateVoice) {
-      await updateUserSettings(userId, voiceUpdates)
-      updatedFields.push('voice')
     }
 
     // Update user profile using Admin SDK

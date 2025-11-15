@@ -53,19 +53,22 @@ export async function POST(request: Request) {
     const wordPairsWithAudio = validatedData.wordPairs.map(pair => {
       const normalizedFirstSentence = pair.firstSentence || ''
       const normalizedSecondSentence = pair.secondSentence || pair.sentence || ''
+      const firstAudioUrl = sourceAudioUrls[pair.first]
+      const secondAudioUrl = targetAudioUrls[pair.second]
+
       return {
         ...pair,
         firstSentence: normalizedFirstSentence,
         secondSentence: normalizedSecondSentence,
         sentence: normalizedSecondSentence,
-        firstAudioUrl: sourceAudioUrls[pair.first],
-        secondAudioUrl: targetAudioUrls[pair.second]
+        ...(firstAudioUrl ? { firstAudioUrl } : {}),
+        ...(secondAudioUrl ? { secondAudioUrl } : {})
       }
     })
 
     // Initialize Firestore
     const db = getFirestore(initAdminApp())
-    
+
     // Create the game document with audio URLs
     const timestamp = Timestamp.now()
     const gameData = {
@@ -81,9 +84,9 @@ export async function POST(request: Request) {
     const userRef = docRef.collection('games').doc()
     await userRef.set(gameData)
 
-    return NextResponse.json({ 
-      success: true, 
-      dictationId: userRef.id 
+    return NextResponse.json({
+      success: true,
+      dictationId: userRef.id
     })
   } catch (error) {
     console.error('Error creating dictation:', error)

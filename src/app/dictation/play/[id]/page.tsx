@@ -13,7 +13,7 @@ interface PlayDictationPageProps {
   params: Promise<{ id: string }>
 }
 const getPlayDescription = async (locale: string, game: DictationGame) => {
-  const locales =  {
+  const locales = {
     en: `Practice your ${game.targetLanguage} skills with this dictation exercise: ${game.description}`,
     he: `תרגל את כישורי ה-${game.targetLanguage} שלך עם תרגיל ההכתבה הזה: ${game.description}`
   }
@@ -24,7 +24,7 @@ const getPlayDescription = async (locale: string, game: DictationGame) => {
 export async function generateMetadata({ params }: PlayDictationPageProps): Promise<Metadata> {
   const { id: dictationId } = await params
   const locale = await getLocale()
-  
+
   try {
     const game = await getGame(dictationId)
     const description = await getPlayDescription(locale, game)
@@ -44,14 +44,14 @@ export default async function PlayDictationPage({ params }: PlayDictationPagePro
   const { id: dictationId } = await params
   const cardTranslations = await getTranslations('Dictation.card')
   const session = await auth()
-  
+
   try {
     const game = await getGame(dictationId)
     const isOwner = session?.user?.id === game.userId
     const editHref = `/dictation/edit/${game.id ?? dictationId}`
 
     return (
-      
+
       <div className="container mx-auto relative z-10">
         <div className="mx-auto max-w-6xl relative">
           <div className="bg-white rounded-2xl shadow-xl p-8 mb-12 border border-gray-100 relative overflow-hidden">
@@ -68,7 +68,7 @@ export default async function PlayDictationPage({ params }: PlayDictationPagePro
                 </Button>
               )}
               <GameShareButton
-                id={game.id}
+                id={game.id ?? dictationId}
                 title={game.title}
                 description={game.description}
                 label={cardTranslations('share')}
