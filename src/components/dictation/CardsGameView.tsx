@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { DictationGame } from '@/lib/types'
 import { getFirstSentence, getSecondSentence } from '@/lib/language-direction'
 import { Button } from '@/components/ui/button'
@@ -47,6 +47,7 @@ export function CardsGameView({
 	const [currentIndex, setCurrentIndex] = useState(0)
 	const [isFlipped, setIsFlipped] = useState(false)
 	const [isComplete, setIsComplete] = useState(false)
+	const audioRef = useRef<HTMLAudioElement | null>(null)
 
 	const handleFlip = useCallback(() => {
 		setIsFlipped(prev => !prev)
@@ -95,6 +96,34 @@ export function CardsGameView({
 		window.addEventListener('keydown', handleKeyDown)
 		return () => window.removeEventListener('keydown', handleKeyDown)
 	}, [handleFlip, handleNext, handlePrev])
+
+	const playFrontAudio = useCallback(() => {
+		const currentPair = deck[currentIndex]
+		if (!currentPair?.firstAudioUrl) {
+			return
+		}
+
+		if (audioRef.current) {
+			audioRef.current.pause()
+			audioRef.current = null
+		}
+
+		const audio = new Audio(currentPair.firstAudioUrl)
+		audioRef.current = audio
+		audio.play().catch(error => {
+			console.error('Error playing TTS audio for card:', error)
+		})
+	}, [deck, currentIndex])
+
+	useEffect(() => {
+		playFrontAudio()
+		return () => {
+			if (audioRef.current) {
+				audioRef.current.pause()
+				audioRef.current = null
+			}
+		}
+	}, [playFrontAudio])
 
 	if (!deck.length) {
 		return (
@@ -194,9 +223,8 @@ export function CardsGameView({
 										{currentPair.first}
 									</p>
 									<p
-										className={`text-lg text-gray-500 transition-opacity duration-300 ${
-											hideExampleSentences ? 'opacity-0' : 'opacity-100'
-										}`}
+										className={`text-lg text-gray-500 transition-opacity duration-300 ${hideExampleSentences ? 'opacity-0' : 'opacity-100'
+											}`}
 									>
 										{frontSentence || t('cardsNoSentence')}
 									</p>
@@ -221,9 +249,8 @@ export function CardsGameView({
 										{currentPair.second}
 									</p>
 									<p
-										className={`text-lg text-indigo-100 transition-opacity duration-300 ${
-											hideExampleSentences ? 'opacity-0' : 'opacity-100'
-										}`}
+										className={`text-lg text-indigo-100 transition-opacity duration-300 ${hideExampleSentences ? 'opacity-0' : 'opacity-100'
+											}`}
 									>
 										{backSentence || t('cardsNoSentence')}
 									</p>
