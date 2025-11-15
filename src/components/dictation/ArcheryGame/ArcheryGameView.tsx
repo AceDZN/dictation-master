@@ -10,9 +10,11 @@ import { Button } from '@/components/ui/button'
 import { GameOverView } from '../GameOverView'
 import { GameHeader, GameHeaderRef } from '../GameHeader'
 import { trackEvent } from '@/lib/posthog-utils'
+import { usePreferredVoice } from '@/hooks/use-preferred-voice'
+import { useTTSPlayer } from '@/hooks/use-tts-player'
 import Realistic from 'react-canvas-confetti/dist/presets/realistic'
 import { Canvas } from '@react-three/fiber'
-import { Leva,  } from 'leva'
+import { Leva, } from 'leva'
 import * as THREE from 'three'
 
 import { Target } from './Target'
@@ -48,8 +50,8 @@ interface GameState {
 
 // Removed module-level Audio to avoid SSR errors
 
-export function ArcheryGameView({ 
-  game, 
+export function ArcheryGameView({
+  game,
   onGameEnd,
   hideExampleSentences = false,
   onToggleExampleSentences,
@@ -60,7 +62,7 @@ export function ArcheryGameView({
   }
   useGLTF.preload('/3d-models/bow.glb')
   const t = useTranslations('Dictation.game')
-  
+
   // Randomize word pairs on initial load if shuffleWords is true
   const randomizedWordPairs = useMemo(() => {
     return shuffleWords
@@ -86,6 +88,7 @@ export function ArcheryGameView({
   })
   // Add debug mode state
   const [debugMode, setDebugMode] = useState(true)
+  const { preferredVoiceId } = usePreferredVoice()
 
   // Audio refs (client-only)
   const hitSoundRef = useRef<HTMLAudioElement | null>(null)
@@ -104,13 +107,13 @@ export function ArcheryGameView({
         setDebugMode(prev => !prev)
       }
     }
-    
+
     window.addEventListener('keydown', handleKeyDown)
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
     }
   }, [])
-  
+
   const gameContainerRef = useRef<HTMLDivElement>(null)
   const confettiController = useRef<any>(null)
   const gameHeaderRef = useRef<GameHeaderRef>(null)
@@ -119,54 +122,61 @@ export function ArcheryGameView({
   // Generate targets for the current word
   const generateTargets = useCallback((currentWord: WordPair, totalOptions: number = 4): Target[] => {
     const targets: Target[] = []
-    
+
     // Get wrong options from other words
     const wrongOptions = randomizedWordPairs
       .filter(wp => wp.second !== currentWord.second)
       .map(wp => wp.second)
       .sort(() => Math.random() - 0.5)
       .slice(0, totalOptions - 1)
-    
+
     // Combine correct answer with wrong options
     const allOptions = [
       { word: currentWord.second, isCorrect: true },
       ...wrongOptions.map(word => ({ word, isCorrect: false }))
     ]
-    
+
     // Shuffle the options
     const shuffledOptions = [...allOptions].sort(() => Math.random() - 0.5)
-    
+
     // Position targets in a semicircle in front of the player
-    const DISTANCE = {min: 7, max: 12}
-    const ANGLE = {min: 4, max: 2.75}
+    const DISTANCE = { min: 7, max: 12 }
+    const ANGLE = { min: 4, max: 2.75 }
     const distance = DISTANCE.min + Math.random() * (DISTANCE.max - DISTANCE.min)
 
     const radius = distance
     const startAngle = -Math.PI / (ANGLE.min + Math.random() * (ANGLE.max - ANGLE.min))
     const endAngle = Math.PI / (ANGLE.min + Math.random() * (ANGLE.max - ANGLE.min))
     const angleStep = (endAngle - startAngle) / (shuffledOptions.length - 1 || 1)
-    
+
     shuffledOptions.forEach((option, i) => {
       const angle = startAngle + (angleStep * i)
       const x = Math.sin(angle) * radius
       const z = -Math.cos(angle) * radius
-      
+
       targets.push({
         position: new THREE.Vector3(x, 1.5, z),
         word: option.word,
         isCorrect: option.isCorrect
       })
     })
-    
+
     return targets
   }, [randomizedWordPairs])
 
   // Current targets
   const [targets, setTargets] = useState<Target[]>([])
-  
+
   const getCurrentWord = useCallback((): WordPair => {
     return randomizedWordPairs[gameState.currentWordIndex]
   }, [randomizedWordPairs, gameState.currentWordIndex])
+  const currentWord = useMemo(() => getCurrentWord(), [getCurrentWord])
+  const speakCurrentWord = useTTSPlayer({
+    text: currentWord?.second,
+    fallbackUrl: currentWord?.secondAudioUrl,
+    voiceId: preferredVoiceId,
+    minDurationMs: 1000
+  })
 
   // Update targets when current word changes
   useEffect(() => {
@@ -181,7 +191,7 @@ export function ArcheryGameView({
       isGameOver: true,
       totalTime: Math.floor((Date.now() - prev.gameStartTime) / 1000)
     }))
-    
+
     trackEvent('game_over', {
       game_id: game.id,
       game_title: game.title,
@@ -259,7 +269,7 @@ export function ArcheryGameView({
     } catch (error) {
       console.error('Sound loading error:', error)
     }
-    
+
     // Pause the timer immediately
     setGameState(prev => ({
       ...prev,
@@ -268,21 +278,13 @@ export function ArcheryGameView({
       score: prev.score + 100
     }))
 
-    // Play pronunciation audio if available
-    const currentWord = getCurrentWord()
-    if (currentWord.secondAudioUrl) {
-      const audio = new Audio(currentWord.secondAudioUrl)
-      audio.addEventListener('ended', () => {
+    speakCurrentWord()
+      .catch(error => {
+        console.error('Error during TTS playback:', error)
+      })
+      .finally(() => {
         moveToNextWord()
       })
-      audio.play().catch(error => {
-        console.error('Error playing audio:', error)
-        moveToNextWord() // Move to next word even if audio fails
-      })
-    } else {
-      // If no audio, wait a moment before moving to next word
-      setTimeout(moveToNextWord, 1500)
-    }
 
     trackEvent('answer_correct', {
       game_id: game.id,
@@ -294,12 +296,12 @@ export function ArcheryGameView({
       word_first: currentWord.first,
       word_second: currentWord.second
     })
-  }, [getCurrentWord, moveToNextWord, game, gameState.currentWordIndex, confettiController])
+  }, [confettiController, currentWord, game, gameState.currentWordIndex, moveToNextWord, speakCurrentWord])
 
   const handleIncorrectAnswer = useCallback(() => {
     const newHearts = gameState.hearts - 1
     const newFails = gameState.fails + 1
-    
+
     // Play miss sound effect
     try {
       const audioEl = missSoundRef.current
@@ -311,12 +313,12 @@ export function ArcheryGameView({
     } catch (error) {
       console.error('Sound loading error:', error)
     }
-    
+
     // Only animate heart loss if we still have hearts
     if (gameState.hearts > 0) {
       gameHeaderRef.current?.animateHeartLoss()
     }
-    
+
     let newStars = 3
     if (newFails >= 5) newStars = 1
     else if (newFails >= 3) newStars = 2
@@ -392,7 +394,7 @@ export function ArcheryGameView({
 
   if (gameState.isGameOver) {
     return (
-      <GameOverView 
+      <GameOverView
         gameId={game.id}
         stars={gameState.stars}
         hearts={gameState.hearts}
@@ -408,11 +410,11 @@ export function ArcheryGameView({
 
   return (
     <div className="max-w-5xl mx-auto">
-      <Realistic onInit={handleConfettiInit} globalOptions={{useWorker: true}} decorateOptions={() => ({
+      <Realistic onInit={handleConfettiInit} globalOptions={{ useWorker: true }} decorateOptions={() => ({
         particleCount: 10,
         spread: 70,
       })} />
-      
+
       <h1 className="text-md mb-8 text-center text-gray-300 relative">
         {game.title}
 
@@ -433,8 +435,8 @@ export function ArcheryGameView({
           </Button>
         )}
       </h1>
-      
-      <GameHeader 
+
+      <GameHeader
         ref={gameHeaderRef}
         hearts={gameState.hearts}
         currentWordIndex={gameState.currentWordIndex}
@@ -445,8 +447,8 @@ export function ArcheryGameView({
       />
 
       <div className="relative text-center mb-8 w-full h-[60vh] flex flex-col justify-center items-center bg-cyan-300 rounded-lg overflow-hidden" ref={gameContainerRef}>
-                 <Canvas shadows>
-          <ArcheryScene 
+        <Canvas shadows>
+          <ArcheryScene
             targets={targets}
             isBowDrawn={gameState.isBowDrawn}
             setIsBowDrawn={setIsBowDrawn}
@@ -454,20 +456,20 @@ export function ArcheryGameView({
           />
         </Canvas>
         <div className="text-4xl font-bold mb-12 text-indigo-600 current-word py-2 px-6 bg-white/70 absolute top-0 left-1/2 z-20 -translate-x-1/2 rounded-b-lg w-auto max-w-full">
-            {getCurrentWord().first}
+          {getCurrentWord().first}
         </div>
         {/* Debug UI is always rendered but only visible when active */}
         <div className={`absolute top-0 right-0 z-10 ${debugMode ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
           <Leva titleBar={{ title: "Archery Debug", filter: false }} />
         </div>
       </div>
-      
+
       {!hideExampleSentences && getSecondSentence(getCurrentWord()) && (
         <div className="text-center text-lg text-gray-600 mb-8 max-w-2xl mx-auto p-4 bg-gray-50 rounded-lg">
           <p>{getSecondSentence(getCurrentWord())}</p>
         </div>
       )}
-      
+
       <div className="text-center text-sm text-gray-400 mb-4">
         {t('instructions')} {t('clickDragInstructions')}
         {/* Add debug hotkey hint with faint styling */}

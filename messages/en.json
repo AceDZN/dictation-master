@@ -84,7 +84,14 @@
     "recommendedImageSize": "Recommended image size: 320x320px",
     "personalInfo": "Personal Information",
     "email": "Email",
-    "gamesCreated": "Games Created"
+    "gamesCreated": "Games Created",
+    "voicePreference": "Preferred voice",
+    "voicePreferenceDescription": "Choose which speech synthesis voice we should use when pronouncing words during games.",
+    "voiceDefaultOption": "Use browser default",
+    "voicePreview": "Preview voice",
+    "voicePreviewSample": "This is your Dictation Masters voice preview.",
+    "voiceNotSupported": "Your browser doesn't support speech synthesis. Please update or use another browser to personalize your voice.",
+    "voiceSyncHint": "Saved voice applies to every game while you're signed in."
   },
   "Language": {
     "language": "Language",

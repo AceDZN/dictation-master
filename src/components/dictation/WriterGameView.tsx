@@ -7,7 +7,7 @@ import { getSecondSentence } from '@/lib/language-direction'
 import { Input } from '@/components/ui/input'
 import Realistic from 'react-canvas-confetti/dist/presets/realistic'
 import { useAnimate } from 'motion/react'
-import {  EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 import { useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
@@ -15,6 +15,8 @@ import { Button } from '@/components/ui/button'
 import { GameOverView } from './GameOverView'
 import { GameHeader, GameHeaderRef } from './GameHeader'
 import { trackEvent } from '@/lib/posthog-utils'
+import { usePreferredVoice } from '@/hooks/use-preferred-voice'
+import { useTTSPlayer } from '@/hooks/use-tts-player'
 
 interface GameViewProps {
   game: DictationGame
@@ -40,8 +42,8 @@ interface GameState {
   score: number
 }
 
-export function WriterGameView({ 
-  game, 
+export function WriterGameView({
+  game,
   onGameEnd,
   hideExampleSentences = false,
   onToggleExampleSentences,
@@ -53,7 +55,7 @@ export function WriterGameView({
   const t = useTranslations('Dictation.game')
   // Randomize word pairs on initial load if shuffleWords is true
   const randomizedWordPairs = useMemo(() => {
-    return shuffleWords 
+    return shuffleWords
       ? [...game.wordPairs].sort(() => Math.random() - 0.5)
       : [...game.wordPairs]
   }, [game.wordPairs, shuffleWords])
@@ -83,6 +85,7 @@ export function WriterGameView({
   const gameHeaderRef = useRef<GameHeaderRef>(null)
   // eslint-disable-next-line 
   const [scope, animate] = useAnimate()
+  const { preferredVoiceId } = usePreferredVoice()
 
   const endGame = useCallback((isWin: boolean = false) => {
     setGameState(prev => ({
@@ -136,6 +139,13 @@ export function WriterGameView({
   }, [])
 
   const getCurrentWord = useCallback((): WordPair => randomizedWordPairs[gameState.currentWordIndex], [randomizedWordPairs, gameState.currentWordIndex])
+  const currentWord = useMemo(() => getCurrentWord(), [getCurrentWord])
+  const speakCurrentWord = useTTSPlayer({
+    text: currentWord?.second,
+    fallbackUrl: currentWord?.secondAudioUrl,
+    voiceId: preferredVoiceId,
+    minDurationMs: 700
+  })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
@@ -187,25 +197,17 @@ export function WriterGameView({
     setInputStatus('correct')
     setHasInputChanged(false)
     confettiController.current?.shoot()
-    
+
     // Pause the timer immediately
     setGameState(prev => ({ ...prev, isPaused: true, completedWords: prev.completedWords + 1 }))
 
-    // Play audio if available and move to next word after completion
-    const currentWord = getCurrentWord()
-    if (currentWord.secondAudioUrl) {
-      const audio = new Audio(currentWord.secondAudioUrl)
-      audio.addEventListener('ended', () => {
+    speakCurrentWord()
+      .catch(error => {
+        console.error('Error during TTS playback:', error)
+      })
+      .finally(() => {
         moveToNextWord()
       })
-      audio.play().catch(error => {
-        console.error('Error playing audio:', error)
-        moveToNextWord() // Move to next word even if audio fails
-      })
-    } else {
-      // If no audio, wait for a moment before moving to next word
-      setTimeout(moveToNextWord, 1000)
-    }
 
     trackEvent('answer_correct', {
       game_id: game.id,
@@ -217,7 +219,7 @@ export function WriterGameView({
       word_first: currentWord.first,
       word_second: currentWord.second
     })
-  }, [ getCurrentWord, moveToNextWord, game, gameState.currentWordIndex])
+  }, [currentWord, game, gameState.currentWordIndex, moveToNextWord, speakCurrentWord])
 
   const getHint = useCallback((word: string, guessCount: number) => {
     const revealed = word.slice(0, Math.min(guessCount + 1, word.length))
@@ -230,12 +232,12 @@ export function WriterGameView({
     const newHearts = gameState.hearts - 1
     const newFails = gameState.fails + 1
     const newGuesses = gameState.currentWordGuesses + 1
-    
+
     // Only animate heart loss if we still have hearts
     if (gameState.hearts > 0) {
       gameHeaderRef.current?.animateHeartLoss()
     }
-    
+
     let newStars = 3
     if (newFails >= 5) newStars = 1
     else if (newFails >= 3) newStars = 2
@@ -318,7 +320,7 @@ export function WriterGameView({
 
   if (gameState.isGameOver) {
     return (
-      <GameOverView 
+      <GameOverView
         gameId={game.id}
         stars={gameState.stars}
         hearts={gameState.hearts}
@@ -334,8 +336,8 @@ export function WriterGameView({
   return (
     <div className="max-w-3xl mx-auto p-6">
 
-      
-      <Realistic onInit={handleConfettiInit} globalOptions={{useWorker: true}} decorateOptions={() => ({
+
+      <Realistic onInit={handleConfettiInit} globalOptions={{ useWorker: true }} decorateOptions={() => ({
         particleCount: 10,
         spread: 70,
       })} />
@@ -359,8 +361,8 @@ export function WriterGameView({
           </Button>
         )}
       </h1>
-      
-      <GameHeader 
+
+      <GameHeader
         ref={gameHeaderRef}
         hearts={gameState.hearts}
         currentWordIndex={gameState.currentWordIndex}
@@ -385,11 +387,10 @@ export function WriterGameView({
                 onBlur={handleInputBlur}
                 onKeyDown={handleInputKeyDown}
                 maxLength={getCurrentWord().second.length}
-                className={`text-center text-xl md:text-4xl font-bold p-6 rounded-xl border-2 shadow-lg h-fit w-auto transition-all duration-300 ease-in-out transform preserve-3d hover:scale-105 focus:scale-105 ${
-                  inputStatus === 'correct' ? 'bg-green-50 border-green-500 scale-105' :
+                className={`text-center text-xl md:text-4xl font-bold p-6 rounded-xl border-2 shadow-lg h-fit w-auto transition-all duration-300 ease-in-out transform preserve-3d hover:scale-105 focus:scale-105 ${inputStatus === 'correct' ? 'bg-green-50 border-green-500 scale-105' :
                   inputStatus === 'incorrect' ? 'bg-red-50 border-red-500 shake' :
-                  'border-indigo-200 hover:border-indigo-400 focus:border-indigo-600'
-                }`}
+                    'border-indigo-200 hover:border-indigo-400 focus:border-indigo-600'
+                  }`}
                 autoComplete="off"
                 style={{
                   transformStyle: 'preserve-3d',
@@ -402,7 +403,7 @@ export function WriterGameView({
                     <TooltipTrigger asChild>
                       <div className="absolute -bottom-20 left-1/2 transform -translate-x-1/2 w-1 h-1" />
                     </TooltipTrigger>
-                    <TooltipContent 
+                    <TooltipContent
                       className="bg-red-500 text-white font-mono text-lg px-4 py-2 shadow-lg relative overflow-visible"
                       sideOffset={16}
                     >

@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import ProfileForm from "../ProfileForm"
 import { getTranslations } from 'next-intl/server'
+import { getUserSettings } from '@/lib/user-settings'
 
 
 interface ProfileEditPageProps {
@@ -15,6 +16,7 @@ export default async function ProfileEditPage({ searchParams }: ProfileEditPageP
   }
 
   const t = await getTranslations('Profile')
+  const userSettings = await getUserSettings(session.user.id)
   await searchParams // Need to await even if not using to comply with Next.js 15
 
   return (
@@ -45,6 +47,8 @@ export default async function ProfileEditPage({ searchParams }: ProfileEditPageP
                 userId={session.user.id}
                 initialName={session.user.name ?? ''}
                 initialImage={session.user.image ?? ''}
+                initialVoiceId={userSettings?.preferredVoiceId ?? null}
+                initialVoiceLabel={userSettings?.preferredVoiceLabel ?? null}
               />
             </div>
           </div>

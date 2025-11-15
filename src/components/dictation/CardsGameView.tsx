@@ -1,11 +1,13 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { DictationGame } from '@/lib/types'
 import { getFirstSentence, getSecondSentence } from '@/lib/language-direction'
 import { Button } from '@/components/ui/button'
 import { useTranslations } from 'next-intl'
 import { EyeIcon, EyeSlashIcon, ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/outline'
+import { usePreferredVoice } from '@/hooks/use-preferred-voice'
+import { useTTSPlayer } from '@/hooks/use-tts-player'
 
 interface CardsGameViewProps {
 	game: DictationGame
@@ -47,7 +49,7 @@ export function CardsGameView({
 	const [currentIndex, setCurrentIndex] = useState(0)
 	const [isFlipped, setIsFlipped] = useState(false)
 	const [isComplete, setIsComplete] = useState(false)
-	const audioRef = useRef<HTMLAudioElement | null>(null)
+	const { preferredVoiceId } = usePreferredVoice()
 
 	const handleFlip = useCallback(() => {
 		setIsFlipped(prev => !prev)
@@ -97,33 +99,20 @@ export function CardsGameView({
 		return () => window.removeEventListener('keydown', handleKeyDown)
 	}, [handleFlip, handleNext, handlePrev])
 
-	const playFrontAudio = useCallback(() => {
-		const currentPair = deck[currentIndex]
-		if (!currentPair?.firstAudioUrl) {
-			return
-		}
+	const currentPair = deck[currentIndex]
 
-		if (audioRef.current) {
-			audioRef.current.pause()
-			audioRef.current = null
-		}
-
-		const audio = new Audio(currentPair.firstAudioUrl)
-		audioRef.current = audio
-		audio.play().catch(error => {
-			console.error('Error playing TTS audio for card:', error)
-		})
-	}, [deck, currentIndex])
+	const speakFrontWord = useTTSPlayer({
+		text: currentPair?.first,
+		fallbackUrl: currentPair?.firstAudioUrl,
+		voiceId: preferredVoiceId,
+	})
 
 	useEffect(() => {
-		playFrontAudio()
-		return () => {
-			if (audioRef.current) {
-				audioRef.current.pause()
-				audioRef.current = null
-			}
+		if (!currentPair) {
+			return
 		}
-	}, [playFrontAudio])
+		speakFrontWord()
+	}, [currentPair, speakFrontWord])
 
 	if (!deck.length) {
 		return (
@@ -162,7 +151,6 @@ export function CardsGameView({
 		)
 	}
 
-	const currentPair = deck[currentIndex]
 	const frontSentence = getFirstSentence(currentPair)
 	const backSentence = getSecondSentence(currentPair)
 	const progressLabel = t('cardsProgress', {

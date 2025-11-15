@@ -6,6 +6,7 @@ import { initAdminApp } from "@/lib/firebase-admin"
 import { uploadProfileImage, deleteProfileImage } from "@/lib/storage"
 import { revalidatePath } from "next/cache"
 import { trackEvent } from '@/lib/posthog-utils'
+import { updateUserSettings } from '@/lib/user-settings'
 
 export async function updateUserProfile(
   userId: string,
@@ -14,6 +15,8 @@ export async function updateUserProfile(
     lastName?: string
     profileImage?: File
     currentImageUrl?: string
+    preferredVoiceId?: string | null
+    preferredVoiceLabel?: string | null
   }
 ) {
   try {
@@ -24,12 +27,16 @@ export async function updateUserProfile(
 
     const adminAuth = getAuth(initAdminApp())
     const updates: { displayName?: string; photoURL?: string } = {}
+    const voiceUpdates: { preferredVoiceId?: string | null; preferredVoiceLabel?: string | null } = {}
+
+    const updatedFields: string[] = []
 
     // Update name if provided
     if (data.firstName || data.lastName) {
       const displayName = `${data.firstName || ''} ${data.lastName || ''}`.trim()
       if (displayName) {
         updates.displayName = displayName
+        updatedFields.push('name')
       }
     }
 
@@ -47,6 +54,18 @@ export async function updateUserProfile(
       }
 
       updates.photoURL = uploadResult.url
+      updatedFields.push('image')
+    }
+
+    if (data.preferredVoiceId !== undefined) {
+      voiceUpdates.preferredVoiceId = data.preferredVoiceId || null
+      voiceUpdates.preferredVoiceLabel = data.preferredVoiceLabel || null
+    }
+
+    const shouldUpdateVoice = Object.keys(voiceUpdates).length > 0
+    if (shouldUpdateVoice) {
+      await updateUserSettings(userId, voiceUpdates)
+      updatedFields.push('voice')
     }
 
     // Update user profile using Admin SDK
@@ -59,10 +78,11 @@ export async function updateUserProfile(
       // Force revalidation of the profile page
       revalidatePath('/profile')
 
-      const updatedFields = ['name', 'image'].filter(() => updatedUser.displayName || updatedUser.photoURL)
-      trackEvent('profile_changes_saved', {
-        fields_updated: updatedFields
-      })
+      if (updatedFields.length) {
+        trackEvent('profile_changes_saved', {
+          fields_updated: updatedFields
+        })
+      }
 
       return { 
         success: true,
@@ -71,6 +91,12 @@ export async function updateUserProfile(
           image: updatedUser.photoURL || null,
         }
       }
+    }
+
+    if (updatedFields.length) {
+      trackEvent('profile_changes_saved', {
+        fields_updated: updatedFields
+      })
     }
 
     return { success: true }

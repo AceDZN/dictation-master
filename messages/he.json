@@ -84,7 +84,14 @@
     "recommendedImageSize": "גודל התמונה המומלץ: 320x320px",
     "personalInfo": "מידע אישי",
     "email": "אימייל",
-    "gamesCreated": "משחקים נוצרו"
+    "gamesCreated": "משחקים נוצרו",
+    "voicePreference": "קול מועדף",
+    "voicePreferenceDescription": "בחרו את קול הדיבור שבו נשתמש כדי להקריא מילים במהלך המשחקים.",
+    "voiceDefaultOption": "ברירת המחדל של הדפדפן",
+    "voicePreview": "האזנה לקול",
+    "voicePreviewSample": "זהו הקול המועדף שלכם ב-Dictation Masters.",
+    "voiceNotSupported": "הדפדפן שלכם לא תומך בסינתזת דיבור. עדכנו או עברו לדפדפן אחר כדי לבחור קול אישי.",
+    "voiceSyncHint": "הבחירה נשמרת בכל המשחקים כאשר אתם מחוברים."
   },
   "Language": {
     "language": "שפה",
