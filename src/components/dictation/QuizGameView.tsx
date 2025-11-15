@@ -14,6 +14,7 @@ import { GameHeader, GameHeaderRef } from './GameHeader'
 import { trackEvent } from '@/lib/posthog-utils'
 import { usePreferredVoice } from '@/hooks/use-preferred-voice'
 import { useTTSPlayer } from '@/hooks/use-tts-player'
+import { getLanguageBCP47Tag } from '@/lib/language-tags'
 
 interface QuizGameViewProps {
   game: DictationGame
@@ -110,16 +111,39 @@ export function QuizGameView({
   const handleConfettiInit = useCallback(({ conductor }: { conductor: any }) => {
     confettiController.current = conductor
   }, [])
+  const sourceLanguageTag = useMemo(
+    () => getLanguageBCP47Tag(game.sourceLanguage),
+    [game.sourceLanguage],
+  )
+  const targetLanguageTag = useMemo(
+    () => getLanguageBCP47Tag(game.targetLanguage),
+    [game.targetLanguage],
+  )
+
   const getCurrentWord = useCallback(
     (): WordPair => randomizedWordPairs[gameState.currentWordIndex],
     [randomizedWordPairs, gameState.currentWordIndex],
   )
   const currentWord = useMemo(() => getCurrentWord(), [getCurrentWord])
+  const speakPromptWord = useTTSPlayer({
+    text: currentWord?.first,
+    fallbackUrl: currentWord?.firstAudioUrl,
+    voiceId: preferredVoiceId,
+    lang: sourceLanguageTag,
+  })
   const speakCurrentWord = useTTSPlayer({
     text: currentWord?.second,
     fallbackUrl: currentWord?.secondAudioUrl,
     voiceId: preferredVoiceId,
+    lang: targetLanguageTag,
   })
+
+  useEffect(() => {
+    if (gameState.isGameOver) {
+      return
+    }
+    speakPromptWord()
+  }, [gameState.isGameOver, speakPromptWord])
 
   const generateOptions = useCallback(() => {
     const currentWord = getCurrentWord()

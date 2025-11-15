@@ -19,6 +19,10 @@ const DEFAULT_VOLUME = 1
 const DEFAULT_MIN_DURATION = 0
 
 let voicesPromise: Promise<SpeechSynthesisVoice[]> | null = null
+const wait = (ms: number) =>
+	new Promise<void>(resolve => {
+		window.setTimeout(resolve, ms)
+	})
 
 const loadVoices = (): Promise<SpeechSynthesisVoice[]> => {
 	if (typeof window === 'undefined' || !window.speechSynthesis) {
@@ -124,6 +128,26 @@ export function useTTSPlayer({
 		})
 	}, [fallbackUrl, volume])
 
+	const waitForSynthIdle = useCallback(async (synth: SpeechSynthesis) => {
+		const start = Date.now()
+		while (synth.speaking || synth.pending) {
+			if (Date.now() - start > 750) {
+				break
+			}
+			await wait(40)
+		}
+	}, [])
+
+	const ensureSynthReady = useCallback(
+		async (synth: SpeechSynthesis) => {
+			if (synth.speaking || synth.pending) {
+				synth.cancel()
+				await waitForSynthIdle(synth)
+			}
+		},
+		[waitForSynthIdle],
+	)
+
 	return useCallback(async () => {
 		const startedAt = Date.now()
 		if (!text?.trim()) {
@@ -146,6 +170,7 @@ export function useTTSPlayer({
 		try {
 			const synth = window.speechSynthesis
 			const voices = await loadVoices()
+			await ensureSynthReady(synth)
 
 			const utterance = new SpeechSynthesisUtterance(text)
 			if (voiceId) {
@@ -195,6 +220,6 @@ export function useTTSPlayer({
 				}
 			}
 		}
-	}, [text, voiceId, lang, rate, pitch, volume, playFallbackAudio, minDurationMs])
+	}, [text, voiceId, lang, rate, pitch, volume, playFallbackAudio, minDurationMs, ensureSynthReady])
 }
 

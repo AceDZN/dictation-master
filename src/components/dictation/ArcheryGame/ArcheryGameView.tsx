@@ -12,6 +12,7 @@ import { GameHeader, GameHeaderRef } from '../GameHeader'
 import { trackEvent } from '@/lib/posthog-utils'
 import { usePreferredVoice } from '@/hooks/use-preferred-voice'
 import { useTTSPlayer } from '@/hooks/use-tts-player'
+import { getLanguageBCP47Tag } from '@/lib/language-tags'
 import Realistic from 'react-canvas-confetti/dist/presets/realistic'
 import { Canvas } from '@react-three/fiber'
 import { Leva, } from 'leva'
@@ -171,12 +172,34 @@ export function ArcheryGameView({
     return randomizedWordPairs[gameState.currentWordIndex]
   }, [randomizedWordPairs, gameState.currentWordIndex])
   const currentWord = useMemo(() => getCurrentWord(), [getCurrentWord])
+  const sourceLanguageTag = useMemo(
+    () => getLanguageBCP47Tag(game.sourceLanguage),
+    [game.sourceLanguage],
+  )
+  const targetLanguageTag = useMemo(
+    () => getLanguageBCP47Tag(game.targetLanguage),
+    [game.targetLanguage],
+  )
+  const speakPromptWord = useTTSPlayer({
+    text: currentWord?.first,
+    fallbackUrl: currentWord?.firstAudioUrl,
+    voiceId: preferredVoiceId,
+    lang: sourceLanguageTag,
+  })
   const speakCurrentWord = useTTSPlayer({
     text: currentWord?.second,
     fallbackUrl: currentWord?.secondAudioUrl,
     voiceId: preferredVoiceId,
-    minDurationMs: 1000
+    minDurationMs: 1000,
+    lang: targetLanguageTag,
   })
+
+  useEffect(() => {
+    if (gameState.isGameOver) {
+      return
+    }
+    speakPromptWord()
+  }, [gameState.isGameOver, speakPromptWord])
 
   // Update targets when current word changes
   useEffect(() => {

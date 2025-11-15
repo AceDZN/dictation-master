@@ -17,6 +17,7 @@ import { GameHeader, GameHeaderRef } from './GameHeader'
 import { trackEvent } from '@/lib/posthog-utils'
 import { usePreferredVoice } from '@/hooks/use-preferred-voice'
 import { useTTSPlayer } from '@/hooks/use-tts-player'
+import { getLanguageBCP47Tag } from '@/lib/language-tags'
 
 interface GameViewProps {
   game: DictationGame
@@ -139,13 +140,29 @@ export function WriterGameView({
   }, [])
 
   const getCurrentWord = useCallback((): WordPair => randomizedWordPairs[gameState.currentWordIndex], [randomizedWordPairs, gameState.currentWordIndex])
+  const sourceLanguageTag = useMemo(() => getLanguageBCP47Tag(game.sourceLanguage), [game.sourceLanguage])
+  const targetLanguageTag = useMemo(() => getLanguageBCP47Tag(game.targetLanguage), [game.targetLanguage])
   const currentWord = useMemo(() => getCurrentWord(), [getCurrentWord])
+  const speakPromptWord = useTTSPlayer({
+    text: currentWord?.first,
+    fallbackUrl: currentWord?.firstAudioUrl,
+    voiceId: preferredVoiceId,
+    lang: sourceLanguageTag,
+  })
   const speakCurrentWord = useTTSPlayer({
     text: currentWord?.second,
     fallbackUrl: currentWord?.secondAudioUrl,
     voiceId: preferredVoiceId,
-    minDurationMs: 700
+    minDurationMs: 700,
+    lang: targetLanguageTag,
   })
+
+  useEffect(() => {
+    if (gameState.isGameOver) {
+      return
+    }
+    speakPromptWord()
+  }, [gameState.isGameOver, speakPromptWord])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value

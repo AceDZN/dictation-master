@@ -79,9 +79,9 @@ export async function updateUserProfile(
       revalidatePath('/profile')
 
       if (updatedFields.length) {
-        trackEvent('profile_changes_saved', {
-          fields_updated: updatedFields
-        })
+      trackEvent('profile_changes_saved', {
+        fields_updated: updatedFields
+      })
       }
 
       return { 

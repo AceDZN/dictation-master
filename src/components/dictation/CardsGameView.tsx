@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl'
 import { EyeIcon, EyeSlashIcon, ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/outline'
 import { usePreferredVoice } from '@/hooks/use-preferred-voice'
 import { useTTSPlayer } from '@/hooks/use-tts-player'
+import { getLanguageBCP47Tag } from '@/lib/language-tags'
 
 interface CardsGameViewProps {
 	game: DictationGame
@@ -101,18 +102,52 @@ export function CardsGameView({
 
 	const currentPair = deck[currentIndex]
 
+	const sourceLanguageTag = useMemo(
+		() => getLanguageBCP47Tag(game.sourceLanguage),
+		[game.sourceLanguage],
+	)
+	const targetLanguageTag = useMemo(
+		() => getLanguageBCP47Tag(game.targetLanguage),
+		[game.targetLanguage],
+	)
+
+	const buildSpeechContent = (word?: string, sentence?: string) => {
+		if (!word?.trim()) {
+			return sentence?.trim()
+		}
+		return sentence?.trim() ? `${word} - ${sentence}` : word
+	}
+
+	const frontSentence = getFirstSentence(currentPair)
+	const backSentence = getSecondSentence(currentPair)
+	const frontSpeechText = buildSpeechContent(currentPair?.first, frontSentence)
+	const backSpeechText = buildSpeechContent(currentPair?.second, backSentence)
+
 	const speakFrontWord = useTTSPlayer({
-		text: currentPair?.first,
+		text: frontSpeechText,
 		fallbackUrl: currentPair?.firstAudioUrl,
 		voiceId: preferredVoiceId,
+		lang: sourceLanguageTag,
+	})
+
+	const speakBackWord = useTTSPlayer({
+		text: backSpeechText,
+		fallbackUrl: currentPair?.secondAudioUrl,
+		voiceId: preferredVoiceId,
+		lang: targetLanguageTag,
 	})
 
 	useEffect(() => {
 		if (!currentPair) {
 			return
 		}
-		speakFrontWord()
-	}, [currentPair, speakFrontWord])
+
+		if (isFlipped) {
+			speakBackWord()
+		} else {
+			speakFrontWord()
+		}
+	}, [currentPair, isFlipped, speakBackWord, speakFrontWord])
 
 	if (!deck.length) {
 		return (
@@ -151,8 +186,6 @@ export function CardsGameView({
 		)
 	}
 
-	const frontSentence = getFirstSentence(currentPair)
-	const backSentence = getSecondSentence(currentPair)
 	const progressLabel = t('cardsProgress', {
 		current: currentIndex + 1,
 		total: deck.length,
