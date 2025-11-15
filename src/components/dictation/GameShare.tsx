@@ -22,7 +22,8 @@ interface UseGameShareResult {
   shareDialog: ReactNode
 }
 
-export function useGameShare({ id, title, description }: GameShareConfig): UseGameShareResult {
+export function useGameShare(config: GameShareConfig): UseGameShareResult {
+  const { id, title } = config
   const t = useTranslations('Dictation.card')
   const [isShareOpen, setIsShareOpen] = useState(false)
   const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle')

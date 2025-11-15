@@ -33,6 +33,8 @@ const RequestSchema = z.object({
     firstSentence: z.string().optional(),
     secondSentence: z.string().optional(),
     sentence: z.string().optional(),
+    firstAudioUrl: z.string().optional(),
+    secondAudioUrl: z.string().optional(),
   })),
 })
 
@@ -72,30 +74,40 @@ For each word pair below, ONLY generate what is marked as missing. Preserve exis
 Word pairs:
 ${wordPairsWithStatus.map(pair => {
       let pairInfo = `${pair.index + 1}. ${pair.first || '[MISSING]'} - ${pair.second || '[MISSING]'}`
-      if (pair.needsTranslation) {
-        pairInfo += '\n   → NEEDS: Complete missing translation'
+
+      // Translation needs
+      if (!pair.first || pair.first.trim().length === 0) {
+        pairInfo += `\n   → NEEDS: Translate "${pair.second}" to ${sourceLanguage}`
+      } else if (!pair.second || pair.second.trim().length === 0) {
+        pairInfo += `\n   → NEEDS: Translate "${pair.first}" to ${targetLanguage}`
       }
-      if (pair.existingFirstSentence) {
-        pairInfo += `\n   → Existing ${sourceLanguage} sentence: "${pair.existingFirstSentence}"`
-      } else if (pair.needsFirstSentence) {
-        pairInfo += `\n   → NEEDS: Generate ${sourceLanguage} example sentence using "${pair.first}"`
+
+      // Sentence needs (only check if we have both translations)
+      if (pair.first && pair.second) {
+        if (pair.existingFirstSentence) {
+          pairInfo += `\n   → Existing ${sourceLanguage} sentence: "${pair.existingFirstSentence}"`
+        } else if (pair.needsFirstSentence) {
+          pairInfo += `\n   → NEEDS: Generate ${sourceLanguage} example sentence using "${pair.first}"`
+        }
+        if (pair.existingSecondSentence) {
+          pairInfo += `\n   → Existing ${targetLanguage} sentence: "${pair.existingSecondSentence}"`
+        } else if (pair.needsSecondSentence) {
+          pairInfo += `\n   → NEEDS: Generate ${targetLanguage} example sentence using "${pair.second}"`
+        }
+        pairInfo += '\n   → NEEDS: Generate English imagePrompt for visualization'
       }
-      if (pair.existingSecondSentence) {
-        pairInfo += `\n   → Existing ${targetLanguage} sentence: "${pair.existingSecondSentence}"`
-      } else if (pair.needsSecondSentence) {
-        pairInfo += `\n   → NEEDS: Generate ${targetLanguage} example sentence using "${pair.second}"`
-      }
-      pairInfo += '\n   → NEEDS: Generate English imagePrompt for visualization'
+
       return pairInfo
     }).join('\n\n')}
 
 CRITICAL: Return strict JSON matching the schema. For each word pair:
+- If a translation is missing (marked [MISSING]), generate the missing translation word
 - If an existing sentence is shown above, you MUST use that exact sentence in your response (do NOT generate a new one)
-- Only generate sentences for items marked "NEEDS: Generate"
-- Always generate imagePrompt for visualization
+- Only generate sentences for items marked "NEEDS: Generate" (and only if both translations exist)
+- Always generate imagePrompt for visualization (even if translations are incomplete)
 - Set sentence field to match secondSentence
 - Preserve the exact order - pair 1 in your response must match pair 1 in the input, etc.
-- If a translation is missing (marked [MISSING]), generate the missing word`
+- If only one translation exists, generate the missing one based on the direction indicated`
 
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
@@ -123,14 +135,16 @@ CRITICAL: Return strict JSON matching the schema. For each word pair:
       const existingFirstSentence = existingPair.firstSentence?.trim()
       const existingSecondSentence = existingPair.secondSentence?.trim() || existingPair.sentence?.trim()
 
+      // Use existing translation if it exists and is not empty, otherwise use generated
+      const existingFirst = existingPair.first?.trim()
+      const existingSecond = existingPair.second?.trim()
+
       return {
-        first: existingPair.first || generatedPair.first || '',
-        second: existingPair.second || generatedPair.second || '',
+        first: existingFirst || generatedPair.first || '',
+        second: existingSecond || generatedPair.second || '',
         firstSentence: existingFirstSentence || generatedPair.firstSentence || '',
         secondSentence: existingSecondSentence || generatedPair.secondSentence || '',
         sentence: existingSecondSentence || generatedPair.secondSentence || generatedPair.sentence || '',
-        firstAudioUrl: existingPair.firstAudioUrl,
-        secondAudioUrl: existingPair.secondAudioUrl,
         imagePrompt: generatedPair.imagePrompt || '',
       }
     })

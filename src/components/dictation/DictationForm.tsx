@@ -207,17 +207,11 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
   }, [formData.title, formData.sourceLanguage, formData.targetLanguage, formData.wordPairs])
 
   const canPopulateData = useMemo(() => {
-    // Need at least basic word pairs to populate
+    // Need languages and at least one word pair entry to populate
     if (!formData.sourceLanguage || !formData.targetLanguage || formData.wordPairs.length === 0) {
       return false
     }
     
-    // Check if there are word pairs with at least first and second
-    const hasValidWordPairs = formData.wordPairs.some(pair => pair.first && pair.second)
-    if (!hasValidWordPairs) {
-      return false
-    }
-
     // Check if AI can help populate missing data:
     // 1. Missing or short title
     const needsTitle = !formData.title || formData.title.length < 3
@@ -225,7 +219,13 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
     // 2. Missing description
     const needsDescription = !formData.description || formData.description.trim().length === 0
     
-    // 3. Missing example sentences for any word pair
+    // 3. Missing translations in any word pair (missing first or second)
+    const needsTranslations = formData.wordPairs.some(pair => 
+      !pair.first || pair.first.trim().length === 0 ||
+      !pair.second || pair.second.trim().length === 0
+    )
+    
+    // 4. Missing example sentences for any complete word pair
     const needsSentences = formData.wordPairs.some(pair => 
       pair.first && pair.second && (
         !pair.firstSentence || pair.firstSentence.trim().length === 0 ||
@@ -233,7 +233,7 @@ export function DictationForm({ id, initialData }: DictationFormProps) {
       )
     )
 
-    return needsTitle || needsDescription || needsSentences
+    return needsTitle || needsDescription || needsTranslations || needsSentences
   }, [formData.title, formData.description, formData.sourceLanguage, formData.targetLanguage, formData.wordPairs])
 
   const handleSubmit = async (e: React.FormEvent) => {
