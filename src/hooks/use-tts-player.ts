@@ -31,7 +31,7 @@ const loadVoices = (): Promise<SpeechSynthesisVoice[]> => {
 
 	const synth = window.speechSynthesis
 
-	voicesPromise = new Promise(resolve => {
+	voicesPromise = new Promise<SpeechSynthesisVoice[]>(resolve => {
 		const availableVoices = synth.getVoices()
 		if (availableVoices.length) {
 			resolve(availableVoices)
@@ -46,7 +46,7 @@ const loadVoices = (): Promise<SpeechSynthesisVoice[]> => {
 
 		synth.addEventListener('voiceschanged', handleVoicesChanged)
 
-		setTimeout(() => {
+		window.setTimeout(() => {
 			synth.removeEventListener('voiceschanged', handleVoicesChanged)
 			resolve(synth.getVoices())
 		}, 500)
