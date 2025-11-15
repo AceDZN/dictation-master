@@ -1,11 +1,11 @@
 import { getTranslations } from 'next-intl/server'
 import { 
+  ArrowUpTrayIcon,
   BoltIcon, 
+  BookOpenIcon,
   GlobeAltIcon, 
-  ChartBarIcon, 
   MicrophoneIcon,
   UserGroupIcon,
-  BookOpenIcon
 } from '@heroicons/react/24/outline'
 
 
@@ -14,34 +14,34 @@ export async function FeaturesSection() {
 
   const features = [
     {
-      name: t('smartLearning.title'),
-      description: t('smartLearning.description'),
+      name: t('dictationBuilder.title'),
+      description: t('dictationBuilder.description'),
+      icon: BookOpenIcon,
+    },
+    {
+      name: t('practiceModes.title'),
+      description: t('practiceModes.description'),
       icon: BoltIcon,
     },
     {
-      name: t('multilingualSupport.title'),
-      description: t('multilingualSupport.description'),
-      icon: GlobeAltIcon,
-    },
-    {
-      name: t('progressTracking.title'),
-      description: t('progressTracking.description'),
-      icon: ChartBarIcon,
-    },
-    {
-      name: t('audioRecognition.title'),
-      description: t('audioRecognition.description'),
+      name: t('instantAudio.title'),
+      description: t('instantAudio.description'),
       icon: MicrophoneIcon,
     },
     {
-      name: t('multiplayerMode.title'),
-      description: t('multiplayerMode.description'),
+      name: t('languageControls.title'),
+      description: t('languageControls.description'),
+      icon: GlobeAltIcon,
+    },
+    {
+      name: t('sharing.title'),
+      description: t('sharing.description'),
       icon: UserGroupIcon,
     },
     {
-      name: t('vocabularyBuilding.title'),
-      description: t('vocabularyBuilding.description'),
-      icon: BookOpenIcon,
+      name: t('fastImport.title'),
+      description: t('fastImport.description'),
+      icon: ArrowUpTrayIcon,
     },
   ]
 

@@ -158,6 +158,8 @@ export async function GameCard({
           <GameCardActions
             id={id}
             userId={userId}
+            title={title}
+            description={description}
           />
         </div>
       </div>

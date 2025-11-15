@@ -1,9 +1,13 @@
 import { GameContainer } from '@/components/dictation/GameContainer'
+import { GameShareButton } from '@/components/dictation/GameShare'
+import { Button } from '@/components/ui/button'
+import { auth } from '@/lib/auth'
 import { getGame } from '@/lib/game'
 import { generateMetadata as generateSiteMetadata } from '@/lib/metadata'
-import { getLocale } from 'next-intl/server'
-import { Metadata } from 'next'
 import { DictationGame } from '@/lib/types'
+import Link from 'next/link'
+import { Metadata } from 'next'
+import { getLocale, getTranslations } from 'next-intl/server'
 
 interface PlayDictationPageProps {
   params: Promise<{ id: string }>
@@ -38,15 +42,39 @@ export async function generateMetadata({ params }: PlayDictationPageProps): Prom
 
 export default async function PlayDictationPage({ params }: PlayDictationPageProps) {
   const { id: dictationId } = await params
+  const cardTranslations = await getTranslations('Dictation.card')
+  const session = await auth()
   
   try {
     const game = await getGame(dictationId)
+    const isOwner = session?.user?.id === game.userId
+    const editHref = `/dictation/edit/${game.id ?? dictationId}`
 
     return (
       
       <div className="container mx-auto relative z-10">
         <div className="mx-auto max-w-6xl relative">
           <div className="bg-white rounded-2xl shadow-xl p-8 mb-12 border border-gray-100 relative overflow-hidden">
+            <div className="flex flex-wrap justify-end gap-3 mb-6">
+              {isOwner && (
+                <Button
+                  asChild
+                  variant="outline"
+                  className="rounded-lg border border-gray-200 text-gray-700 hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50"
+                >
+                  <Link href={editHref}>
+                    {cardTranslations('edit')}
+                  </Link>
+                </Button>
+              )}
+              <GameShareButton
+                id={game.id}
+                title={game.title}
+                description={game.description}
+                label={cardTranslations('share')}
+                className="h-10"
+              />
+            </div>
             <GameContainer game={game} />
           </div>
         </div>

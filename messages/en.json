@@ -1,62 +1,62 @@
 {
   "HomePage": {
-    "title": "Master Languages Through Interactive Dictation",
-    "description": "Create personalized dictation games to enhance vocabulary learning across multiple languages. Perfect for educators and language learners.",
-    "createGame": "Create Your First Game",
-    "learnMore": "Learn more",
+    "title": "Dictation activities built for real classrooms",
+    "description": "Plan focused dictation games, switch between practice modes, and give every learner clear pronunciation directly in the browser.",
+    "createGame": "Create a dictation",
+    "learnMore": "See how it works",
     "hero": {
-      "card1": "Learn",
-      "card2": "Practice",
-      "card3": "Master",
-      "card4": "Enjoy"
+      "card1": "Writer Mode",
+      "card2": "Quiz Mode",
+      "card3": "Cards Mode",
+      "card4": "Archery Mode"
     },
     "newVersionAvailable": "New Version Available"
   },
   "Features": {
-    "sectionTitle": "Powerful Features",
-    "sectionSubtitle": "Designed for Effective Language Learning",
-    "sectionDescription": "Our platform offers a comprehensive set of tools to make language learning engaging, personalized, and effective.",
-    "smartLearning": {
-      "title": "Smart Learning",
-      "description": "Our AI-powered system adapts to your learning style and progress, ensuring optimal retention and advancement."
+    "sectionTitle": "Built for dictation",
+    "sectionSubtitle": "Everything you need to run focused practice",
+    "sectionDescription": "Dictation Masters keeps the spotlight on bilingual word lists, pronunciation, and engaging game loops—no vaporware dashboards.",
+    "dictationBuilder": {
+      "title": "Flexible dictation builder",
+      "description": "Mix any source and target language, add instructions, and attach example sentences for every pair."
     },
-    "multilingualSupport": {
-      "title": "Multilingual Support",
-      "description": "Learn and practice in over 12 languages with native speaker pronunciations and cultural nuances."
+    "practiceModes": {
+      "title": "Multiple practice modes",
+      "description": "Let learners switch between Writer, Quiz, Cards, and Archery games using the same word set."
     },
-    "progressTracking": {
-      "title": "Progress Tracking",
-      "description": "Monitor your improvement with detailed statistics and analytics on your learning journey."
+    "instantAudio": {
+      "title": "Instant pronunciation",
+      "description": "Built-in text-to-speech plays every prompt so students hear the dictation exactly as intended."
     },
-    "audioRecognition": {
-      "title": "Audio Recognition",
-      "description": "Practice speaking and listening with our advanced speech recognition technology."
+    "languageControls": {
+      "title": "Language direction controls",
+      "description": "Flip practice direction, shuffle word order, and decide when example sentences appear."
     },
-    "multiplayerMode": {
-      "title": "Multiplayer Mode",
-      "description": "Compete with friends or join language learning communities to enhance motivation."
+    "sharing": {
+      "title": "Shareable game links",
+      "description": "Publish your dictations to the public gallery or keep private drafts for class use."
     },
-    "vocabularyBuilding": {
-      "title": "Vocabulary Building",
-      "description": "Expand your vocabulary with context-based learning and spaced repetition techniques."
+    "fastImport": {
+      "title": "Fast content import",
+      "description": "Upload CSV or TSV files or use AI-assisted generation to create word lists in seconds."
     }
   },
   "HowItWorks": {
-    "sectionTitle": "Easy to Get Started",
-    "sectionSubtitle": "Three Simple Steps to Language Mastery",
-    "sectionDescription": "Our platform makes it easy to create, practice, and master language skills through interactive dictation games.",
-    "imagePlaceholder": "Image coming soon",
+    "sectionTitle": "Dictation-first workflow",
+    "sectionSubtitle": "From idea to playable activity in minutes",
+    "sectionDescription": "Everything happens in the browser: build your list, tune the gameplay, and invite learners with a single link.",
+    "imagePlaceholder": "Preview coming soon",
     "step1": {
-      "title": "Create Your Dictation Game",
-      "description": "Set up a personalized dictation game by selecting languages and adding word pairs with example sentences."
+      "title": "Plan your dictation set",
+      "description": "Choose source and target languages, define instructions, and add word pairs manually or via upload."
     },
     "step2": {
-      "title": "Add Words and Phrases",
-      "description": "Build your vocabulary list manually or use our AI-powered tools to generate content from texts or images."
+      "title": "Tune the gameplay",
+      "description": "Pick default modes, hearts, timers, and example sentence settings so the activity matches your classroom flow."
     },
     "step3": {
-      "title": "Play and Practice",
-      "description": "Start playing in writing or quiz mode to practice and reinforce your language skills."
+      "title": "Share and start practicing",
+      "description": "Launch Writer, Quiz, Cards, or Archery mode immediately and share the link with learners or colleagues."
     }
   },
   "LatestGames": {
@@ -215,7 +215,22 @@
       "delete": "Delete",
       "play": "Play",
       "words": "{count} words",
-      "created": "Created"
+      "created": "Created",
+      "share": "Share",
+      "shareTitle": "Share this dictation",
+      "shareDescription": "Send this link to learners or colleagues so they can play instantly.",
+      "shareLinkLabel": "Game link",
+      "shareCopy": "Copy link",
+      "shareCopied": "Copied!",
+      "shareHint": "Click the link to copy it or choose a platform below.",
+      "shareOn": "Share on",
+      "shareTwitter": "X (Twitter)",
+      "shareFacebook": "Facebook",
+      "shareLinkedIn": "LinkedIn",
+      "shareWhatsApp": "WhatsApp",
+      "shareError": "Something went wrong. Please try again.",
+      "shareDefaultDescription": "Practice this dictation on Dictation Masters",
+      "shareMessage": "Check this dictation game: {title}"
     }
   }
 }
