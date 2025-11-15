@@ -185,6 +185,7 @@ export function ArcheryGameView({
     fallbackUrl: currentWord?.firstAudioUrl,
     voiceId: preferredVoiceId,
     lang: sourceLanguageTag,
+    disableSpeech: true,
   })
   const speakCurrentWord = useTTSPlayer({
     text: currentWord?.second,
@@ -192,6 +193,7 @@ export function ArcheryGameView({
     voiceId: preferredVoiceId,
     minDurationMs: 1000,
     lang: targetLanguageTag,
+    disableSpeech: true,
   })
 
   useEffect(() => {

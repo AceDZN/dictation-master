@@ -11,6 +11,7 @@ interface UseTTSPlayerOptions {
 	pitch?: number
 	volume?: number
 	minDurationMs?: number
+	disableSpeech?: boolean
 }
 
 const DEFAULT_RATE = 1
@@ -19,6 +20,9 @@ const DEFAULT_VOLUME = 1
 const DEFAULT_MIN_DURATION = 0
 
 let voicesPromise: Promise<SpeechSynthesisVoice[]> | null = null
+let playbackQueue: Promise<void> = Promise.resolve()
+const UTTERANCE_TIMEOUT_MS = 5000
+
 const wait = (ms: number) =>
 	new Promise<void>(resolve => {
 		window.setTimeout(resolve, ms)
@@ -73,6 +77,7 @@ export function useTTSPlayer({
 	pitch = DEFAULT_PITCH,
 	volume = DEFAULT_VOLUME,
 	minDurationMs = DEFAULT_MIN_DURATION,
+	disableSpeech = false,
 }: UseTTSPlayerOptions) {
 	const fallbackAudioRef = useRef<HTMLAudioElement | null>(null)
 
@@ -86,9 +91,9 @@ export function useTTSPlayer({
 		}
 	}, [])
 
-	const playFallbackAudio = useCallback(async (): Promise<void> => {
+	const playFallbackAudio = useCallback(async (): Promise<boolean> => {
 		if (!fallbackUrl || typeof window === 'undefined') {
-			return
+			return false
 		}
 
 		return new Promise(resolve => {
@@ -105,13 +110,13 @@ export function useTTSPlayer({
 
 				function handleEnded() {
 					cleanup()
-					resolve()
+					resolve(true)
 				}
 
 				function handleError(event: Event) {
 					console.error('Fallback audio error', event)
 					cleanup()
-					resolve()
+					resolve(false)
 				}
 
 				audio.addEventListener('ended', handleEnded)
@@ -119,11 +124,11 @@ export function useTTSPlayer({
 				void audio.play().catch(error => {
 					console.error('Fallback audio play error', error)
 					cleanup()
-					resolve()
+					resolve(false)
 				})
 			} catch (error) {
 				console.error('Failed to play fallback audio', error)
-				resolve()
+				resolve(false)
 			}
 		})
 	}, [fallbackUrl, volume])
@@ -144,13 +149,21 @@ export function useTTSPlayer({
 				synth.cancel()
 				await waitForSynthIdle(synth)
 			}
+			if (synth.paused && typeof synth.resume === 'function') {
+				try {
+					synth.resume()
+				} catch (error) {
+					console.warn('Failed to resume speech synthesis', error)
+				}
+			}
 		},
 		[waitForSynthIdle],
 	)
 
-	return useCallback(async () => {
+	const playSpeech = useCallback(async () => {
 		const startedAt = Date.now()
-		if (!text?.trim()) {
+		const trimmedText = text?.trim()
+		if (!trimmedText) {
 			if (minDurationMs > 0) {
 				const elapsed = Date.now() - startedAt
 				if (elapsed < minDurationMs) {
@@ -172,7 +185,7 @@ export function useTTSPlayer({
 			const voices = await loadVoices()
 			await ensureSynthReady(synth)
 
-			const utterance = new SpeechSynthesisUtterance(text)
+			const utterance = new SpeechSynthesisUtterance(trimmedText)
 			if (voiceId) {
 				const selectedVoice =
 					voices.find(voice => voice.voiceURI === voiceId) ??
@@ -194,15 +207,33 @@ export function useTTSPlayer({
 				utterance.onstart = () => {
 					didStartSpeaking = true
 				}
-				utterance.onend = () => resolve()
+				const cleanup = () => {
+					window.clearTimeout(timeoutId)
+				}
+				utterance.onend = () => {
+					cleanup()
+					resolve()
+				}
 				utterance.onerror = event => {
 					console.error('Speech synthesis error', event.error)
 					if (event.error === 'canceled' || event.error === 'interrupted') {
+						cleanup()
 						resolve()
 						return
 					}
+					cleanup()
 					reject(event.error)
 				}
+
+				const timeoutId = window.setTimeout(() => {
+					console.warn('Speech synthesis timeout, forcing cancel')
+					try {
+						synth.cancel()
+					} catch (error) {
+						console.error('Failed to cancel speech synthesis after timeout', error)
+					}
+					resolve()
+				}, UTTERANCE_TIMEOUT_MS)
 
 				synth.cancel()
 				synth.speak(utterance)
@@ -221,5 +252,28 @@ export function useTTSPlayer({
 			}
 		}
 	}, [text, voiceId, lang, rate, pitch, volume, playFallbackAudio, minDurationMs, ensureSynthReady])
+
+	return useCallback(async () => {
+		const shouldUseSpeech = !disableSpeech && !!text?.trim()
+
+		if (fallbackUrl) {
+			const playedAudio = await playFallbackAudio()
+			if (playedAudio || !shouldUseSpeech) {
+				return
+			}
+		}
+
+		if (!shouldUseSpeech) {
+			return
+		}
+
+		playbackQueue = playbackQueue
+			.catch(error => {
+				console.error('Previous TTS playback failed', error)
+			})
+			.then(() => playSpeech())
+
+		return playbackQueue
+	}, [disableSpeech, fallbackUrl, playFallbackAudio, playSpeech, text])
 }
 

@@ -130,12 +130,14 @@ export function QuizGameView({
     fallbackUrl: currentWord?.firstAudioUrl,
     voiceId: preferredVoiceId,
     lang: sourceLanguageTag,
+    disableSpeech: true,
   })
   const speakCurrentWord = useTTSPlayer({
     text: currentWord?.second,
     fallbackUrl: currentWord?.secondAudioUrl,
     voiceId: preferredVoiceId,
     lang: targetLanguageTag,
+    disableSpeech: true,
   })
 
   useEffect(() => {

@@ -128,6 +128,7 @@ export function CardsGameView({
 		fallbackUrl: currentPair?.firstAudioUrl,
 		voiceId: preferredVoiceId,
 		lang: sourceLanguageTag,
+		disableSpeech: true,
 	})
 
 	const speakBackWord = useTTSPlayer({
@@ -135,6 +136,7 @@ export function CardsGameView({
 		fallbackUrl: currentPair?.secondAudioUrl,
 		voiceId: preferredVoiceId,
 		lang: targetLanguageTag,
+		disableSpeech: true,
 	})
 
 	useEffect(() => {

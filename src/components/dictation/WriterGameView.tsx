@@ -148,6 +148,7 @@ export function WriterGameView({
     fallbackUrl: currentWord?.firstAudioUrl,
     voiceId: preferredVoiceId,
     lang: sourceLanguageTag,
+    disableSpeech: true,
   })
   const speakCurrentWord = useTTSPlayer({
     text: currentWord?.second,
@@ -155,6 +156,7 @@ export function WriterGameView({
     voiceId: preferredVoiceId,
     minDurationMs: 700,
     lang: targetLanguageTag,
+    disableSpeech: true,
   })
 
   useEffect(() => {
