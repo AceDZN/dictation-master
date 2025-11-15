@@ -3,6 +3,19 @@ import { EyeIcon } from '@heroicons/react/24/outline'
 import { getTranslations } from 'next-intl/server'
 import { GameCardActions } from './GameCardActions'
 
+type TimestampLike =
+  | Date
+  | number
+  | string
+  | {
+    toDate?: () => Date
+    seconds?: number
+    nanoseconds?: number
+    _seconds?: number
+    _nanoseconds?: number
+  }
+  | undefined
+
 interface Game {
   id: string
   title: string
@@ -14,54 +27,87 @@ interface Game {
     second: string
     sentence?: string
   }>
-  createdAt: {
-    _seconds: number
-    _nanoseconds: number
-    toDate?: () => Date
-  }
+  createdAt?: TimestampLike
   isPublic?: boolean
   playCount?: number
   userId?: string
 }
 
-export async function GameCard({ 
-  id, 
-  title, 
-  description, 
-  sourceLanguage, 
-  targetLanguage, 
-  wordPairs, 
+const getDateFromTimestamp = (timestamp: TimestampLike) => {
+  if (!timestamp) {
+    return undefined
+  }
+
+  if (timestamp instanceof Date) {
+    return timestamp
+  }
+
+  if (typeof timestamp === 'number') {
+    const millis = timestamp > 1_000_000_000_000 ? timestamp : timestamp * 1000
+    return new Date(millis)
+  }
+
+  if (typeof timestamp === 'string') {
+    const parsed = Date.parse(timestamp)
+    if (!Number.isNaN(parsed)) {
+      return new Date(parsed)
+    }
+    return undefined
+  }
+
+  if (typeof timestamp.toDate === 'function') {
+    try {
+      return timestamp.toDate()
+    } catch (error) {
+      console.error('Error converting timestamp via toDate:', error)
+      return undefined
+    }
+  }
+
+  const seconds =
+    typeof timestamp.seconds === 'number'
+      ? timestamp.seconds
+      : typeof timestamp._seconds === 'number'
+        ? timestamp._seconds
+        : undefined
+
+  if (typeof seconds === 'number') {
+    const nanoseconds =
+      typeof timestamp.nanoseconds === 'number'
+        ? timestamp.nanoseconds
+        : typeof timestamp._nanoseconds === 'number'
+          ? timestamp._nanoseconds
+          : 0
+    return new Date(seconds * 1000 + Math.floor(nanoseconds / 1_000_000))
+  }
+
+  return undefined
+}
+
+export async function GameCard({
+  id,
+  title,
+  description,
+  sourceLanguage,
+  targetLanguage,
+  wordPairs,
   createdAt,
   isPublic,
   playCount = 0,
   userId,
 }: Game) {
   const t = await getTranslations('Dictation.card')
-  
-  const formatDate = (timestamp: Game['createdAt']) => {
-    // Check if there's a toDate method and it's callable
-    if (timestamp && typeof timestamp.toDate === 'function') {
-      try {
-        return timestamp.toDate().toLocaleDateString()
-      } catch (error) {
-        console.error('Error calling toDate():', error)
-      }
-    }
-    
-    // If toDate fails or doesn't exist, try using _seconds
-    if (timestamp && typeof timestamp._seconds === 'number') {
-      return new Date(timestamp._seconds * 1000).toLocaleDateString()
-    }
-    
-    // Last resort fallback
-    return new Date().toLocaleDateString()
+
+  const formatDate = (timestamp: TimestampLike) => {
+    const date = getDateFromTimestamp(timestamp)
+    return (date ?? new Date()).toLocaleDateString()
   }
 
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-md hover:shadow-xl transition-all hover:-translate-y-1 duration-300">
       {/* Decorative gradient top edge */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
-      
+
       {/* Public/Private indicator */}
       <div className="absolute top-4 right-4 z-10">
         {isPublic ? (
@@ -75,7 +121,7 @@ export async function GameCard({
           </span>
         )}
       </div>
-      
+
       <div className="p-6 h-full flex flex-col justify-between">
         {/* Card Header */}
         <div className="flex flex-col items-center mb-4">
@@ -86,7 +132,7 @@ export async function GameCard({
             </p>
           )}
         </div>
-        
+
         {/* Card Content */}
         <div className="mt-6 space-y-3">
           {/* Language info with glass morphism effect */}
@@ -101,21 +147,21 @@ export async function GameCard({
               </div>
             </div>
           </div>
-          
+
           {/* Words count and created date */}
           <div className="flex justify-between text-xs text-gray-500 px-1">
             <div>{t('words', { count: wordPairs.length })}</div>
             <div>{t('created')} {formatDate(createdAt)}</div>
           </div>
-          
+
           {/* Actions */}
-          <GameCardActions 
-            id={id} 
-            userId={userId} 
+          <GameCardActions
+            id={id}
+            userId={userId}
           />
         </div>
       </div>
-      
+
       {/* Hover effect overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-indigo-600/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
     </div>

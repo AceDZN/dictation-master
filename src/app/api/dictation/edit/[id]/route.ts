@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getFirestore } from 'firebase-admin/firestore'
+import { getFirestore, Timestamp } from 'firebase-admin/firestore'
 import { initAdminApp } from '@/lib/firebase-admin'
 import { auth } from '@/lib/auth'
 import { DictationGame } from '@/lib/types'
@@ -7,6 +7,49 @@ import { getTTSUrls } from '@/lib/server/tts'
 
 // Initialize Firestore
 const db = getFirestore(initAdminApp())
+
+const toTimestamp = (value: unknown, fallback: Timestamp = Timestamp.now()): Timestamp => {
+  if (value instanceof Timestamp) {
+    return value
+  }
+
+  if (value && typeof (value as { toDate?: () => Date }).toDate === 'function') {
+    try {
+      return Timestamp.fromDate((value as { toDate: () => Date }).toDate())
+    } catch (error) {
+      console.error('Error converting timestamp via toDate():', error)
+    }
+  }
+
+  if (value instanceof Date) {
+    return Timestamp.fromDate(value)
+  }
+
+  if (typeof value === 'number') {
+    const millis = value > 1_000_000_000_000 ? value : value * 1000
+    return Timestamp.fromMillis(millis)
+  }
+
+  if (typeof value === 'string') {
+    const parsed = Date.parse(value)
+    if (!Number.isNaN(parsed)) {
+      return Timestamp.fromMillis(parsed)
+    }
+  }
+
+  if (value && typeof value === 'object') {
+    const seconds = (value as { seconds?: number }).seconds
+      ?? (value as { _seconds?: number })._seconds
+    if (typeof seconds === 'number') {
+      const nanoseconds = (value as { nanoseconds?: number }).nanoseconds
+        ?? (value as { _nanoseconds?: number })._nanoseconds
+        ?? 0
+      return new Timestamp(seconds, nanoseconds)
+    }
+  }
+
+  return fallback
+}
 
 export async function GET(
   req: NextRequest,
@@ -32,6 +75,24 @@ export async function GET(
     }
 
     const data = doc.data() as DictationGame
+
+    const normalizedCreatedAt = toTimestamp(
+      data.createdAt || doc.createTime,
+      doc.createTime || Timestamp.now(),
+    )
+
+    const needsRepair =
+      !data.createdAt ||
+      !(data.createdAt instanceof Timestamp) ||
+      typeof (data.createdAt as { toDate?: () => Date }).toDate !== 'function'
+
+    if (needsRepair) {
+      await docRef.update({
+        createdAt: normalizedCreatedAt,
+      })
+      data.createdAt = normalizedCreatedAt
+    }
+
     return NextResponse.json(data)
   } catch (error) {
     console.error('Error retrieving dictation:', error)
@@ -93,9 +154,27 @@ export async function PUT(
       })
     }
 
+    const {
+      // createdAt: _ignoredCreatedAt,
+      // updatedAt: _ignoredUpdatedAt,
+      // userId: _ignoredUserId,
+      ...sanitizedBody
+    } = body
+
+    const preservedCreatedAtRaw =
+      currentData.createdAt ||
+      doc.createTime ||
+      Timestamp.now()
+
+    const preservedCreatedAt = toTimestamp(
+      preservedCreatedAtRaw,
+      Timestamp.now()
+    )
+
     const updatedData: Partial<DictationGame> = {
-      ...body,
-      updatedAt: new Date(),
+      ...sanitizedBody,
+      createdAt: preservedCreatedAt,
+      updatedAt: Timestamp.now(),
     }
 
     await docRef.update(updatedData)
@@ -124,7 +203,7 @@ export async function DELETE(
 
     // Initialize Firestore
     const db = getFirestore(initAdminApp())
-    
+
     // Get reference to the game document
     const userRef = db.collection('dictation_games').doc(session.user.id)
     const gameRef = userRef.collection('games').doc(dictationId)

@@ -12,22 +12,23 @@ export const Forest = () => {
   useGLTF.preload('/3d-models/tree-3-c.glb')
 
   const treesCount = 6
-  const treeParams = [8, 4]
   const MIN_TREE_DISTANCE = 15 // Minimum distance between trees
 
-  // Helper function to calculate distance between two points
-  const calculateDistance = (x1: number, z1: number, x2: number, z2: number) => {
-    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(z2 - z1, 2))
-  }
-
-  // Helper function to check if a position is too close to existing trees
-  const isTooClose = (x: number, z: number, existingTrees: Array<{ x: number, z: number }>) => {
-    return existingTrees.some(tree =>
-      calculateDistance(x, z, tree.x, tree.z) < MIN_TREE_DISTANCE
-    )
-  }
-
   const trees = useMemo(() => {
+    const treeParams = [8, 4]
+
+    // Helper function to calculate distance between two points
+    const calculateDistance = (x1: number, z1: number, x2: number, z2: number) => {
+      return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(z2 - z1, 2))
+    }
+
+    // Helper function to check if a position is too close to existing trees
+    const isTooClose = (x: number, z: number, existingTrees: Array<{ x: number, z: number }>) => {
+      return existingTrees.some(tree =>
+        calculateDistance(x, z, tree.x, tree.z) < MIN_TREE_DISTANCE
+      )
+    }
+
     const treePositions = []
     const treePosition = treeParams.map((param) => param * 10)
     let attempts = 0
@@ -61,7 +62,7 @@ export const Forest = () => {
       treePositions.push({ id: treePositions.length, x, y: y /*+ Math.random() * 2*/, z, variant, scale, rotation })
     }
     return treePositions
-  }, [isTooClose, treeParams, treesCount]) // Empty dependency array so this only calculates once
+  }, [treesCount]) // Only treesCount as dependency since treeParams and isTooClose are now inside
 
   return (
     <group>

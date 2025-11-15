@@ -3,7 +3,7 @@
 import { z } from 'zod'
 import type { DictationGame } from '@/lib/types'
 import { auth } from "@/lib/auth"
-import { getFirestore } from 'firebase-admin/firestore'
+import { getFirestore, Timestamp } from 'firebase-admin/firestore'
 import { initAdminApp } from '@/lib/firebase-admin'
 
 const CreateDictationSchema = z.object({
@@ -81,6 +81,53 @@ export interface Game {
   playCount?: number
 }
 
+const normalizeTimestamp = (
+  value: unknown,
+  fallback: Timestamp,
+) => {
+  if (value instanceof Timestamp) {
+    return {
+      _seconds: value.seconds,
+      _nanoseconds: value.nanoseconds,
+      toDate: () => value.toDate(),
+    }
+  }
+
+  if (value instanceof Date) {
+    const millis = value.getTime()
+    const seconds = Math.floor(millis / 1000)
+    const nanoseconds = (millis % 1000) * 1_000_000
+    return {
+      _seconds: seconds,
+      _nanoseconds: nanoseconds,
+      toDate: () => value,
+    }
+  }
+
+  if (value && typeof value === 'object') {
+    const maybeSeconds = (value as { seconds?: number; _seconds?: number }).seconds
+      ?? (value as { _seconds?: number })._seconds
+    const maybeNanoseconds = (value as { nanoseconds?: number; _nanoseconds?: number }).nanoseconds
+      ?? (value as { _nanoseconds?: number })._nanoseconds
+
+    if (typeof maybeSeconds === 'number') {
+      const seconds = maybeSeconds
+      const nanoseconds = typeof maybeNanoseconds === 'number' ? maybeNanoseconds : 0
+      return {
+        _seconds: seconds,
+        _nanoseconds: nanoseconds,
+        toDate: () => new Date(seconds * 1000 + Math.floor(nanoseconds / 1_000_000)),
+      }
+    }
+  }
+
+  return {
+    _seconds: fallback.seconds,
+    _nanoseconds: fallback.nanoseconds,
+    toDate: () => fallback.toDate(),
+  }
+}
+
 export async function getGames(): Promise<Game[]> {
   const session = await auth()
   if (!session?.user?.id) {
@@ -96,13 +143,12 @@ export async function getGames(): Promise<Game[]> {
 
   return gamesSnapshot.docs.map(doc => {
     const data = doc.data()
+    const fallbackTimestamp = doc.createTime ?? Timestamp.fromMillis(0)
+
     return {
       id: doc.id,
       ...data,
-      createdAt: {
-        _seconds: data.createdAt?.seconds || 0,
-        _nanoseconds: data.createdAt?.nanoseconds || 0
-      }
+      createdAt: normalizeTimestamp(data.createdAt, fallbackTimestamp),
     }
   }) as Game[]
 }

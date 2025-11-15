@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getFirestore } from 'firebase-admin/firestore'
+import { getFirestore, Timestamp } from 'firebase-admin/firestore'
 import { auth } from '@/lib/auth'
 import { initAdminApp } from '@/lib/firebase-admin'
 import { z } from 'zod'
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
     const db = getFirestore(initAdminApp())
     
     // Create the game document with audio URLs
-    const timestamp = new Date()
+    const timestamp = Timestamp.now()
     const gameData = {
       ...validatedData,
       wordPairs: wordPairsWithAudio,

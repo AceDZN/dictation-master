@@ -29,8 +29,8 @@ export interface DictationGame {
   targetLanguage: string
   wordPairs: WordPair[]
   quizParameters: QuizParameters
-  createdAt?: Date
-  updatedAt?: Date
+  createdAt?: Timestamp | Date
+  updatedAt?: Timestamp | Date
 }
 
 export interface GameStructure {
