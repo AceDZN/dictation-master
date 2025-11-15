@@ -28,10 +28,8 @@ export function useGameShare({ id, title, description }: GameShareConfig): UseGa
   const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle')
   const normalizedAppUrl = useMemo(() => APP_URL.replace(/\/$/, ''), [])
   const shareUrl = useMemo(() => `${normalizedAppUrl}/dictation/play/${id}`, [normalizedAppUrl, id])
-  const safeDescription = (description?.trim() ?? '') || t('shareDefaultDescription')
   const shareMessage = t('shareMessage', { title })
   const encodedUrl = encodeURIComponent(shareUrl)
-  const encodedMessage = encodeURIComponent(shareMessage)
   const socialLinks = useMemo(() => [
     {
       id: 'twitter',
