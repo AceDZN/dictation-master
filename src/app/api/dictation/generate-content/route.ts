@@ -30,11 +30,11 @@ const RequestSchema = z.object({
   wordPairs: z.array(z.object({
     first: z.string(),
     second: z.string(),
-    firstSentence: z.string().optional(),
-    secondSentence: z.string().optional(),
-    sentence: z.string().optional(),
-    firstAudioUrl: z.string().optional(),
-    secondAudioUrl: z.string().optional(),
+    firstSentence: z.string().nullish(),
+    secondSentence: z.string().nullish(),
+    sentence: z.string().nullish(),
+    firstAudioUrl: z.string().nullish(),
+    secondAudioUrl: z.string().nullish(),
   })),
 })
 
@@ -45,16 +45,19 @@ export async function POST(req: NextRequest) {
 
     // Build prompt with existing data, marking what needs to be generated
     const wordPairsWithStatus = wordPairs.map((pair, index) => {
-      const needsFirstSentence = !pair.firstSentence || pair.firstSentence.trim().length === 0
-      const needsSecondSentence = !pair.secondSentence || pair.secondSentence.trim().length === 0
+      const existingFirstSentence = pair.firstSentence && typeof pair.firstSentence === 'string' ? pair.firstSentence.trim() : ''
+      const existingSecondSentence = (pair.secondSentence && typeof pair.secondSentence === 'string' ? pair.secondSentence.trim() : '') ||
+        (pair.sentence && typeof pair.sentence === 'string' ? pair.sentence.trim() : '')
+      const needsFirstSentence = !existingFirstSentence || existingFirstSentence.length === 0
+      const needsSecondSentence = !existingSecondSentence || existingSecondSentence.length === 0
       const needsTranslation = !pair.first || !pair.second
 
       return {
         index,
         first: pair.first || '',
         second: pair.second || '',
-        existingFirstSentence: pair.firstSentence || '',
-        existingSecondSentence: pair.secondSentence || pair.sentence || '',
+        existingFirstSentence,
+        existingSecondSentence,
         needsFirstSentence,
         needsSecondSentence,
         needsTranslation,
@@ -132,14 +135,28 @@ CRITICAL: Return strict JSON matching the schema. For each word pair:
       }
 
       // Preserve existing sentences if they exist, otherwise use generated ones
-      const existingFirstSentence = existingPair.firstSentence?.trim()
-      const existingSecondSentence = existingPair.secondSentence?.trim() || existingPair.sentence?.trim()
+      const existingFirstSentence = existingPair.firstSentence && typeof existingPair.firstSentence === 'string' ? existingPair.firstSentence.trim() : ''
+      const existingSecondSentence = (existingPair.secondSentence && typeof existingPair.secondSentence === 'string' ? existingPair.secondSentence.trim() : '') ||
+        (existingPair.sentence && typeof existingPair.sentence === 'string' ? existingPair.sentence.trim() : '')
 
       // Use existing translation if it exists and is not empty, otherwise use generated
       const existingFirst = existingPair.first?.trim()
       const existingSecond = existingPair.second?.trim()
 
-      return {
+      // Preserve audio URLs if they exist (non-null, non-undefined, non-empty)
+      const existingFirstAudioUrl = existingPair.firstAudioUrl && typeof existingPair.firstAudioUrl === 'string' && existingPair.firstAudioUrl.trim() ? existingPair.firstAudioUrl.trim() : undefined
+      const existingSecondAudioUrl = existingPair.secondAudioUrl && typeof existingPair.secondAudioUrl === 'string' && existingPair.secondAudioUrl.trim() ? existingPair.secondAudioUrl.trim() : undefined
+
+      const result: {
+        first: string
+        second: string
+        firstSentence: string
+        secondSentence: string
+        sentence: string
+        imagePrompt: string
+        firstAudioUrl?: string
+        secondAudioUrl?: string
+      } = {
         first: existingFirst || generatedPair.first || '',
         second: existingSecond || generatedPair.second || '',
         firstSentence: existingFirstSentence || generatedPair.firstSentence || '',
@@ -147,6 +164,16 @@ CRITICAL: Return strict JSON matching the schema. For each word pair:
         sentence: existingSecondSentence || generatedPair.secondSentence || generatedPair.sentence || '',
         imagePrompt: generatedPair.imagePrompt || '',
       }
+
+      // Only include audio URLs if they exist
+      if (existingFirstAudioUrl) {
+        result.firstAudioUrl = existingFirstAudioUrl
+      }
+      if (existingSecondAudioUrl) {
+        result.secondAudioUrl = existingSecondAudioUrl
+      }
+
+      return result
     })
 
     const normalizedContent = {
