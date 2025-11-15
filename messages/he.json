@@ -190,7 +190,7 @@
       "languageDirectionLabel": "בחר כיוון תרגול",
       "cardsProgress": "קלף {current} מתוך {total}",
       "cardsInstructions": "הקישו על הקלף כדי לעבור בין המקור לתרגום",
-      "cardsNoSentence": "אין משפט לדוגמה",
+      "cardsNoSentence": "",
       "cardsTapToReveal": "הקישו או לחצו על רווח כדי לחשוף את התרגום",
       "cardsTapToHide": "הקישו שוב או לחצו על רווח כדי להסתיר את התרגום",
       "cardsPrevious": "הקודם",
@@ -211,4 +211,4 @@
       "created": "נוצר"
     }
   }
-} 
+}

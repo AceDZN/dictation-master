@@ -62,7 +62,7 @@
   "LatestGames": {
     "title": "Latest Dictation Games",
     "description": "Check out the most recent public dictation games created by our community."
-    },
+  },
   "Profile": {
     "title": "Profile",
     "editProfile": "Edit Profile",
@@ -190,7 +190,7 @@
       "languageDirectionLabel": "Choose practice direction",
       "cardsProgress": "Card {current} of {total}",
       "cardsInstructions": "Tap the card to flip between source and translation",
-      "cardsNoSentence": "No example sentence available",
+      "cardsNoSentence": "",
       "cardsTapToReveal": "Tap or press space to reveal the translation",
       "cardsTapToHide": "Tap or press space to hide the translation",
       "cardsPrevious": "Previous",
@@ -211,4 +211,4 @@
       "created": "Created"
     }
   }
-} 
+}
