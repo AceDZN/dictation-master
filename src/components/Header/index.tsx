@@ -97,7 +97,7 @@ function UserButton() {
 
 export function Header() {
   const t = useTranslations('Header')
-  
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/75 backdrop-blur-lg">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -109,9 +109,9 @@ export function Header() {
             height={32}
             className="h-8 w-auto"
           />
-          <span className="font-semibold text-xl ltr:-ml-[5px] rtl:mr-[5px]">{t('appName')}</span>
+          <span className="font-semibold text-lg md:text-xl ltr:-ml-[5px] rtl:mr-[5px]">{t('appName')}</span>
         </Link>
-        
+
         <div className="flex items-center gap-2">
           <LanguageSelector />
           {UserButton()}

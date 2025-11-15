@@ -8,13 +8,13 @@ async function getLatestGames(): Promise<Game[]> {
   const response = await fetch(`${APP_URL}/api/dictation/latest`, {
     cache: 'no-store'
   })
-  
+
   if (!response.ok) {
     throw new Error('Failed to fetch latest games')
   }
   const data = await response.json()
   console.log('DEBUG - Raw data from API:', data.games[0]?.createdAt)
-  
+
   // Return the games directly without transforming the timestamp
   // The API is already sending the data in the correct format
   return data.games;
@@ -25,11 +25,11 @@ export async function LatestGames() {
   let games = [] as any;
   try {
     games = await getLatestGames()
-    
+
     if (!games.length) {
       return null
     }
-  } catch(error){
+  } catch (error) {
     console.log('error occured', error)
     return null
   }
@@ -38,12 +38,12 @@ export async function LatestGames() {
     <section className="py-24 sm:py-32 relative overflow-hidden bg-gray-50">
       {/* Decorative dots pattern */}
       <div className="container mx-auto px-4">
-        <div className="absolute inset-0 opacity-5" style={{ 
+        <div className="absolute inset-0 opacity-5" style={{
           backgroundImage: 'radial-gradient(circle, rgba(99, 102, 241, 0.8) 1px, transparent 1px)',
           backgroundSize: '20px 20px'
         }}></div>
-        
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
+
+        <div className="mx-auto max-w-7xl md:px-6 lg:px-8 relative z-10">
           <div className="mx-auto max-w-2xl text-center mb-16">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
               {t('title')}
@@ -52,9 +52,9 @@ export async function LatestGames() {
               {t('description')}
             </p>
           </div>
-          
+
           <div className="mx-auto grid max-w-2xl grid-cols-1 gap-8 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-            {games.map((game:any) => (
+            {games.map((game: any) => (
               <GameCard key={game.id} {...game} />
             ))}
           </div>

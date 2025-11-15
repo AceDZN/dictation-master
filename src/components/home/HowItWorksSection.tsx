@@ -4,7 +4,7 @@ import { getTranslations } from 'next-intl/server'
 
 export async function HowItWorksSection() {
   const t = await getTranslations('HowItWorks')
-  
+
   const steps = [
     {
       id: '01',
@@ -29,7 +29,7 @@ export async function HowItWorksSection() {
   return (
     <section id="how-it-works" className="py-24 sm:py-32">
       <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl md:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl lg:text-center mb-16">
             <h2 className="text-base font-semibold leading-7 text-indigo-600">
               {t('sectionTitle')}
@@ -41,7 +41,7 @@ export async function HowItWorksSection() {
               {t('sectionDescription')}
             </p>
           </div>
-          
+
           <div className="mx-auto mt-16 max-w-7xl">
             <div className="grid grid-cols-1 gap-y-20 lg:grid-cols-3 lg:gap-x-12">
               {steps.map((step, index) => (
@@ -50,7 +50,7 @@ export async function HowItWorksSection() {
                   <div className="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-600 shadow-indigo-500/50 shadow-lg">
                     <span className="text-xl font-bold text-white">{step.id}</span>
                   </div>
-                  
+
                   {/* Image */}
                   <div className="mt-6 rounded-2xl bg-gray-50 border border-gray-100 shadow-inner overflow-hidden w-full max-w-md">
                     <div className="p-2">
@@ -62,7 +62,7 @@ export async function HowItWorksSection() {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Text */}
                   <div className="mt-6 max-w-md text-center lg:text-start">
                     <h3 className="text-lg font-semibold leading-8 text-gray-900">{step.name}</h3>

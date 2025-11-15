@@ -224,7 +224,7 @@ export function CardsGameView({
 					<button
 						type='button'
 						onClick={handleFlip}
-						className='relative w-full h-[420px] focus:outline-none'
+						className={`relative w-full h-[300px] md:h-[420px] focus:outline-none`}
 					>
 						<div
 							className='relative w-full h-full transition-transform duration-500 ease-out [transform-style:preserve-3d]'
@@ -241,12 +241,12 @@ export function CardsGameView({
 									<p className='text-4xl font-bold text-gray-900 break-words'>
 										{currentPair.first}
 									</p>
-									<p
+									{!hideExampleSentences && <p
 										className={`text-lg text-gray-500 transition-opacity duration-300 ${hideExampleSentences ? 'opacity-0' : 'opacity-100'
 											}`}
 									>
 										{frontSentence || t('cardsNoSentence')}
-									</p>
+									</p>}
 								</div>
 								<div className='text-sm text-gray-400'>
 									{t('cardsTapToReveal')}
@@ -267,12 +267,12 @@ export function CardsGameView({
 									<p className='text-4xl font-bold break-words'>
 										{currentPair.second}
 									</p>
-									<p
+									{!hideExampleSentences && <p
 										className={`text-lg text-indigo-100 transition-opacity duration-300 ${hideExampleSentences ? 'opacity-0' : 'opacity-100'
 											}`}
 									>
 										{backSentence || t('cardsNoSentence')}
-									</p>
+									</p>}
 								</div>
 								<div className='text-sm text-indigo-200'>
 									{t('cardsTapToHide')}

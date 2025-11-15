@@ -1,9 +1,9 @@
 import { getTranslations } from 'next-intl/server'
-import { 
+import {
   ArrowUpTrayIcon,
-  BoltIcon, 
+  BoltIcon,
   BookOpenIcon,
-  GlobeAltIcon, 
+  GlobeAltIcon,
   MicrophoneIcon,
   UserGroupIcon,
 } from '@heroicons/react/24/outline'
@@ -48,7 +48,7 @@ export async function FeaturesSection() {
   return (
     <section id="features" className="py-16 sm:py-24 bg-gray-50">
       <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl md:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl lg:text-center mb-16">
             <h2 className="text-base font-semibold leading-7 text-indigo-600">
               {t('sectionTitle')}
@@ -63,8 +63,8 @@ export async function FeaturesSection() {
           <div className="mx-auto max-w-7xl">
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {features.map((feature, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className="group relative rounded-2xl bg-white p-8 shadow-md ring-1 ring-gray-200/50 hover:shadow-lg hover:ring-indigo-300 transition-all duration-300 hover:-translate-y-1"
                 >
                   <div className="absolute -inset-px z-10 rounded-2xl opacity-0 transition group-hover:opacity-100" aria-hidden="true">
@@ -74,7 +74,7 @@ export async function FeaturesSection() {
                   <div className="relative z-20 flex h-16 w-16 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 shadow-sm">
                     <feature.icon className="h-8 w-8" aria-hidden="true" />
                   </div>
-                  
+
                   <div className="relative z-20 mt-6">
                     <h3 className="text-lg font-semibold leading-8 text-gray-900">
                       {feature.name}
