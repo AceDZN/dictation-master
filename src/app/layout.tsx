@@ -51,15 +51,15 @@ export default async function RootLayout({
               <main className="flex-grow">
                 <div className="container mx-auto px-0">
                   {/*<AdBlockDetector />*/}
-                  <div className="relative isolate py-12 px-4">
-                  
-                                  
+                  <div className="relative isolate py-12 px-0 md:px-4">
+
+
                     {/* Decorative blurred circles */}
                     <div className="absolute top-40 z-0  user-select-none pointer-events-none left-0 w-72 h-72 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" />
                     <div className="absolute bottom-20 z-0  user-select-none pointer-events-none right-0 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" style={{ animationDelay: '1s' }} />
-                    
+
                     {/* Dot pattern decoration */}
-                    
+
                     <div className="absolute inset-0 -z-10 mx-0 max-w-none overflow-hidden">
                       <div className="absolute left-1/2 top-0 ml-[-38rem] h-[25rem] w-[81.25rem] dark:[mask-image:linear-gradient(white,transparent)]">
                         <div className="absolute inset-0 bg-grid-slate-900/[0.04] [mask-image:linear-gradient(to_bottom_left,white,transparent,transparent)] dark:bg-grid-slate-100/[0.03]" style={{
@@ -72,8 +72,8 @@ export default async function RootLayout({
                       </div>
                     </div>
                     {/* Top background gradient */}
-                    <BackgroundGradient position="top" />      
-                    
+                    <BackgroundGradient position="top" />
+
                     {children}
                     {/* Bottom background gradient */}
                     <BackgroundGradient position="bottom" />
