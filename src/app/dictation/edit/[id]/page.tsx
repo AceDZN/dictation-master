@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { Spinner } from '@/components/ui/spinner'
-import { DictationForm } from '@/components/dictation/DictationForm'
+import { DictationWizard } from '@/components/dictation/DictationWizard'
 import { getTranslations } from 'next-intl/server'
 
 interface EditDictationPageProps {
@@ -22,7 +22,7 @@ export default async function EditDictationPage({ params }: EditDictationPagePro
         </div>
 
         <Suspense fallback={<div className="flex justify-center"><Spinner size="lg" /></div>}>
-          <DictationForm id={dictationId} />
+          <DictationWizard id={dictationId} />
         </Suspense>
       </div>
     </div>

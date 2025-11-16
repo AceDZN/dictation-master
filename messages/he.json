@@ -230,6 +230,21 @@
       "deleteConfirmAction": "מחק לצמיתות",
       "deleteSuccess": "ההכתבה נמחקה",
       "deleteError": "לא ניתן למחוק את ההכתבה. נסו שוב."
+    },
+    "wizard": {
+      "chooseMethod": "איך תרצו ליצור את ההכתבה?",
+      "chooseMethodDescription": "העלו תמונה עם זוגות מילים או הזינו אותם ידנית",
+      "uploadImage": "העלאת תמונה",
+      "uploadImageDescription": "העלו תמונה המכילה זוגות מילים. הבינה המלאכותית שלנו תחלץ אותם אוטומטית.",
+      "chooseUpload": "העלה תמונה",
+      "manualEntry": "הזנה ידנית",
+      "manualEntryDescription": "הזינו זוגות מילים ידנית עם שליטה מלאה על כל ערך.",
+      "chooseManual": "הזן ידנית",
+      "back": "חזור",
+      "uploadImageStepDescription": "בחרו את שפת המקור והשפה היעד, ואז העלו קובץ תמונה.",
+      "processingImage": "מעבד את התמונה שלכם...",
+      "processingImageDescription": "הבינה המלאכותית שלנו מחלצת זוגות מילים מהתמונה. זה עשוי לקחת רגע.",
+      "supportedFormats": "פורמטים נתמכים: JPG, PNG, GIF"
     }
   }
 }

@@ -230,6 +230,21 @@
       "deleteConfirmAction": "Delete",
       "deleteSuccess": "Dictation deleted",
       "deleteError": "Could not delete dictation. Please try again."
+    },
+    "wizard": {
+      "chooseMethod": "How would you like to create your dictation?",
+      "chooseMethodDescription": "Upload an image with word pairs or enter them manually",
+      "uploadImage": "Upload Image",
+      "uploadImageDescription": "Upload an image containing word pairs. Our AI will extract them automatically.",
+      "chooseUpload": "Upload Image",
+      "manualEntry": "Manual Entry",
+      "manualEntryDescription": "Enter word pairs manually with full control over each entry.",
+      "chooseManual": "Enter Manually",
+      "back": "Back",
+      "uploadImageStepDescription": "Select your source and target languages, then upload an image file.",
+      "processingImage": "Processing your image...",
+      "processingImageDescription": "Our AI is extracting word pairs from your image. This may take a moment.",
+      "supportedFormats": "Supported formats: JPG, PNG, GIF"
     }
   }
 }

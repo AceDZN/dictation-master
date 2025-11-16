@@ -1,4 +1,4 @@
-import { DictationForm } from "@/components/dictation/DictationForm"
+import { DictationWizard } from "@/components/dictation/DictationWizard"
 import { generateMetadata as generateSiteMetadata } from '@/lib/metadata'
 import { getTranslations, getLocale } from 'next-intl/server'
 import { Metadata } from 'next'
@@ -8,7 +8,7 @@ interface CreateDictationPageProps {
 }
 
 const getCreateTitle = (locale: string) => {
-  const locales =  {
+  const locales = {
     en: 'Create New Dictation',
     he: 'צור תרגיל הכתבה חדש'
   }
@@ -16,7 +16,7 @@ const getCreateTitle = (locale: string) => {
 }
 
 const getCreateDescription = (locale: string) => {
-  const locales =  {
+  const locales = {
     en: 'Create a new dictation exercise to help others learn languages through interactive text-based learning.',
     he: `צור תרגיל הכתבה חדש כדי לעזור לאחרים ללמוד שפות דרך למידה אינטראקטיבית מבוססת טקסט.`
   }
@@ -40,14 +40,7 @@ export default async function CreateDictationPage({ searchParams }: CreateDictat
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="space-y-8">
-        <div>
-          <h1 className="text-2xl font-bold">{t('title')}</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            {t('description')}
-          </p>
-        </div>
-
-        <DictationForm />
+        <DictationWizard />
       </div>
     </div>
   )

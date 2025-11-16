@@ -52,7 +52,7 @@ export function FileUpload({ onStart, onComplete, onError, disabled = false, sou
       <Input
         id="file-upload"
         type="file"
-        accept=".txt,.csv,image/*"
+        accept="image/*"
         onChange={handleFileChange}
         disabled={disabled}
       />
