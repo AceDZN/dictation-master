@@ -54,8 +54,8 @@ export default async function PlayDictationPage({ params }: PlayDictationPagePro
 
       <div className="container mx-auto relative z-10">
         <div className="mx-auto max-w-6xl relative">
-          <div className="bg-white rounded-2xl shadow-xl p-8 mb-12 border border-gray-100 relative overflow-hidden">
-            <div className="flex flex-wrap justify-end gap-3 mb-6">
+          <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 mb-8 sm:mb-12 border border-gray-100 relative overflow-hidden">
+            <div className="flex flex-wrap justify-end gap-3 mb-4 sm:mb-6">
               {isOwner && (
                 <Button
                   asChild
@@ -84,7 +84,7 @@ export default async function PlayDictationPage({ params }: PlayDictationPagePro
     return (
       <div className="container mx-auto relative z-10">
         <div className="mx-auto max-w-6xl relative">
-          <div className="bg-white rounded-2xl shadow-xl p-8 mb-12 border border-gray-100 relative overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 mb-8 sm:mb-12 border border-gray-100 relative overflow-hidden">
             <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
               {error instanceof Error ? error.message : 'Failed to load game'}
             </div>

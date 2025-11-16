@@ -51,7 +51,7 @@ export default async function RootLayout({
               <main className="flex-grow">
                 <div className="container mx-auto px-0">
                   {/*<AdBlockDetector />*/}
-                  <div className="relative isolate py-12 px-0 md:px-4">
+                  <div className="relative isolate py-0 md:py-6 lg:py-12 px-0 md:px-4">
 
 
                     {/* Decorative blurred circles */}
