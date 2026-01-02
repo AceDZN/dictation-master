@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { WordPair } from "@/lib/types"
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline"
 import { FileUpload } from "./FileUpload"
+import { TextPromptInput } from "./TextPromptInput"
 import type { WordPairsList } from "@/lib/openai"
 import { useTranslations } from 'next-intl'
 
@@ -63,14 +64,39 @@ export function WordPairList({
   return (
     <div className="space-y-4">
       {onFileUploadStart && onFileUploadComplete && onFileUploadError && (
-        <FileUpload
-          onStart={onFileUploadStart}
-          onComplete={onFileUploadComplete}
-          onError={onFileUploadError}
-          disabled={disabled}
-          sourceLanguage={sourceLanguage}
-          targetLanguage={targetLanguage}
-        />
+        <div className="space-y-4">
+          {/* Text Prompt Input */}
+          <div className="border rounded-lg p-4 bg-gray-50/50">
+            <TextPromptInput
+              onStart={onFileUploadStart}
+              onComplete={onFileUploadComplete}
+              onError={onFileUploadError}
+              disabled={disabled}
+              sourceLanguage={sourceLanguage}
+              targetLanguage={targetLanguage}
+            />
+          </div>
+          
+          {/* Divider with "or" text */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-gray-300" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-gray-500">{t('orDivider')}</span>
+            </div>
+          </div>
+          
+          {/* File Upload */}
+          <FileUpload
+            onStart={onFileUploadStart}
+            onComplete={onFileUploadComplete}
+            onError={onFileUploadError}
+            disabled={disabled}
+            sourceLanguage={sourceLanguage}
+            targetLanguage={targetLanguage}
+          />
+        </div>
       )}
       
       <div className="border rounded-lg overflow-hidden">

@@ -156,7 +156,15 @@
       "saveAsDraft": "Save as Draft",
       "createDictation": "Create Dictation",
       "creating": "Creating...",
-      "processingFile": "Processing File..."
+      "processingFile": "Processing File...",
+      "textPromptLabel": "Extract from Text",
+      "textPromptDescription": "Paste a word list, story, or any text to automatically extract word pairs. The AI will identify key vocabulary and generate translations.",
+      "textPromptPlaceholder": "Paste your text here... e.g., a list of words, a short story, vocabulary from a lesson, or any text you want to learn from.",
+      "textPromptEmpty": "Please enter some text to extract word pairs from",
+      "extractWordPairs": "Extract Words",
+      "extracting": "Extracting...",
+      "characters": "characters",
+      "orDivider": "or"
     },
     "game": {
       "startGame": "Start Game",

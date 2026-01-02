@@ -156,7 +156,15 @@
       "saveAsDraft": "שמור כטיוטה",
       "createDictation": "צור הכתבה",
       "creating": "יוצר...",
-      "processingFile": "מעבד קובץ..."
+      "processingFile": "מעבד קובץ...",
+      "textPromptLabel": "חילוץ מטקסט",
+      "textPromptDescription": "הדביקו רשימת מילים, סיפור או כל טקסט כדי לחלץ אוטומטית זוגות מילים. הבינה המלאכותית תזהה אוצר מילים מרכזי ותייצר תרגומים.",
+      "textPromptPlaceholder": "הדביקו את הטקסט שלכם כאן... למשל, רשימת מילים, סיפור קצר, אוצר מילים משיעור, או כל טקסט שתרצו ללמוד ממנו.",
+      "textPromptEmpty": "נא להזין טקסט כדי לחלץ ממנו זוגות מילים",
+      "extractWordPairs": "חלץ מילים",
+      "extracting": "מחלץ...",
+      "characters": "תווים",
+      "orDivider": "או"
     },
     "game": {
       "startGame": "התחל משחק",
