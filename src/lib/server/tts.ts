@@ -7,13 +7,16 @@ import { APP_URL } from '@/lib/server-constants'
  * @returns Record mapping each word to its TTS URL
  */
 export async function getTTSUrls(words: string[], language: string): Promise<Record<string, string>> {
-  const response = await fetch(`${APP_URL}/api/dictation/tts`, {
+  const url = `${APP_URL}/api/dictation/tts`
+  console.log('getTTSUrls', { words, language, url })
+  const response = await fetch(url, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify({ words, language })
   })
+  console.log('response', response)
   const data = await response.json()
   if (!data.success) {
     throw new Error('Failed to generate TTS')

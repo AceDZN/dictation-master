@@ -1,7 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { useFormState, useFormStatus } from "react-dom"
+import { useActionState } from "react"
+import { useFormStatus } from "react-dom"
 import { useRouter } from "next/navigation"
 import { handleCredentialsSignIn, handleGoogleSignIn } from "../actions"
 
@@ -75,7 +76,7 @@ function GoogleSignInButton() {
 
 export default function SignInForm({ from }: { from: string }) {
   const router = useRouter()
-  const [state, formAction] = useFormState(
+  const [state, formAction] = useActionState(
     async (prevState: any, formData: FormData) => {
       const email = formData.get("email") as string
       const password = formData.get("password") as string
